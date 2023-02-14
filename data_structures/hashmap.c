@@ -26,7 +26,7 @@ hashtable initHashtable()
     return ht;
 }
 
-bool insert(hashtable *ht, char *str, int length, char *tok)
+bool insert(hashtable *ht, char *str, int length, token_names tok)
 {
     int getHash = hash(str, length);
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
@@ -35,7 +35,7 @@ bool insert(hashtable *ht, char *str, int length, char *tok)
     {
         ptr = malloc(sizeof(bucket_node *));
         ptr->str = str;
-        ptr->tok_name = tok;
+        ptr->tok = tok;
         ptr->next = NULL;
         ht->table[getHash]->bucket_ptr = ptr;
         return true;
@@ -47,7 +47,7 @@ bool insert(hashtable *ht, char *str, int length, char *tok)
     }
     ptr->next = malloc(sizeof(bucket_node *));
     ptr->next->str = str;
-    ptr->next->tok_name = tok;
+    ptr->next->tok = tok;
     ptr->next->next = NULL;
     return false;
 }
@@ -96,21 +96,21 @@ bool delete(hashtable ht, char *str, int length)
     return false;
 }
 
-char *get(hashtable *ht, char *str, int length)
+token_names get(hashtable *ht, char *str, int length)
 {
     int getHash = hash(str, length);
-    printf("%d", getHash);
+
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
     while (ptr != NULL)
     {
         if (strcmp(ptr->str, str) == 0)
         {
-            return ptr->tok_name;
+            return ptr->tok;
         }
         ptr = ptr->next;
     }
     printf("Entered string does not exist in the hashtable!");
-    return NULL;
+    return -1;
 }
 
 // int main()
