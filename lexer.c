@@ -4,6 +4,8 @@
 
 // typedef enum
 
+// void twinbuffer()
+
 void populate_hashtable(hashtable *ht)
 {
     insert(ht, "integer", 7, INTEGER);
@@ -45,10 +47,6 @@ void find_token(char *id)
     populate_hashtable(&ht);
     printf("%d", get(&ht, "switche", 6));
 }
-
-// void getNextToken(FILE *fp)
-// {
-// }
 
 int main()
 {
