@@ -15,11 +15,11 @@ twinbuffer *twinbuffer_init(FILE *fp)
 
 char readOneCharacter(twinbuffer *tb)
 {
-    if (tb->end)
-    {
-        return EOF;
-    }
     FILE *fp = tb->fp;
+    // if (!(tb->begin == 0 && tb->fwd == 0))
+    // {
+    //     tb->fwd++;
+    // }
     if (tb->begin == 0 && tb->fwd == 0)
     {
         int x = fread(tb->buffer, 1, SIZE / 2, fp);
@@ -39,7 +39,6 @@ char readOneCharacter(twinbuffer *tb)
     }
     else if (tb->fwd == SIZE / 2)
     {
-        printf("buffer reloaded\n");
         int read = fread(&tb->buffer[SIZE / 2], 1, SIZE / 2, fp);
         char temp = tb->buffer[tb->fwd];
         if (read < SIZE / 2)
@@ -51,7 +50,6 @@ char readOneCharacter(twinbuffer *tb)
     }
     else if (tb->fwd == SIZE)
     {
-        printf("first half reload\n");
         int read = fread(tb->buffer, 1, SIZE / 2, fp);
         char temp = tb->buffer[0];
         if (read < SIZE / 2)

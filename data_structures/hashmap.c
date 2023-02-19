@@ -6,6 +6,7 @@
 
 int hash(char *str, int length)
 {
+    printf("what is the string read:%s %d\n", str, length);
     int corr_hash = 0;
     for (int i = 0; i < length; i++)
     {
@@ -55,9 +56,11 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
 bool exists(hashtable ht, char *str, int length)
 {
     int getHash = hash(str, length);
+    printf("hash:%d\n", getHash);
     bucket_node *ptr = ht.table[getHash]->bucket_ptr;
     while (ptr != NULL)
     {
+        printf("inside exists %s\n", ptr->str);
         if (strcmp(ptr->str, str) == 0)
         {
             return true;

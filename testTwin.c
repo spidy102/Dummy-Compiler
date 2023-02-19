@@ -14,5 +14,9 @@ int main()
             break;
         printf("%c", temp);
     }
-    printf("\n%c\n\n%c", tb->buffer[1], tb->buffer[5]);
+    for (int i = 0; i < 7; i++)
+    {
+
+        printf("%d\n", tb->buffer[i]);
+    }
 }
