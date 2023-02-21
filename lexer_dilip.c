@@ -119,7 +119,6 @@ token* getNextToken(FILE *fp)
     while (1)
     {
         char c = readOneCharacter(tb); // full string here
-        printf("char c:%c", c);
 
         switch (s)// note: should we add break after all cases? am adding here, 
         //also what happens if none of the if cases get accepted, need to show error
@@ -295,11 +294,13 @@ token* getNextToken(FILE *fp)
             {
                 s = 5;
                 break; // note: here?
+            } else if (c=='e' || c=='E') {
+                s = 6;
+                break;
             }
             else
             {
                 s = 12;
-                break;
             }
 
         case 12:
@@ -308,11 +309,13 @@ token* getNextToken(FILE *fp)
 
             int size4 = getSize(tb);
             char *lexeme4 = copyLexeme(tb, size4);
+                                   printf("real: %s", lexeme4);
+
             float rnum = atof(lexeme4);
             token* tk1 = malloc(sizeof(token*));
             tk1->line_num = line_num;
             tk1->rnum = rnum;
-            tk1->token = NUM;
+            tk1->token = RNUM;
             return tk1;
 
             break;
@@ -368,9 +371,11 @@ token* getNextToken(FILE *fp)
             //note: need to add increase line number
             line_num++;
             // return ;//note: what to return here
+            s = 0;
             break;
         case 14:
             // return ;//note: what to return here
+            s = 0;
             break;
         case 15:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), PLUS);
@@ -409,6 +414,7 @@ token* getNextToken(FILE *fp)
             break;
         case 20:
             // return; //note: comment
+            s = 0;
             break;
         case 22:
             if (c == '<')
@@ -541,7 +547,6 @@ token* getNextToken(FILE *fp)
 int main()
 {
     FILE *fp = fopen("example.erp", "r");
-    printf("%d %d", getNextToken(fp)->token, NUM);
+    printf("%d %d", getNextToken(fp)->token, LE);
 }
-
 
