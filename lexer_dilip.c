@@ -111,12 +111,16 @@ token* getNextToken(FILE *fp)
 {
     twinbuffer *tb = twinbuffer_init(fp);
     hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    int s = 0; // state
 
+    populate_hashtable(&ht);
+    printf("hello\n");
+
+    int s = 0; // state
     while (1)
     {
         char c = readOneCharacter(tb); // full string here
+        printf("char c:%c", c);
+
         switch (s)// note: should we add break after all cases? am adding here, 
         //also what happens if none of the if cases get accepted, need to show error
         // all cases in {}?
@@ -208,32 +212,31 @@ token* getNextToken(FILE *fp)
             }
             break;
         case 1:
-            if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_')
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
             {
                 break;
             }
             else
             {
                 s = 2;
+                break;
             }
-            break;
         case 2:
             retract(1, tb);
-            int size = getSize(tb);
-            char *lexeme = copyLexeme(tb, size);
-            if (exists(ht, lexeme, size))
+            int size1 = getSize(tb);
+            char *lexeme1 = copyLexeme(tb, size1);
+            if (exists(ht, lexeme1, size1))
             {
-                token_names tokene = get(&ht, lexeme, size);
+                token_names tokene = get(&ht, lexeme1, size1);
                 //return token;//note: does this go to the string
-                return make_token(line_num, lexeme, tokene);
+                return make_token(line_num, lexeme1, tokene);
             }
             else
             {
                 // printf("%s\n", lexeme);
                 //return ID;//note: shouldnt we return the string of this
-                return make_token(line_num, lexeme, ID);
+                return make_token(line_num, lexeme1, ID);
             }
-            break;
         case 3:
             if (c >= '0' && c <= '9')
             {
@@ -248,13 +251,13 @@ token* getNextToken(FILE *fp)
             else
             {
                 s = 10;
+                break;
             }
         case 10:
             retract(1, tb);//note here only retract one?
-            int size4 = getSize(tb);
-            char *lexeme4 = copyLexeme(tb, size4);
-            int correspondingNumber = atoi(lexeme4);
-            int size = getSize(tb);
+            int size2 = getSize(tb);
+            char *lexeme2 = copyLexeme(tb, size2);
+            int correspondingNumber = atoi(lexeme2);
             token* tk = malloc(sizeof(token*));
             tk->line_num = line_num;
             tk->integer = correspondingNumber;
@@ -269,17 +272,17 @@ token* getNextToken(FILE *fp)
             else if (c == '.')
             {
                 s = 11;
+                break;
             }
             else
             {
                 // generate error here
             }
-            break;
         case 11:
             retract(2, tb);
-            int size1 = getSize(tb);
-            char *lexeme1 = copyLexeme(tb, size1);
-            int x = atoi(lexeme1);
+            int size3 = getSize(tb);
+            char *lexeme3 = copyLexeme(tb, size3);
+            int x = atoi(lexeme3);
             
             token* tk2 = malloc(sizeof(token*));
             tk2->line_num = line_num;
@@ -296,22 +299,21 @@ token* getNextToken(FILE *fp)
             else
             {
                 s = 12;
+                break;
             }
-            break;
 
         case 12:
             retract(1, tb);
             //return RNUM;//note: shouldnt we return the string of this
 
-            int size = getSize(tb);
-            char *lexeme = copyLexeme(tb, size);
-            float rnum = atof(lexeme);
-            struct TOKEN tk;
+            int size4 = getSize(tb);
+            char *lexeme4 = copyLexeme(tb, size4);
+            float rnum = atof(lexeme4);
             token* tk1 = malloc(sizeof(token*));
             tk1->line_num = line_num;
             tk1->rnum = rnum;
             tk1->token = NUM;
-            return tk;
+            return tk1;
 
             break;
 
@@ -355,22 +357,21 @@ token* getNextToken(FILE *fp)
         case 9:// might not be acutate due to e
             retract(1, tb);
             char *lexeme5 = copyLexeme(tb, getSize(tb));
-            float rnum = atof(lexeme5);
-            token* tk = malloc(sizeof(token*));
-            tk->line_num = line_num;
-            tk->rnum = x;// maybe lexeme better?
-            tk->token = RNUM;
-            return tk;
-
+            float x1 = atof(lexeme5);
+            token* tk3 = malloc(sizeof(token*));
+            tk3->line_num = line_num;
+            tk3->rnum = x1;// maybe lexeme better?
+            tk3->token = RNUM;
+            return tk3;
             break;
         case 13:
             //note: need to add increase line number
             line_num++;
-            return ;//note: what to return here
-            //break;
+            // return ;//note: what to return here
+            break;
         case 14:
-            return ;//note: what to return here
-            //break;
+            // return ;//note: what to return here
+            break;
         case 15:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), PLUS);
             //return "PLUS";//note: this return correct
@@ -407,7 +408,8 @@ token* getNextToken(FILE *fp)
                 s = 18;
             break;
         case 20:
-            return; //note: comment
+            // return; //note: comment
+            break;
         case 22:
             if (c == '<')
             {
@@ -420,7 +422,6 @@ token* getNextToken(FILE *fp)
             else
             {
                 s = 26;
-
             }
             break;
         case 23:
@@ -438,7 +439,6 @@ token* getNextToken(FILE *fp)
             return make_token(line_num, copyLexeme(tb, getSize(tb)), LE);
         case 26:
             retract(1, tb);
-            //return "LT";
             return make_token(line_num, copyLexeme(tb, getSize(tb)), LT);
         case 27:
             retract(1, tb);
@@ -502,7 +502,7 @@ token* getNextToken(FILE *fp)
         case 42:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), SQBC);
         case 43:
-        if (c == '.')
+            if (c == '.')
                 s = 44;
             else
             {
@@ -531,7 +531,7 @@ token* getNextToken(FILE *fp)
 
 
         default:
-            println("error: not a valid state (default)");
+            printf("error: not a valid state (default)");
             break;
         }
         

@@ -12,6 +12,7 @@ int hash(char *str, int length)
     {
         corr_hash += (int)str[i];
     }
+    // printf("hash:%d\n", corr_hash%HASHTABLE_SIZE);
     return corr_hash % HASHTABLE_SIZE;
 }
 
@@ -43,8 +44,10 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     }
     while (ptr->next != NULL)
     {
-
         ptr = ptr->next;
+        if (strcmp("declare",str)==0) {
+            printf("%s\n", ptr->str);
+        }
     }
     ptr->next = malloc(sizeof(bucket_node *));
     ptr->next->str = str;
@@ -119,9 +122,17 @@ token_names get(hashtable *ht, char *str, int length)
 // int main()
 // {
 //     hashtable ht = initHashtable();
-//     insert(&ht, "jnt", 3, "INTEGER");
-//     insert(&ht, " ", 1, "SPACE");
-//     printf(get(&ht, "jnt", 3));
+//     insert(&ht, "integer", 7, INTEGER);
+//     // printf("%d\n", get(ht, "integer", 7));
+//     insert(&ht, "real", 4, REAL);
+//     insert(&ht, "boolean", 7, BOOLEAN);
+//     insert(&ht, "of", 2, OF);
+//     insert(&ht, "array", 5, ARRAY);
+//     insert(&ht, "start", 5, START);
+//     insert(&ht, "end", 3, END);
+//     insert(&ht, "declare", 7, DECLARE);
+//     insert(&ht, "module", 6, MODULE);
+//     printf("%d", get(&ht, "jnt", 3));
 //     printf("%d", delete (ht, " ", 1));
-//     printf(get(&ht, " ", 1));
+//     // printf(get(&ht, " ", 1));
 // }
