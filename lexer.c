@@ -577,6 +577,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
 
     char c = fgetc(fp1);
     int s = 0;
+    int newComment = 1;
 
     while(c != EOF) {
         switch(s) {
@@ -607,8 +608,11 @@ void removeComments(char *testcaseFile, char *cleanFile) {
                     s = 19;
                 }
                 else {
-                    fputc(' ',fp2);
-                    fputc(' ',fp2);
+                    if(newComment==1) {
+                        fputc(' ',fp2);
+                        fputc(' ',fp2);
+                        newComment = !newComment;
+                    }
                     fputc(c,fp2);
                     s = 18;
                 }
@@ -618,6 +622,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
                 if(c == '*') {
                     fputc(' ',fp2);
                     fputc(' ',fp2);
+                    newComment = !newComment;
                     s = 0;
                 }
                 else {
@@ -626,6 +631,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
                     s = 18;
                 }
                 break;
+
 
         }
         c = fgetc(fp1);
