@@ -24,7 +24,7 @@ int getSize(twinbuffer *tb)
     int size = 0;
     if (tb->fwd - 1 > tb->begin)
     {
-        printf("size calculation, %d %d", tb->fwd, tb->begin);
+        // printf("size calculation, %d %d", tb->fwd, tb->begin);
         size = tb->fwd - 1 - tb->begin + 1;
     }
     else
@@ -99,11 +99,11 @@ void populate_hashtable(hashtable *ht)
     insert(ht, "false", 5, FALSE);
 }
 
-void find_token(char *id)
-{
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-}
+// void find_token(char *id)
+// {
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+// }
 
 // token_names getNextToken(FILE *fp)
 token *getNextToken(FILE *fp)
@@ -112,7 +112,6 @@ token *getNextToken(FILE *fp)
     hashtable ht = initHashtable();
 
     populate_hashtable(&ht);
-    printf("hello\n");
 
     int s = 0; // state
     while (1)
@@ -310,7 +309,6 @@ token *getNextToken(FILE *fp)
 
             int size4 = getSize(tb);
             char *lexeme4 = copyLexeme(tb, size4);
-            printf("real: %s", lexeme4);
 
             float rnum = atof(lexeme4);
             token *tk1 = malloc(sizeof(token *));
