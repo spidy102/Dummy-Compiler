@@ -22,14 +22,14 @@ token *make_token(int line_num, char *lexeme, token_names tok)
 int getSize(twinbuffer *tb)
 {
     int size = 0;
-    if (tb->fwd - 1 > tb->begin)
+    if (tb->fwd >= tb->begin)
     {
         // printf("size calculation, %d %d", tb->fwd, tb->begin);
-        size = tb->fwd - 1 - tb->begin + 1;
+        size = tb->fwd + 1 - tb->begin;
     }
     else
     {
-        size = SIZE - tb->begin + tb->fwd;
+        size = SIZE - tb->begin + tb->fwd + 1;
     }
     return size;
 }
@@ -38,10 +38,10 @@ char *copyLexeme(twinbuffer *tb, int size)
 {
 
     char *lexeme = malloc(sizeof(char) * size);
-    if (tb->fwd > tb->begin)
+    if (tb->fwd >= tb->begin)
     {
         int i = 0;
-        for (int j = tb->begin; j <= tb->fwd - 1; j++)
+        for (int j = tb->begin; j <= tb->fwd; j++)
         {
             lexeme[i++] = tb->buffer[j];
         }
@@ -54,13 +54,14 @@ char *copyLexeme(twinbuffer *tb, int size)
             lexeme[j++] = tb->buffer[i];
         }
 
-        for (int i = 0; i <= tb->fwd - 1; i++)
+        for (int i = 0; i <= tb->fwd; i++)
         {
             lexeme[j++] = tb->buffer[i];
         }
     }
-    tb->begin = tb->fwd - 1;
-    tb->fwd++;
+    tb->begin = tb->fwd + 1;
+    // printf("\nfwd:%d beg:%d\n", tb->fwd, tb->begin);
+    // tb->fwd++;
     return lexeme;
 }
 
@@ -106,18 +107,29 @@ void populate_hashtable(hashtable *ht)
 // }
 
 // token_names getNextToken(FILE *fp)
-token *getNextToken(FILE *fp)
+token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
 {
-    twinbuffer *tb = twinbuffer_init(fp);
-    hashtable ht = initHashtable();
 
     populate_hashtable(&ht);
-
+    char prev = ' ';
     int s = 0; // state
+    char c = readOneCharacter(tb);
     while (1)
     {
-        char c = readOneCharacter(tb); // full string here
 
+        // full string here
+        // printf("%d ascii read:%d %c\n", s, c, c);
+        // if (prev == '\0' && c == prev)
+        // {
+        //     printf("nothing else to tokenize!");
+        //     exit(0);
+        // }
+        if (c == 0 && tb->begin == tb->fwd)
+        {
+            printf("Nothing else to tokenize!");
+            exit(0);
+        }
+        prev = c;
         switch (s) // note: should we add break after all cases? am adding here,
         // also what happens if none of the if cases get accepted, need to show error
         //  all cases in {}?
@@ -130,10 +142,12 @@ token *getNextToken(FILE *fp)
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
             {
                 s = 1;
+                c = readOneCharacter(tb);
             }
             else if (c >= '0' && c <= '9')
             {
                 s = 3;
+                c = readOneCharacter(tb);
             }
             else if (c == '\n')
             {
@@ -154,14 +168,17 @@ token *getNextToken(FILE *fp)
             else if (c == '*')
             {
                 s = 17;
+                c = readOneCharacter(tb);
             }
             else if (c == '<')
             {
                 s = 22;
+                c = readOneCharacter(tb);
             }
             else if (c == '>')
             {
                 s = 28;
+                c = readOneCharacter(tb);
             }
             else if (c == ',')
             {
@@ -170,6 +187,7 @@ token *getNextToken(FILE *fp)
             else if (c == '=')
             {
                 s = 35;
+                c = readOneCharacter(tb);
             }
             else if (c == ';')
             {
@@ -178,6 +196,7 @@ token *getNextToken(FILE *fp)
             else if (c == '!')
             {
                 s = 38;
+                c = readOneCharacter(tb);
             }
             else if (c == '/')
             {
@@ -194,10 +213,12 @@ token *getNextToken(FILE *fp)
             else if (c == '.')
             {
                 s = 43;
+                c = readOneCharacter(tb);
             }
             else if (c == ':')
             {
                 s = 45;
+                c = readOneCharacter(tb);
             }
             else if (c == '(')
             {
@@ -211,17 +232,19 @@ token *getNextToken(FILE *fp)
         case 1:
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
             {
-                break;
+                c = readOneCharacter(tb);
             }
             else
             {
                 s = 2;
-                break;
             }
+            break;
         case 2:
             retract(1, tb);
             int size1 = getSize(tb);
+            // printf("size: %d", size1);
             char *lexeme1 = copyLexeme(tb, size1);
+            // printf("lexeme1: %s %d\n", lexeme1, size1);
             if (exists(ht, lexeme1, size1))
             {
                 token_names tokene = get(&ht, lexeme1, size1);
@@ -238,18 +261,18 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 3;
-                break; // note should this break exist? idts
+                c = readOneCharacter(tb);
             }
             else if (c == '.')
             {
                 s = 4;
-                break; // note here also remove
+                c = readOneCharacter(tb);
             }
             else
             {
                 s = 10;
-                break;
             }
+            break;
         case 10:
             retract(1, tb); // note here only retract one?
             int size2 = getSize(tb);
@@ -264,17 +287,17 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 5;
-                break; // note: break here?
+                c = readOneCharacter(tb);
             }
             else if (c == '.')
             {
                 s = 11;
-                break;
             }
             else
             {
                 // generate error here
             }
+            break;
         case 11:
             retract(2, tb);
             int size3 = getSize(tb);
@@ -291,18 +314,18 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 5;
-                break; // note: here?
+                c = readOneCharacter(tb);
             }
             else if (c == 'e' || c == 'E')
             {
                 s = 6;
-                break;
+                c = readOneCharacter(tb);
             }
             else
             {
                 s = 12;
             }
-
+            break;
         case 12:
             retract(1, tb);
             // return RNUM;//note: shouldnt we return the string of this
@@ -316,30 +339,27 @@ token *getNextToken(FILE *fp)
             tk1->rnum = rnum;
             tk1->token = RNUM;
             return tk1;
-
-            break;
-
         case 6:
             if (c == '+' || c == '-')
             {
                 s = 5;
-                break;
+                c = readOneCharacter(tb);
             }
             else if (c >= '0' || c <= '9')
             {
                 s = 8;
-                break;
+                c = readOneCharacter(tb);
             }
             else
             {
                 // note: error
             }
-
+            break;
         case 7:
             if (c >= '0' || c <= '9')
             {
                 s = 8;
-                break;
+                c = readOneCharacter(tb);
             }
             else
             {
@@ -351,6 +371,7 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 8;
+                c = readOneCharacter(tb);
             }
             else
                 s = 9;
@@ -367,14 +388,18 @@ token *getNextToken(FILE *fp)
             return tk3;
             break;
         case 13:
-            // note: need to add increase line number
             line_num++;
-            // return ;//note: what to return here
             s = 0;
+            copyLexeme(tb, getSize(tb));
+            c = readOneCharacter(tb);
             break;
         case 14:
             // return ;//note: what to return here
             s = 0;
+            // printf("\n%d %d\n", tb->begin, tb->fwd);
+            copyLexeme(tb, getSize(tb));
+            c = readOneCharacter(tb);
+            // printf("\n%d %d %c\n", tb->begin, tb->fwd, c);
             break;
         case 15:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), PLUS);
@@ -385,11 +410,13 @@ token *getNextToken(FILE *fp)
             if (c == '*')
             {
                 s = 18;
+                c = readOneCharacter(tb);
             }
             else
             {
                 s = 21;
             }
+            break;
         case 21:
             retract(1, tb);
             return make_token(line_num, copyLexeme(tb, getSize(tb)), MUL);
@@ -419,6 +446,7 @@ token *getNextToken(FILE *fp)
             if (c == '<')
             {
                 s = 23;
+                c = readOneCharacter(tb);
             }
             else if (c == '=')
             {
@@ -440,6 +468,7 @@ token *getNextToken(FILE *fp)
             }
             break;
         case 24:
+
             return make_token(line_num, copyLexeme(tb, getSize(tb)), DRIVERDEF);
         case 25:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), LE);
@@ -453,6 +482,7 @@ token *getNextToken(FILE *fp)
             if (c == '>')
             {
                 s = 29;
+                c = readOneCharacter(tb);
             }
             else if (c == '=')
             {
@@ -463,7 +493,9 @@ token *getNextToken(FILE *fp)
             break;
         case 29:
             if (c == '>')
+            {
                 s = 30;
+            }
             else
                 s = 31;
             break;
@@ -505,7 +537,6 @@ token *getNextToken(FILE *fp)
             return make_token(line_num, copyLexeme(tb, getSize(tb)), DIV);
         case 41:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), SQBO);
-            ;
         case 42:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), SQBC);
         case 43:
@@ -546,5 +577,10 @@ token *getNextToken(FILE *fp)
 int main()
 {
     FILE *fp = fopen("example.erp", "r");
-    printf("%d %d", getNextToken(fp)->token, LE);
+    twinbuffer *tb = twinbuffer_init(fp);
+    hashtable ht = initHashtable();
+    // while (1)
+    //     printf("%d %d\n", getNextToken(fp, ht, tb)->token, LE);
+
+    // printf("%s", tb->buffer);
 }

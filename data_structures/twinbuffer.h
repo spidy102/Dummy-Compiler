@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define SIZE 10
+#define SIZE 512
 
 typedef struct twinbuffer
 {

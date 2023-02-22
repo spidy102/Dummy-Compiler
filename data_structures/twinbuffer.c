@@ -7,7 +7,7 @@ twinbuffer *twinbuffer_init(FILE *fp)
     twinbuffer *tb = malloc(sizeof(twinbuffer *));
     tb->fp = fp;
     tb->begin = 0;
-    tb->fwd = 0;
+    tb->fwd = -1;
     tb->end = false;
     tb->buffer = malloc(sizeof(SIZE) * sizeof(char));
     return tb;
@@ -20,9 +20,10 @@ char readOneCharacter(twinbuffer *tb)
     // {
     //     tb->fwd++;
     // }
-    if (tb->begin == 0 && tb->fwd == 0)
+    if (tb->begin == 0 && tb->fwd == -1)
     {
         int x = fread(tb->buffer, 1, SIZE / 2, fp);
+        printf("num of bytes read: %d", x);
         if (x < SIZE / 2)
         {
             tb->buffer[x] = '\0';
@@ -33,22 +34,20 @@ char readOneCharacter(twinbuffer *tb)
         // {
         //     tb->buffer[read] = '\0';
         // }
-        char temp = tb->buffer[tb->fwd];
-        tb->fwd++;
+        char temp = tb->buffer[++tb->fwd];
         return temp;
     }
-    else if (tb->fwd == SIZE / 2)
+    else if (tb->fwd == SIZE / 2 - 1)
     {
         int read = fread(&tb->buffer[SIZE / 2], 1, SIZE / 2, fp);
-        char temp = tb->buffer[tb->fwd];
+        char temp = tb->buffer[++tb->fwd];
         if (read < SIZE / 2)
         {
             tb->buffer[read + SIZE / 2] = '\0';
         }
-        tb->fwd++;
         return temp;
     }
-    else if (tb->fwd == SIZE)
+    else if (tb->fwd == SIZE - 1)
     {
         int read = fread(tb->buffer, 1, SIZE / 2, fp);
         char temp = tb->buffer[0];
@@ -56,12 +55,12 @@ char readOneCharacter(twinbuffer *tb)
         {
             tb->buffer[read] = '\0';
         }
-        tb->fwd = 1;
+        tb->fwd = 0;
         return temp;
     }
     else
     {
-        return tb->buffer[tb->fwd++];
+        return tb->buffer[(++tb->fwd) % SIZE];
     }
 }
 
