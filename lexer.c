@@ -363,10 +363,10 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 8;
+                break;
             }
             else
                 s = 9;
-            break;
 
         case 9: // might not be acutate due to e
             retract(1, tb);
@@ -394,20 +394,25 @@ token *getNextToken(FILE *fp)
         case 16:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), MINUS);
         case 17:
+            // printf("%c", c);
             if (c == '*')
             {
                 s = 18;
+                break;
             }
             else
             {
                 s = 21;
             }
-            break;
+            
 
         case 21:
             retract(1, tb);
+            printf("multiplication here\n");
             return make_token(line_num, copyLexeme(tb, getSize(tb)), MUL);
         case 18:
+        printf("hello %c\n", c);
+        
             if (c == '*')
             {
                 s = 19;
@@ -581,6 +586,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
                     s = 17;
                 }
                 else {
+                    s = 0;
                     fputc(c,fp2);
                 }
                 break;
@@ -604,6 +610,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
                     fputc(' ',fp2);
                     fputc(' ',fp2);
                     fputc(c,fp2);
+                    s = 18;
                 }
                 break;
             
