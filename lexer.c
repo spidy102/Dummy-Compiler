@@ -106,6 +106,14 @@ void populate_hashtable(hashtable *ht)
 // }
 
 // token_names getNextToken(FILE *fp)
+
+// void lexer_init(FILE *fp) {
+//     twinbuffer *tb = twinbuffer_init(fp);
+//     hashtable ht = initHashtable();
+
+//     populate_hashtable(&ht);
+// }
+
 token *getNextToken(FILE *fp)
 {
     twinbuffer *tb = twinbuffer_init(fp);
@@ -238,12 +246,12 @@ token *getNextToken(FILE *fp)
             if (c >= '0' && c <= '9')
             {
                 s = 3;
-                break; // note should this break exist? idts
+                break; // note should this break exist? yes it should
             }
             else if (c == '.')
             {
                 s = 4;
-                break; // note here also remove
+                break; // note here also remove // no don't
             }
             else
             {
@@ -273,6 +281,8 @@ token *getNextToken(FILE *fp)
             }
             else
             {
+                s = 50;
+                break;
                 // generate error here
             }
         case 11:
@@ -322,7 +332,7 @@ token *getNextToken(FILE *fp)
         case 6:
             if (c == '+' || c == '-')
             {
-                s = 5;
+                s = 7;
                 break;
             }
             else if (c >= '0' || c <= '9')
@@ -332,6 +342,8 @@ token *getNextToken(FILE *fp)
             }
             else
             {
+                s = 50;
+                break;
                 // note: error
             }
 
@@ -339,10 +351,10 @@ token *getNextToken(FILE *fp)
             if (c >= '0' || c <= '9')
             {
                 s = 8;
-                break;
             }
             else
             {
+                s = 50;
                 // note: error
             }
             break;
@@ -390,6 +402,8 @@ token *getNextToken(FILE *fp)
             {
                 s = 21;
             }
+            break;
+
         case 21:
             retract(1, tb);
             return make_token(line_num, copyLexeme(tb, getSize(tb)), MUL);
@@ -484,6 +498,7 @@ token *getNextToken(FILE *fp)
                 s = 36;
             else
             {
+                s = 50;
                 // note: error
             }
             break;
@@ -496,6 +511,7 @@ token *getNextToken(FILE *fp)
                 s = 39;
             else
             {
+                s = 50;
                 // note: error
             }
             break;
@@ -505,7 +521,7 @@ token *getNextToken(FILE *fp)
             return make_token(line_num, copyLexeme(tb, getSize(tb)), DIV);
         case 41:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), SQBO);
-            ;
+            
         case 42:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), SQBC);
         case 43:
@@ -513,6 +529,7 @@ token *getNextToken(FILE *fp)
                 s = 44;
             else
             {
+                s = 50;
                 // note: error
             }
             break;
@@ -536,11 +553,81 @@ token *getNextToken(FILE *fp)
         case 49:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), BC);
 
+        case 50:
+            printf("invalid input\n");
+            exit(0);
+            break;
+
         default:
             printf("error: not a valid state (default)");
             break;
         }
     }
+}
+
+void removeComments(char *testcaseFile, char *cleanFile) {
+
+    FILE *fp1 = fopen(testcaseFile,"r");
+    FILE *fp2 = fopen(cleanFile,"w");
+
+    char c = fgetc(fp1);
+    int s = 0;
+
+    while(c != EOF) {
+        switch(s) {
+
+            case 0:
+                if(c == '*') {
+                    s = 17;
+                }
+                else {
+                    fputc(c,fp2);
+                }
+                break;
+            
+            case 17:
+                if(c == '*') {
+                    s = 18;
+                }
+                else {
+                    s = 0;
+                    fputc('*',fp2);
+                    fputc(c,fp2);
+                }
+                break;
+            
+            case 18:
+                if(c == '*') {
+                    s = 19;
+                }
+                else {
+                    fputc(' ',fp2);
+                    fputc(' ',fp2);
+                    fputc(c,fp2);
+                }
+                break;
+            
+            case 19:
+                if(c == '*') {
+                    fputc(' ',fp2);
+                    fputc(' ',fp2);
+                    s = 0;
+                }
+                else {
+                    fputc('*',fp2);
+                    fputc(c,fp2);
+                    s = 18;
+                }
+                break;
+
+        }
+        c = fgetc(fp1);
+    }
+
+    fclose(fp1);
+    fclose(fp2);
+
+    printf("Removed comments");
 }
 
 int main()
