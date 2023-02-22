@@ -70,8 +70,11 @@ int main(){
             else{
                 s= 50;
             }
+            break;
+        case 41:
+        
         default:
             break;
     }
-    printf("%d", s);
+
 }
