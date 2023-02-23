@@ -35,6 +35,10 @@ int main (){
 
         fgets (dataReadFromFile, 90, fp);
         char * token = strtok(dataReadFromFile, " ");
+        struct node {
+            int nodeToken[20];                        //Data of the node
+            struct node *nextPtr;           //Address of the next node
+        }*startNode;
          // loop through the string to extract all other tokens
         while( token != NULL ) {
             printf( " %s\n", token ); //printing each token
