@@ -9,11 +9,6 @@ int main (){
     char data[130][100];
     char nonTerminals[120][20];
 
-    struct node {
-        int char[20];                        //Data of the node
-        struct node *nextPtr;           //Address of the next node
-    }*stNode;
-
     void createNodeList(int n); // function to create the list
     void displayList();         // function to display the list
 
@@ -43,11 +38,14 @@ int main (){
          // loop through the string to extract all other tokens
         while( token != NULL ) {
             printf( " %s\n", token ); //printing each token
+            
             token = strtok(NULL, " ");
         }
 
         struct node *forwardNode, *tempNode;
-        startNode = struct 
+        startNode = (struct node *)malloc(sizeof(struct node));
+        startNode->nodeToken = token;
+        startNode ->nextPtr = NULL;
         int finalCountOfGrammar = count;
         // printing final count
         // printf("%d",finalCountOfGrammar);
