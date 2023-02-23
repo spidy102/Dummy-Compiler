@@ -92,16 +92,21 @@ void getNonTerminals(ruleNode* head, char* nonTerminals){
 
 void getFirst(char* nonTerminal, ruleNode* headArray[], int grammarSize) {
     // TODO: CORRECT THIS!
-    printf("First(%s) = ", nonTerminal);
+    // printf("First(%s) = ", nonTerminal);
     for(int i = 0; i < grammarSize; i++){
         if(strcmp(nonTerminal, headArray[i]->grammarEntry) == 0){
             ruleNode* temp = headArray[i]->nextPtr;
             while(temp != NULL){
                 if(isNonTerminal(temp->grammarEntry)){
                     getFirst(temp->grammarEntry, headArray, grammarSize);
+                    if (strcmp(temp->grammarEntry,"ε") == 0){
+                        getFirst(temp->nextPtr->grammarEntry, headArray, grammarSize);
+                    }
                 }
                 else{
-                    printf("%s ", temp->grammarEntry);
+                    if (strcmp(temp->grammarEntry,"ε") != 0){
+                        printf("%s ", temp->grammarEntry);
+                    }
                     break;
                 }
                 temp = temp->nextPtr;
