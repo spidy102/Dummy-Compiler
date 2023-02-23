@@ -12,7 +12,7 @@ int hash(char *str, int length)
     {
         corr_hash += (int)str[i];
     }
-    // printf("hash:%d\n", corr_hash%HASHTABLE_SIZE);
+    // printf("hash:%d\n", corr_hash % HASHTABLE_SIZE);
     return corr_hash % HASHTABLE_SIZE;
 }
 
@@ -46,6 +46,10 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     {
         ptr = ptr->next;
     }
+    if (strcmp("takes", str) == 0)
+    {
+        printf("1hello\n");
+    }
     ptr->next = malloc(sizeof(bucket_node *));
     ptr->next->str = str;
     ptr->next->tok = tok;
@@ -53,13 +57,12 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     return false;
 }
 
-bool exists(hashtable ht, char *str, int length)
+bool exists(hashtable *ht, char *str, int length)
 {
     int getHash = hash(str, length);
-    bucket_node *ptr = ht.table[getHash]->bucket_ptr;
+    bucket_node *ptr = ht->table[getHash]->bucket_ptr;
     while (ptr != NULL)
     {
-        printf("inside exists %s\n", ptr->str);
         if (strcmp(ptr->str, str) == 0)
         {
             return true;
@@ -71,7 +74,7 @@ bool exists(hashtable ht, char *str, int length)
 
 bool delete(hashtable ht, char *str, int length)
 {
-    if (!exists(ht, str, length))
+    if (!exists(&ht, str, length))
         return false;
     int getHash = hash(str, length);
     bucket_node *ptr = ht.table[getHash]->bucket_ptr;

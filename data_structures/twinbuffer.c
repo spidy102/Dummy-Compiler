@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "twinbuffer.h"
 
 twinbuffer *twinbuffer_init(FILE *fp)
@@ -10,6 +11,7 @@ twinbuffer *twinbuffer_init(FILE *fp)
     tb->fwd = -1;
     tb->end = false;
     tb->buffer = malloc(sizeof(SIZE) * sizeof(char));
+    // memset(tb->buffer, '\0', SIZE);
     return tb;
 }
 
@@ -23,7 +25,6 @@ char readOneCharacter(twinbuffer *tb)
     if (tb->begin == 0 && tb->fwd == -1)
     {
         int x = fread(tb->buffer, 1, SIZE / 2, fp);
-        printf("num of bytes read: %d", x);
         if (x < SIZE / 2)
         {
             tb->buffer[x] = '\0';

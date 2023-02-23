@@ -26,7 +26,7 @@ int hash(char *str, int length);
 
 bool insert(hashtable *ht, char *str, int length, token_names tok);
 
-bool exists(hashtable ht, char *str, int length);
+bool exists(hashtable *ht, char *str, int length);
 
 bool delete(hashtable ht, char *str, int length);
 

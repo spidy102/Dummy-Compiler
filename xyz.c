@@ -9,7 +9,7 @@ int main()
         if (1)
         {
             x += 2;
-            continue;
+            
         }
     case 2:
         printf("inside 2 rn\n");

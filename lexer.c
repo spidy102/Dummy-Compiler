@@ -110,10 +110,11 @@ void populate_hashtable(hashtable *ht)
 token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
 {
 
-    populate_hashtable(&ht);
     char prev = ' ';
     int s = 0; // state
+
     char c = readOneCharacter(tb);
+
     while (1)
     {
 
@@ -242,10 +243,9 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
         case 2:
             retract(1, tb);
             int size1 = getSize(tb);
-            // printf("size: %d", size1);
             char *lexeme1 = copyLexeme(tb, size1);
-            // printf("lexeme1: %s %d\n", lexeme1, size1);
-            if (exists(ht, lexeme1, size1))
+
+            if (exists(&ht, lexeme1, size1))
             {
                 token_names tokene = get(&ht, lexeme1, size1);
                 // return token;//note: does this go to the string
@@ -253,7 +253,6 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             }
             else
             {
-                // printf("%s\n", lexeme);
                 // return ID;//note: shouldnt we return the string of this
                 return make_token(line_num, lexeme1, ID);
             }
@@ -396,10 +395,8 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
         case 14:
             // return ;//note: what to return here
             s = 0;
-            // printf("\n%d %d\n", tb->begin, tb->fwd);
             copyLexeme(tb, getSize(tb));
             c = readOneCharacter(tb);
-            // printf("\n%d %d %c\n", tb->begin, tb->fwd, c);
             break;
         case 15:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), PLUS);
@@ -579,8 +576,31 @@ int main()
     FILE *fp = fopen("example.erp", "r");
     twinbuffer *tb = twinbuffer_init(fp);
     hashtable ht = initHashtable();
-    // while (1)
-    //     printf("%d %d\n", getNextToken(fp, ht, tb)->token, LE);
+    populate_hashtable(&ht);
+    while (1)
+        printf("%d %d\n", getNextToken(fp, ht, tb)->token, LE);
 
-    // printf("%s", tb->buffer);
+    printf("%s", tb->buffer);
+
+    populate_hashtable(&ht);
+    bucket_node *ptr1 = ht.table[536]->bucket_ptr;
+
+    while (ptr1 != NULL)
+    {
+        printf("\n%s\n", ptr1->str);
+        ptr1 = ptr1->next;
+    }
+
+    // exists(ht, "module", 6);
+    // exists(ht, "mod1", 4);
+    // exists(ht, "takes", 5);
+    // exists(ht, "index", 5);
+
+    ptr1 = ht.table[536]->bucket_ptr;
+
+    while (ptr1 != NULL)
+    {
+        printf("\n%s\n", ptr1->str);
+        ptr1 = ptr1->next;
+    }
 }
