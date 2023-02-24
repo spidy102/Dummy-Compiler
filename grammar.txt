@@ -10,4 +10,3 @@ input_plist ID COLON datatype new_input_plist
 new_input_plist COMMA ID COLON datatype new_input_plist
 new_input_plist EPSILON
 output_plist ID COLON datatype new_output_list
-

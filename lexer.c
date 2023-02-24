@@ -65,6 +65,12 @@ char *copyLexeme(twinbuffer *tb, int size)
     return lexeme;
 }
 
+void error(twinbuffer *tb, int line_num)
+{
+    printf("Lexical error at line number: %d, lexeme read is %s\n", line_num, copyLexeme(tb, getSize(tb)));
+    return;
+}
+
 void populate_hashtable(hashtable *ht)
 {
     insert(ht, "integer", 7, INTEGER);
@@ -229,6 +235,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             {
                 s = 49;
             }
+            else
+            {
+                s = 50;
+            }
             break;
         case 1:
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
@@ -244,7 +254,7 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             retract(1, tb);
             int size1 = getSize(tb);
             char *lexeme1 = copyLexeme(tb, size1);
-
+            // printf("lexeme1:%s %d %c\n", lexeme1, size1, c);
             if (exists(&ht, lexeme1, size1))
             {
                 token_names tokene = get(&ht, lexeme1, size1);
@@ -294,6 +304,11 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             }
             else
             {
+                retract(1, tb);
+
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
                 // generate error here
             }
             break;
@@ -339,23 +354,30 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             tk1->token = RNUM;
             return tk1;
         case 6:
+
             if (c == '+' || c == '-')
             {
-                s = 5;
+
+                s = 7;
                 c = readOneCharacter(tb);
             }
-            else if (c >= '0' || c <= '9')
+            else if (c >= '0' && c <= '9')
             {
+
                 s = 8;
                 c = readOneCharacter(tb);
             }
             else
             {
                 // note: error
+                retract(1, tb);
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
             }
             break;
         case 7:
-            if (c >= '0' || c <= '9')
+            if (c >= '0' && c <= '9')
             {
                 s = 8;
                 c = readOneCharacter(tb);
@@ -363,6 +385,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             else
             {
                 // note: error
+                retract(1, tb);
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
             }
             break;
 
@@ -514,6 +540,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             else
             {
                 // note: error
+                retract(1, tb);
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
             }
             break;
         case 36:
@@ -526,6 +556,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             else
             {
                 // note: error
+                retract(1, tb);
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
             }
             break;
         case 39:
@@ -542,6 +576,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             else
             {
                 // note: error
+                retract(1, tb);
+                error(tb, line_num);
+                s = 0;
+                c = readOneCharacter(tb);
             }
             break;
         case 44:
@@ -564,8 +602,10 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
         case 49:
             return make_token(line_num, copyLexeme(tb, getSize(tb)), BC);
 
-        default:
-            printf("error: not a valid state (default)");
+        case 50:
+            error(tb, line_num);
+            s = 0;
+            c = readOneCharacter(tb);
             break;
         }
     }
@@ -578,7 +618,17 @@ int main()
     hashtable ht = initHashtable();
     populate_hashtable(&ht);
     while (1)
-        printf("%d %d\n", getNextToken(fp, ht, tb)->token, LE);
+    {
+        token *tk = getNextToken(fp, ht, tb);
+        if (tk->token == NUM)
+        {
+            printf("%d\n", tk->integer);
+        }
+        else
+        {
+            printf("%s\n", tk->str);
+        }
+    }
 
     printf("%s", tb->buffer);
 

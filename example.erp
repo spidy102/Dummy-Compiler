@@ -1,25 +1,16 @@
-<<module mod1>>
-takes input [index: integer, val_: integer];
+<<<driver program>>>
 start
-declare i_1: integer;
-i_1:= val_+ index - 4;
-print(i_1);
-end
-<<<driver Program>>>
+declare a,b:integer;
+declare c:boolean;
+a:=21;
+b:=23:
+c:=(b-a>3);
+switch(c)
 start
-declare a,b, dummy:integer;
-a:=48;
-b:=10;
-dummy:=100;
-declare flag: boolean;
-flag:=(a>=30)AND(b<30);
-switch(flag)
-start
-case false :print(100);
+case true: b:=100;
 break;
-case true :use module mod1 with parameters a, b;
+case false: b:= -100;
 break;
 end
 end
-end
-end
+#
