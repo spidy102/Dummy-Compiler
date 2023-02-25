@@ -73,7 +73,7 @@ arithmeticExpr term1 arithmeticExprDash
 arithmeticExprDash op1 term1 arithmeticExprDash
 arithmeticExprDash EPSILON
 term1 op2 term1Dash
-term1Dash op1Dash op2 term1Dash
+term1Dash op1Dashop2 term1Dash
 term1Dash EPSILON
 op1 PLUS
 op1 MINUS
@@ -92,15 +92,11 @@ relationalOp GE
 relationalOp EQ
 relationalOp NE
 declareStmt DECLARE idList COLON dataType SEMICOL
-condionalStmt SWITCH BO ID BC START caseStmt default END 
-caseStmt CASE value COLON statements BREAK SEMICOL caseStmtDash
-caseStmtDash caseStmt
-caseStmtDash EPSILON
 value NUM
 value TRUE
 value FALSE
-default DEFAULT COLON statements BREAK SEMICOL
-default EPSILON
+default_ DEFAULT COLON statements BREAK SEMICOL
+default_ EPSILON
 iterativeStmt FOR BO ID IN NUM RANGEOP NUM BC START statements END
 iterativeStmt WHILE BO boolConjunctArithmetic BC START statements END
 range ID RANGEOP rangeDash
