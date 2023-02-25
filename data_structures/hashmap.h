@@ -1,5 +1,5 @@
 #include "token_name.h"
-
+#include <stdbool.h>
 #define HASHTABLE_SIZE 10000
 
 typedef struct BUCKET_NODE

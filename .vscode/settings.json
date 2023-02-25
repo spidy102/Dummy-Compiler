@@ -1,6 +1,8 @@
 {
-    "files.associations": {
-        "*.ejs": "html",
-        "twinbuffer.h": "c"
-    }
+  "files.associations": {
+    "*.ejs": "html",
+    "twinbuffer.h": "c",
+    "*.txt": "c"
+  },
+  "C_Cpp.errorSquiggles": "enabled"
 }
