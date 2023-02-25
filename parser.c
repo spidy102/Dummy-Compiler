@@ -260,36 +260,61 @@ void populateParseTable()
 
         if (grammarHeadArray[i]->nextPtr->isTerminal)
         {
-            if (grammarHeadArray[i]->nextPtr->t == EPSILON)
-            {
+            // if (grammarHeadArray[i]->nextPtr->t == EPSILON)
+            // {
 
+            //     getFollowSets(grammarHeadArray[i]->nt);
+            //     int j = 0;
+            //     ull temp = follows[grammarHeadArray[i]->nt];
+            //     while (temp != 0)
+            //     {
+            //         if (temp % 2 == 1)
+            //         {
+            //             parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
+            //         }
+            //         temp /= 2;
+            //         j++;
+            //     }
+            // }
+
+            ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
+            if (contains_in_set(&first_set, EPSILON))
+            {
+                remove_from_set(&first_set, EPSILON);
                 getFollowSets(grammarHeadArray[i]->nt);
-                int j = 0;
-                ull temp = follows[grammarHeadArray[i]->nt];
-                while (temp != 0)
+                ull follow_set = follows[grammarHeadArray[i]->nt];
+                if (contains_in_set(&follow_set, EPSILON))
                 {
-                    if (temp % 2 == 1)
+                    remove_from_set(&follow_set, EPSILON);
+                }
+                int j = 0;
+                while (follow_set != 0)
+                {
+                    if (follow_set % 2 == 1)
                     {
-                        parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
+                        ruleNode *new_rule = malloc(sizeof(ruleNode *));
+                        new_rule->isTerminal = false;
+                        new_rule->nt = grammarHeadArray[i]->nt;
+                        new_rule->nextPtr = malloc(sizeof(ruleNode *));
+                        new_rule->nextPtr->isTerminal = true;
+                        new_rule->nextPtr->t = EPSILON;
+                        new_rule->nextPtr->nextPtr = NULL;
+                        parseTable[grammarHeadArray[i]->nt][j] = new_rule;
                     }
-                    temp /= 2;
+                    follow_set /= 2;
                     j++;
                 }
             }
-            else
+            int j = 0;
+            ull temp = first_set;
+            while (temp != 0)
             {
-                ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
-                int j = 0;
-                ull temp = first_set;
-                while (temp != 0)
+                if (temp % 2 == 1)
                 {
-                    if (temp % 2 == 1)
-                    {
-                        parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
-                    }
-                    temp /= 2;
-                    j++;
+                    parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
                 }
+                temp /= 2;
+                j++;
             }
         }
     }

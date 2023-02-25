@@ -235,6 +235,11 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             {
                 s = 49;
             }
+            else if (c == '\r')
+            {
+                copyLexeme(tb, getSize(tb));
+                c = readOneCharacter(tb);
+            }
             else
             {
                 s = 50;
@@ -447,10 +452,17 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
             if (c == '*')
             {
                 s = 19;
+                c = readOneCharacter(tb);
+            }
+            else if (c == '\n')
+            {
+                line_num++;
+                c = readOneCharacter(tb);
             }
             else
             {
                 s = 18;
+                c = readOneCharacter(tb);
             }
             break;
         case 19:
@@ -459,11 +471,18 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
                 s = 20;
             }
             else
+            {
+                if (c == '\n')
+                    line_num++;
                 s = 18;
+                c = readOneCharacter(tb);
+            }
             break;
         case 20:
             // return; //note: comment
             s = 0;
+            copyLexeme(tb, getSize(tb));
+            c = readOneCharacter(tb);
             break;
         case 22:
             if (c == '<')

@@ -1,5 +1,12 @@
 <<<driver program>>>
 start
+**hello
+*
+
+
+
+
+hello**
 declare a,b:integer;
 declare c:boolean;
 a:=21;
