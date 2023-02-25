@@ -151,12 +151,10 @@ void getFollowSets(nonTerminal nT)
         ruleNode *SymOnRHS = grammarHeadArray[i]->nextPtr;
         while (SymOnRHS != NULL)
         {
-            // printf("hemlo??");
             if (!SymOnRHS->isTerminal)
             {
                 if (SymOnRHS->nt == nT)
                 {
-                    printf("which rule: %d %d\n", i, nT);
                     bool isDone = false;
                     while (1)
                     {
@@ -186,13 +184,16 @@ void getFollowSets(nonTerminal nT)
                         }
                         else
                         {
-                            if (!SymOnRHS->isTerminal && SymOnRHS->nt == nT)
+
+                            if (head->nt == nT)
                             {
                                 isDone = true;
                                 break;
                             }
                             getFollowSets(head->nt);
                             union_two_sets(&follows[nT], &follows[nT], &follows[head->nt]);
+                            isDone = true;
+                            break;
                         }
                     }
                     if (isDone)
@@ -256,8 +257,8 @@ int main()
     // }
     // printf("%d", grammarHeadArray[108]->nt);
 
-    getFollowSets(moduleDeclarations);
+    getFollowSets(whichId);
 
-    print_set_elements(&follows[moduleDeclarations]);
+    print_set_elements(&follows[whichId]);
     freeGrammar();
 }
