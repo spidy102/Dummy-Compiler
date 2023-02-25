@@ -12,7 +12,7 @@ nonTerminal NTStringMappedEnum(char *str)
     char buffer[100];
     while (fgets(buffer, 100, fp) != NULL)
     {
-        buffer[strlen(buffer)-3] = '\0';
+        buffer[strlen(buffer) - 3] = '\0';
         if (strcmp(buffer, str) == 0)
         {
 
@@ -32,7 +32,7 @@ token_names TStringMappedEnum(char *str)
 
     while (fgets(buffer, 100, fp) != NULL)
     {
-        buffer[strlen(buffer)-3] = '\0';
+        buffer[strlen(buffer) - 3] = '\0';
         if (strcmp(buffer, str) == 0)
         {
             return i;
@@ -56,7 +56,7 @@ void fill_grammar(FILE *fp)
     int i = 0;
     while (fgets(buffer, 100, fp) != NULL)
     {
-        buffer[strlen(buffer)-2] = '\0';
+        buffer[strlen(buffer) - 2] = '\0';
         grammarHeadArray[i] = malloc(sizeof(ruleNode *));
         ruleNode *ptr = grammarHeadArray[i];
         char *tk = strtok(buffer, " \n");
@@ -65,7 +65,7 @@ void fill_grammar(FILE *fp)
         {
             if (isTerminal(tk))
             {
-                
+
                 // if (tk[strlen(tk) - 1] == '\n')
                 // {
                 //     tk[strlen(tk) - 1] = '\0';
@@ -143,6 +143,76 @@ void getFirstSets(nonTerminal nT)
     }
 }
 
+void getFollowSets(nonTerminal nT)
+{
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+        ruleNode *head = grammarHeadArray[i];
+        ruleNode *SymOnRHS = grammarHeadArray[i]->nextPtr;
+        while (SymOnRHS != NULL)
+        {
+            // printf("hemlo??");
+            if (!SymOnRHS->isTerminal)
+            {
+                if (SymOnRHS->nt == nT)
+                {
+                    printf("which rule: %d %d\n", i, nT);
+                    bool isDone = false;
+                    while (1)
+                    {
+                        if (SymOnRHS->nextPtr != NULL)
+                        {
+                            if (SymOnRHS->nextPtr->isTerminal)
+                            {
+                                add_in_set(&follows[nT], SymOnRHS->nextPtr->t);
+                                isDone = true;
+                                break;
+                            }
+                            else
+                            {
+                                getFirstSets(SymOnRHS->nextPtr->nt);
+                                union_two_sets(&follows[nT], &follows[nT], &firsts[SymOnRHS->nextPtr->nt]);
+                                if (contains_in_set(&firsts[SymOnRHS->nextPtr->nt], EPSILON))
+                                {
+                                    remove_from_set(&follows[nT], EPSILON);
+                                    SymOnRHS = SymOnRHS->nextPtr;
+                                }
+                                else
+                                {
+                                    isDone = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (!SymOnRHS->isTerminal && SymOnRHS->nt == nT)
+                            {
+                                isDone = true;
+                                break;
+                            }
+                            getFollowSets(head->nt);
+                            union_two_sets(&follows[nT], &follows[nT], &follows[head->nt]);
+                        }
+                    }
+                    if (isDone)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    SymOnRHS = SymOnRHS->nextPtr;
+                }
+            }
+            else
+            {
+                SymOnRHS = SymOnRHS->nextPtr;
+            }
+        }
+    }
+}
+
 void freeList(ruleNode *head)
 {
     ruleNode *temp;
@@ -162,7 +232,6 @@ void freeGrammar()
         freeList(grammarHeadArray[i]);
     }
 }
-
 
 int main()
 {
@@ -186,9 +255,9 @@ int main()
     //     ptr = ptr->nextPtr;
     // }
     // printf("%d", grammarHeadArray[108]->nt);
-    
-    getFirstSets(factorDashDash);
 
-    print_set_elements(&firsts[factorDashDash]);
+    getFollowSets(moduleDeclarations);
+
+    print_set_elements(&follows[moduleDeclarations]);
     freeGrammar();
 }

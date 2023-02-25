@@ -26,3 +26,4 @@ typedef struct ruleNode
 ruleNode *grammarHeadArray[NUM_RULES];
 
 ull firsts[NON_TERMINALS + 1];
+ull follows[NON_TERMINALS + 1];
