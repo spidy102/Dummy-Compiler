@@ -3,6 +3,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "./data_structures/set.h"
+#include "./data_structures/token_name.h"
+#include "./data_structures/hashmap.h"
+#include "lexerDef.h"
+#include "./data_structures/twinbuffer.h"
+#include "./data_structures/stack.h"
+
+ruleNode *grammarHeadArray[NUM_RULES];
+
+ull firsts[NON_TERMINALS + 1];
+ull follows[NON_TERMINALS + 1];
+
+ruleNode *parseTable[NON_TERMINALS][TERMINALS];
 
 nonTerminal NTStringMappedEnum(char *str)
 {
@@ -350,6 +363,19 @@ void printParseTable()
     }
 }
 
+void parseInputSourceCode(FILE *fp)
+{
+    hashtable ht;
+    twinbuffer *tb;
+    line_num = 1;
+    stack *st = initStack();
+    // printf("yha aaye?");
+    tb = twinbuffer_init(fp);
+    ht = initHashtable();
+    token *lookAhead = getNextToken(ht, tb);
+    printf("%d", lookAhead->token);
+}
+
 void freeList(ruleNode *head)
 {
     ruleNode *temp;
@@ -379,6 +405,9 @@ int main()
 
     FILE *fp = fopen("Grammar.txt", "r");
     fill_grammar(fp);
+
+    FILE *fp1 = fopen("example.erp", "r");
+    parseInputSourceCode(fp1);
     // ruleNode *ptr = grammarHeadArray[129];
     // while (ptr != NULL)
     // {
@@ -393,8 +422,8 @@ int main()
     //     ptr = ptr->nextPtr;
     // }
     // printf("%d", n9);
-    getFirstSets(arithmeticOrBooleanExpr);
-    print_set_elements(&firsts[arithmeticOrBooleanExpr]);
+    // getFirstSets(arithmeticOrBooleanExpr);
+    // print_set_elements(&firsts[arithmeticOrBooleanExpr]);
 
     // populateParseTable();
     // printParseTable();

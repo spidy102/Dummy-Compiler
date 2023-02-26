@@ -11,6 +11,7 @@ twinbuffer *twinbuffer_init(FILE *fp)
     tb->fwd = -1;
     tb->end = false;
     tb->buffer = malloc(sizeof(SIZE) * sizeof(char));
+
     // memset(tb->buffer, '\0', SIZE);
     return tb;
 }
@@ -18,6 +19,7 @@ twinbuffer *twinbuffer_init(FILE *fp)
 char readOneCharacter(twinbuffer *tb)
 {
     FILE *fp = tb->fp;
+
     // if (!(tb->begin == 0 && tb->fwd == 0))
     // {
     //     tb->fwd++;

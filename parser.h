@@ -1,6 +1,9 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 #include <stdbool.h>
-#include "./data_structures/token_name.h"
 #include "./data_structures/set.h"
+#include "./data_structures/token_name.h"
 
 #define NUM_RULES 145
 #define NON_TERMINALS 74
@@ -23,9 +26,11 @@ typedef struct ruleNode
     bool isTerminal;
 } ruleNode;
 
-ruleNode *grammarHeadArray[NUM_RULES];
+extern ruleNode *grammarHeadArray[NUM_RULES];
 
-ull firsts[NON_TERMINALS + 1];
-ull follows[NON_TERMINALS + 1];
+extern ull firsts[NON_TERMINALS + 1];
+extern ull follows[NON_TERMINALS + 1];
 
-ruleNode *parseTable[NON_TERMINALS][TERMINALS];
+extern ruleNode *parseTable[NON_TERMINALS][TERMINALS];
+
+#endif

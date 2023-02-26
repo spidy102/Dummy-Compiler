@@ -1,3 +1,6 @@
+#ifndef HASHMAP_H
+#define HASHMAP_H
+
 #include "token_name.h"
 #include <stdbool.h>
 #define HASHTABLE_SIZE 1000
@@ -31,3 +34,5 @@ bool exists(hashtable *ht, char *str, int length);
 bool delete(hashtable ht, char *str, int length);
 
 token_names get(hashtable *ht, char *str, int length);
+
+#endif

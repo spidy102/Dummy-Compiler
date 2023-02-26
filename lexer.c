@@ -8,6 +8,8 @@
 
 // typedef enum
 
+int line_num;
+
 // void twinbuffer()
 
 token *make_token(int line_num, char *lexeme, token_names tok)
@@ -113,14 +115,12 @@ void populate_hashtable(hashtable *ht)
 // }
 
 // token_names getNextToken(FILE *fp)
-token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
+token *getNextToken(hashtable ht, twinbuffer *tb)
 {
 
     char prev = ' ';
     int s = 0; // state
-
     char c = readOneCharacter(tb);
-
     while (1)
     {
 
@@ -630,46 +630,54 @@ token *getNextToken(FILE *fp, hashtable ht, twinbuffer *tb)
     }
 }
 
-int main()
-{
-    FILE *fp = fopen("example.erp", "r");
-    twinbuffer *tb = twinbuffer_init(fp);
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    while (1)
-    {
-        token *tk = getNextToken(fp, ht, tb);
-        if (tk->token == NUM)
-        {
-            printf("%d\n", tk->integer);
-        }
-        else
-        {
-            printf("%s\n", tk->str);
-        }
-    }
+// int main()
+// {
+//     FILE *fp = fopen("example.erp", "r");
+//     if (fp == NULL)
+//     {
+//         printf("File cannot be openened");
+//     }
+//     twinbuffer *tb;
+//     hashtable ht;
+//     line_num = 1;
+//     tb = twinbuffer_init(fp);
+//     ht = initHashtable();
+//     populate_hashtable(&ht);
+//     // printf("%c", readOneCharacter(tb));
+//     while (1)
+//     {
+//         token *tk = getNextToken(ht, tb);
+//         if (tk->token == NUM)
+//         {
+//             printf("%d\n", tk->integer);
+//         }
+//         else
+//         {
+//             printf("%s\n", tk->str);
+//         }
+//     }
 
-    printf("%s", tb->buffer);
+//     // printf("%s", tb->buffer);
 
-    populate_hashtable(&ht);
-    bucket_node *ptr1 = ht.table[536]->bucket_ptr;
+//     // populate_hashtable(&ht);
+//     // bucket_node *ptr1 = ht.table[536]->bucket_ptr;
 
-    while (ptr1 != NULL)
-    {
-        printf("\n%s\n", ptr1->str);
-        ptr1 = ptr1->next;
-    }
+//     // while (ptr1 != NULL)
+//     // {
+//     //     printf("\n%s\n", ptr1->str);
+//     //     ptr1 = ptr1->next;
+//     // }
 
-    // exists(ht, "module", 6);
-    // exists(ht, "mod1", 4);
-    // exists(ht, "takes", 5);
-    // exists(ht, "index", 5);
+//     // exists(ht, "module", 6);
+//     // exists(ht, "mod1", 4);
+//     // exists(ht, "takes", 5);
+//     // exists(ht, "index", 5);
 
-    ptr1 = ht.table[536]->bucket_ptr;
+//     // ptr1 = ht.table[536]->bucket_ptr;
 
-    while (ptr1 != NULL)
-    {
-        printf("\n%s\n", ptr1->str);
-        ptr1 = ptr1->next;
-    }
-}
+//     // while (ptr1 != NULL)
+//     // {
+//     //     printf("\n%s\n", ptr1->str);
+//     //     ptr1 = ptr1->next;
+//     // }
+// }

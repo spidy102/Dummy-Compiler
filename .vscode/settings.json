@@ -2,7 +2,8 @@
   "files.associations": {
     "*.ejs": "html",
     "twinbuffer.h": "c",
-    "*.txt": "c"
+    "*.txt": "c",
+    "token_name.h": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

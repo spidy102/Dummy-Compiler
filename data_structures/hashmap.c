@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hashmap.h"
+#include "token_name.h"
 
 int hash(char *str, int length)
 {

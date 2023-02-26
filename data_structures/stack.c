@@ -9,11 +9,11 @@ stack *initStack()
     return st;
 }
 
-char top(stack *st)
+ruleNode *top(stack *st)
 {
     if (!isEmpty(st))
-        return st->top->NTOrT;
-    return ' ';
+        return st->top->rule;
+    return NULL;
 }
 
 st_element *getTopPointer(stack *st)
@@ -21,24 +21,24 @@ st_element *getTopPointer(stack *st)
     return st->top;
 }
 
-bool push(stack *st, char NTOrT)
+bool push(stack *st, ruleNode *rule)
 {
     st_element *currentTop = getTopPointer(st);
     st_element *newTop = malloc(sizeof(st_element *));
-    newTop->NTOrT = NTOrT;
+    newTop->rule = rule;
     newTop->next = malloc(sizeof(st_element *));
     newTop->next = currentTop;
     st->top = newTop;
     return true;
 }
 
-char pop(stack *st)
+ruleNode *pop(stack *st)
 {
     if (isEmpty(st))
-        return ' ';
+        return NULL;
     st_element *currentTop = getTopPointer(st);
     st->top = currentTop->next;
-    return currentTop->NTOrT;
+    return currentTop->rule;
 }
 
 bool isEmpty(stack *st)

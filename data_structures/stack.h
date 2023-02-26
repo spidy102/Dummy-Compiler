@@ -1,7 +1,11 @@
+#ifndef STACK_H
+#define STACK_H
 
+#include <stdbool.h>
+#include "../parser.h"
 typedef struct st_el
 {
-    char NTOrT;
+    ruleNode *rule;
     struct st_el *next;
 } st_element;
 
@@ -12,10 +16,14 @@ typedef struct STACK
 
 stack *initStack();
 
-char top(stack *st);
+ruleNode *top(stack *st);
 
-bool push(stack *st, char NTOrT);
+st_element *getTopPointer(stack *st);
+
+bool push(stack *st, ruleNode *rule);
+
+ruleNode *pop(stack *st);
 
 bool isEmpty(stack *st);
 
-char pop(stack *st);
+#endif
