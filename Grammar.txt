@@ -8,16 +8,17 @@ driverModule DRIVERDEF DRIVER PROGRAM DRIVERENDDEF moduleDef
 module DEF MODULE ID ENDDEF TAKES INPUT SQBO input_plist SQBC SEMICOL ret moduleDef
 ret RETURNS SQBO output_plist SQBC SEMICOL
 ret EPSILON
-input_plist ID COLON dataType new_input_plist
-new_input_plist COMMA ID COLON dataType new_input_plist
-new_input_plist EPSILON
-output_plist ID COLON dataType new_output_plist
-new_output_plist COMMA ID COLON dataType new_output_plist
-new_output_plist EPSILON
+input_plist ID COLON dataType n1
+n1 COMMA ID COLON dataType n1
+n1 EPSILON
+output_plist ID COLON type n2
+n2 COMMA ID COLON type n2
+n2 EPSILON
 dataType INTEGER
 dataType REAL
 dataType BOOLEAN
-dataType ARRAY SQBO range SQBC OF type
+dataType ARRAY SQBO range_arrays SQBC OF type
+range_arrays index_arr RANGEOP index_arr
 type INTEGER
 type REAL
 type BOOLEAN
@@ -28,61 +29,95 @@ statement ioStmt
 statement simpleStmt
 statement declareStmt
 statement condionalStmt
-statement iterativeStmt 
+statement iterativeStmt
 ioStmt GET_VALUE BO ID BC SEMICOL
-ioStmt PRINT BO varAndBool BC SEMICOL
-var ID whichId
-var NUM
-var RNUM 
-bool_ TRUE
-bool_ FALSE
-varAndBool var
-varAndBool bool_
-whichId SQBO ID SQBC
-whichId EPSILON
+ioStmt PRINT BO var_print BC SEMICOL
+boolConstt TRUE
+boolConstt FALSE
+id_num_rnum ID
+id_num_rnum NUM
+id_num_rnum RNUM
+array_element_for_print ID SQBO index_arr SQBC
+var_print id_num_rnum
+var_print boolConstt
+var_print array_element_for_print
+var_print ID p1
+var_print NUM
+var_print RNUM
+var_print boolConstt
+p1 SQBO new_index SQBC
+p1 EPSILON
 simpleStmt assignmentStmt
 simpleStmt moduleReuseStmt
 assignmentStmt ID whichStmt
 whichStmt lvalueIDStmt
 whichStmt lvalueARRStmt
 lvalueIDStmt ASSIGNOP expression SEMICOL
-lvalueARRStmt SQBO index_ SQBC ASSIGNOP expression SEMICOL
-index_ NUM
-index_ ID
-moduleReuseStmt optional USE MODULE ID WITH PARAMETERS idList SEMICOL
+lvalueARRStmt SQBO element_index_with_expressions SQBC ASSIGNOP expression SEMICOL
+index_arr sign new_index
+new_index NUM
+new_index ID
+sign PLUS
+sign MINUS
+sign EPSILON
+moduleReuseStmt optional USE MODULE ID WITH PARAMETERS actual_para_list SEMICOL
+actual_para_list NUM
+actual_para_list RNUM
+actual_para_list boolConstt
+actual_para_list ID n_11
+n_11 SQBO element_index_with_expressions SQBC
+n_11 EPSILON
 optional SQBO idList SQBC ASSIGNOP
 optional EPSILON
-idList ID idListDash
-idListDash COMMA ID idListDash
-idListDash EPSILON
-expression PLUS expressionDash
-expression MINUS expressionDash
-expression boolConjunctArithmetic
-expressionDash var
-expressionDash BO arithmeticExpr BC
-factorDash bool_
-boolConjunctArithmetic factorDash boolConjunctArithmeticDash
-boolConjunctArithmeticDash logicalOp factorDash boolConjunctArithmeticDash
-boolConjunctArithmeticDash EPSILON
-factorDash arithmeticExpr factorDashDash
-factorDash bool_ factorDashDash
-factorDashDash relationalOp arithmeticExpr factorDashDash
-factorDashDash EPSILON
-arithmeticExpr BO boolConjunctArithmetic BC
-arithmeticExpr term1 arithmeticExprDash
-arithmeticExprDash op1 term1 arithmeticExprDash
-arithmeticExprDash EPSILON
-term1 op2 term1Dash
-term1Dash op1Dashop2 term1Dash
-term1Dash EPSILON
+idList ID n3
+n3 COMMA ID n3
+n3 EPSILON
+expression arithmeticOrBooleanExpr
+expression u
+u unary_op new_NT
+new_NT BO arithmeticExpr BC
+new_NT var_id_num
+var_id_num  ID
+var_id_num  NUM
+var_id_num  RNUM
+unary_op PLUS
+unary_op MINUS
+arithmeticOrBooleanExpr anyTerm n7
+n7 logicalOp anyTerm n7
+n7 EPSILON
+anyTerm arithmeticExpr n8
+anyTerm boolConstt n8
+n8 relationalOp arithmeticExpr
+n8 EPSILON
+arithmeticExpr term n4
+n4 op1 term n4
+n4 EPSILON
+term factor n5
+n5 op2 factor n5
+n5 EPSILON
+factor BO arithmeticOrBooleanExpr BC
+factor id_num_rnum
+factor boolConstt
+factor array_element
+array_element ID SQBO element_index_with_expressions SQBC
+element_index_with_expressions sign n_10
+element_index_with_expressions arrExpr
+n_10 new_index
+n_10 BO arrExpr BC
+arrExpr arrTerm arr_N4
+arr_N4 op1 arrTerm arr_N4
+arr_N4 EPSILON
+arrTerm arrFactor arr_N5
+arr_N5 op2 arrFactor arr_N5
+arr_N5 EPSILON
+arrFactor ID
+arrFactor NUM
+arrFactor boolConstt
+arrFactor BO arrExpr BC
 op1 PLUS
 op1 MINUS
-op1Dash MUL
-op1Dash DIV
-op2 BO arithmeticExpr BC
-op2 ID
-op2 NUM
-op2 RNUM
+op2 MUL
+op2 DIV
 logicalOp AND
 logicalOp OR
 relationalOp LT
@@ -92,14 +127,19 @@ relationalOp GE
 relationalOp EQ
 relationalOp NE
 declareStmt DECLARE idList COLON dataType SEMICOL
+condionalStmt SWITCH BO ID BC START caseStmts default_ END
+caseStmts CASE value COLON statements BREAK SEMICOL n9
+n9 CASE value COLON statements BREAK SEMICOL n9
+n9 EPSILON
 value NUM
 value TRUE
 value FALSE
 default_ DEFAULT COLON statements BREAK SEMICOL
 default_ EPSILON
-iterativeStmt FOR BO ID IN NUM RANGEOP NUM BC START statements END
-iterativeStmt WHILE BO boolConjunctArithmetic BC START statements END
-range ID RANGEOP rangeDash
-range NUM RANGEOP rangeDash
-rangeDash ID
-rangeDash NUM
+iterativeStmt FOR BO ID IN range_for_loop BC START statements END
+iterativeStmt WHILE BO arithmeticOrBooleanExpr BC START statements END
+index_for_loop sign_for_loop new_index_for_loop
+new_index_for_loop  NUM
+sign_for_loop PLUS
+sign_for_loop MINUS
+sign_for_loop EPSILON

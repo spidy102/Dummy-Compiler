@@ -2,13 +2,13 @@
 #include "./data_structures/token_name.h"
 #include "./data_structures/set.h"
 
-#define NUM_RULES 105
-#define NON_TERMINALS 54
+#define NUM_RULES 145
+#define NON_TERMINALS 74
 #define TERMINALS 55
 
 typedef enum
 {
-#include "nonterms.txt"
+#include "nonterms1.txt"
 } nonTerminal;
 
 typedef struct ruleNode

@@ -8,11 +8,12 @@ nonTerminal NTStringMappedEnum(char *str)
 {
 
     int i = 0;
-    FILE *fp = fopen("nonterms.txt", "r");
+    FILE *fp = fopen("nonterms1.txt", "r");
     char buffer[100];
     while (fgets(buffer, 100, fp) != NULL)
     {
-        buffer[strlen(buffer) - 3] = '\0';
+        buffer[strlen(buffer) - 2] = '\0';
+        // printf("%s\n", buffer);
         if (strcmp(buffer, str) == 0)
         {
 
@@ -145,20 +146,27 @@ void getFirstSets(nonTerminal nT)
 
 ull getFirstSetsOneRule(nonTerminal nT, int i)
 {
+
     ull first_set;
+
     if (grammarHeadArray[i]->nt == nT)
     {
+
         ruleNode *SymOnRHS = grammarHeadArray[i]->nextPtr;
         while (1)
         {
+
             if (SymOnRHS->isTerminal)
             {
+
                 add_in_set(&first_set, SymOnRHS->t);
                 return first_set;
             }
             else
             {
+
                 getFirstSets(SymOnRHS->nt);
+                // print_set_elements(&firsts[SymOnRHS->nt]);
                 if (contains_in_set(&firsts[SymOnRHS->nt], EPSILON))
                 {
                     union_two_sets(&first_set, &first_set, &firsts[SymOnRHS->nt]);
@@ -184,6 +192,7 @@ ull getFirstSetsOneRule(nonTerminal nT, int i)
 
 void getFollowSets(nonTerminal nT)
 {
+
     for (int i = 0; i < NUM_RULES; i++)
     {
         ruleNode *head = grammarHeadArray[i];
@@ -257,65 +266,62 @@ void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
     {
+        // if (grammarHeadArray[i]->nextPtr->isTerminal)
 
-        if (grammarHeadArray[i]->nextPtr->isTerminal)
+        // if (grammarHeadArray[i]->nextPtr->t == EPSILON)
+        // {
+
+        //     getFollowSets(grammarHeadArray[i]->nt);
+        //     int j = 0;
+        //     ull temp = follows[grammarHeadArray[i]->nt];
+        //     while (temp != 0)
+        //     {
+        //         if (temp % 2 == 1)
+        //         {
+        //             parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
+        //         }
+        //         temp /= 2;
+        //         j++;
+        //     }
+        // }
+        ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
+        if (contains_in_set(&first_set, EPSILON))
         {
-            // if (grammarHeadArray[i]->nextPtr->t == EPSILON)
-            // {
-
-            //     getFollowSets(grammarHeadArray[i]->nt);
-            //     int j = 0;
-            //     ull temp = follows[grammarHeadArray[i]->nt];
-            //     while (temp != 0)
-            //     {
-            //         if (temp % 2 == 1)
-            //         {
-            //             parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
-            //         }
-            //         temp /= 2;
-            //         j++;
-            //     }
-            // }
-
-            ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
-            if (contains_in_set(&first_set, EPSILON))
+            remove_from_set(&first_set, EPSILON);
+            getFollowSets(grammarHeadArray[i]->nt);
+            ull follow_set = follows[grammarHeadArray[i]->nt];
+            if (contains_in_set(&follow_set, EPSILON))
             {
-                remove_from_set(&first_set, EPSILON);
-                getFollowSets(grammarHeadArray[i]->nt);
-                ull follow_set = follows[grammarHeadArray[i]->nt];
-                if (contains_in_set(&follow_set, EPSILON))
-                {
-                    remove_from_set(&follow_set, EPSILON);
-                }
-                int j = 0;
-                while (follow_set != 0)
-                {
-                    if (follow_set % 2 == 1)
-                    {
-                        ruleNode *new_rule = malloc(sizeof(ruleNode *));
-                        new_rule->isTerminal = false;
-                        new_rule->nt = grammarHeadArray[i]->nt;
-                        new_rule->nextPtr = malloc(sizeof(ruleNode *));
-                        new_rule->nextPtr->isTerminal = true;
-                        new_rule->nextPtr->t = EPSILON;
-                        new_rule->nextPtr->nextPtr = NULL;
-                        parseTable[grammarHeadArray[i]->nt][j] = new_rule;
-                    }
-                    follow_set /= 2;
-                    j++;
-                }
+                remove_from_set(&follow_set, EPSILON);
             }
             int j = 0;
-            ull temp = first_set;
-            while (temp != 0)
+            while (follow_set != 0)
             {
-                if (temp % 2 == 1)
+                if (follow_set % 2 == 1)
                 {
-                    parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
+                    ruleNode *new_rule = malloc(sizeof(ruleNode *));
+                    new_rule->isTerminal = false;
+                    new_rule->nt = grammarHeadArray[i]->nt;
+                    new_rule->nextPtr = malloc(sizeof(ruleNode *));
+                    new_rule->nextPtr->isTerminal = true;
+                    new_rule->nextPtr->t = EPSILON;
+                    new_rule->nextPtr->nextPtr = NULL;
+                    parseTable[grammarHeadArray[i]->nt][j] = new_rule;
                 }
-                temp /= 2;
+                follow_set /= 2;
                 j++;
             }
+        }
+        int j = 0;
+        ull temp = first_set;
+        while (temp != 0)
+        {
+            if (temp % 2 == 1)
+            {
+                parseTable[grammarHeadArray[i]->nt][j] = grammarHeadArray[i];
+            }
+            temp /= 2;
+            j++;
         }
     }
 }
@@ -370,9 +376,10 @@ int main()
     {
         firsts[i] = (ull)0;
     }
+
     FILE *fp = fopen("Grammar.txt", "r");
     fill_grammar(fp);
-    // ruleNode *ptr = grammarHeadArray[48];
+    // ruleNode *ptr = grammarHeadArray[129];
     // while (ptr != NULL)
     // {
     //     if (ptr->isTerminal)
@@ -385,13 +392,11 @@ int main()
     //     }
     //     ptr = ptr->nextPtr;
     // }
-    // printf("%d", grammarHeadArray[108]->nt);
+    // printf("%d", n9);
+    getFirstSets(arithmeticOrBooleanExpr);
+    print_set_elements(&firsts[arithmeticOrBooleanExpr]);
 
-    // ull first_set = getFirstSetsOneRule(moduleDeclarations, 1);
-    // getFollowSets(caseStmtDash);
-    // print_set_elements(&follows[caseStmtDash]);
-
-    populateParseTable();
-    printParseTable();
+    // populateParseTable();
+    // printParseTable();
     freeGrammar();
 }
