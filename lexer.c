@@ -134,7 +134,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
         if (c == 0 && tb->begin == tb->fwd)
         {
             printf("Nothing else to tokenize!");
-            exit(0);
+            return NULL;
         }
         prev = c;
         switch (s) // note: should we add break after all cases? am adding here,
@@ -259,6 +259,10 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
             retract(1, tb);
             int size1 = getSize(tb);
             char *lexeme1 = copyLexeme(tb, size1);
+            if (strcmp("driver", lexeme1) == 0)
+            {
+                printf("hemlo! %d\n", size1);
+            }
             // printf("lexeme1:%s %d %c\n", lexeme1, size1, c);
             if (exists(&ht, lexeme1, size1))
             {

@@ -5,7 +5,7 @@
 #include "./data_structures/set.h"
 #include "./data_structures/token_name.h"
 
-#define NUM_RULES 145
+#define NUM_RULES 144
 #define NON_TERMINALS 74
 #define TERMINALS 55
 
@@ -16,7 +16,6 @@ typedef enum
 
 typedef struct ruleNode
 {
-    // stores the entry as a string and contains a pointer to the next node in a rule
     union
     {
         nonTerminal nt;

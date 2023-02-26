@@ -9,6 +9,7 @@
 #include "lexerDef.h"
 #include "./data_structures/twinbuffer.h"
 #include "./data_structures/stack.h"
+#include "./data_structures/tree.h"
 
 ruleNode *grammarHeadArray[NUM_RULES];
 
@@ -159,8 +160,7 @@ void getFirstSets(nonTerminal nT)
 
 ull getFirstSetsOneRule(nonTerminal nT, int i)
 {
-
-    ull first_set;
+    ull first_set = 0;
 
     if (grammarHeadArray[i]->nt == nT)
     {
@@ -369,11 +369,93 @@ void parseInputSourceCode(FILE *fp)
     twinbuffer *tb;
     line_num = 1;
     stack *st = initStack();
-    // printf("yha aaye?");
     tb = twinbuffer_init(fp);
     ht = initHashtable();
+    populate_hashtable(&ht);
     token *lookAhead = getNextToken(ht, tb);
-    printf("%d", lookAhead->token);
+    Symbol startSymbol;
+    startSymbol.isTerminal = false;
+    startSymbol.nt = program;
+    treenode *start = initNode(startSymbol);
+    push(st, start);
+    printf("%s", lookAhead->str);
+    while (lookAhead != NULL)
+    {
+        printf("token passed?%d\n", lookAhead->token);
+        treenode *top1 = top(st);
+        if (top1 == NULL)
+        {
+            // report error E4
+            printf("e4\n");
+            exit(0);
+        }
+        else if (top1->node.isTerminal)
+        {
+            if (top1->node.t == lookAhead->token)
+            {
+                pop(st);
+                lookAhead = getNextToken(ht, tb);
+            }
+            else
+            {
+                printf("what terminal: %d??\n", top1->node.t);
+                // report error e1;
+                printf("e1\n");
+                break;
+            }
+        }
+        else if (!top1->node.isTerminal)
+        {
+            ruleNode *rule = parseTable[top1->node.nt][lookAhead->token];
+
+            ruleNode *temp = rule;
+
+            printf("Rule:\n");
+            while (temp != NULL)
+            {
+                if (temp->isTerminal)
+                {
+                    printf("terminal: %d\n", temp->t);
+                }
+                else
+                {
+                    printf("non terminal: %d\n", temp->nt);
+                }
+                temp = temp->nextPtr;
+            }
+
+            printf("\n\n\n\n");
+
+            if (parseTable[top1->node.nt][lookAhead->token] != NULL)
+            {
+                // excluding epsilon
+                if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
+                {
+                    pop(st);
+                    continue;
+                }
+                treenode *parent = pop(st);
+                ruleNode *rule = parseTable[top1->node.nt][lookAhead->token]->nextPtr;
+                pushRecursive(st, rule);
+                treenode *child = top(st);
+                parent->child = child;
+            }
+            else
+            {
+                // report error e2
+                printf("e2\n");
+                exit(0);
+            }
+        }
+    }
+    printStack(st);
+
+    if (!isEmpty(st))
+    {
+        // report error E3;
+        printf("e3\n");
+        // exit(0);
+    }
 }
 
 void freeList(ruleNode *head)
@@ -401,31 +483,42 @@ int main()
     for (int i = 0; i <= NON_TERMINALS; i++)
     {
         firsts[i] = (ull)0;
+        follows[i] = (ull)0;
     }
 
     FILE *fp = fopen("Grammar.txt", "r");
     fill_grammar(fp);
 
     FILE *fp1 = fopen("example.erp", "r");
-    parseInputSourceCode(fp1);
-    // ruleNode *ptr = grammarHeadArray[129];
-    // while (ptr != NULL)
-    // {
-    //     if (ptr->isTerminal)
-    //     {
-    //         printf("terminal: %d\n", ptr->t);
-    //     }
-    //     else
-    //     {
-    //         printf("non terminal %d\n", ptr->nt);
-    //     }
-    //     ptr = ptr->nextPtr;
-    // }
-    // printf("%d", n9);
-    // getFirstSets(arithmeticOrBooleanExpr);
-    // print_set_elements(&firsts[arithmeticOrBooleanExpr]);
 
-    // populateParseTable();
+    populateParseTable();
+
+    parseInputSourceCode(fp1);
+    printf("ran well!!\n");
+    ruleNode *ptr = parseTable[factor][ID];
+
+    while (ptr != NULL)
+    {
+        if (ptr->isTerminal)
+        {
+            printf("terminal: %d\n", ptr->t);
+        }
+        else
+        {
+            printf("non terminal %d\n", ptr->nt);
+        }
+        ptr = ptr->nextPtr;
+    }
+    // printf("%d", n9);
+    ull first_set = getFirstSetsOneRule(factor, 100);
+    print_set_elements(&first_set);
+
+    // getFirstSets(factor);
+    // print_set_elements(&firsts[factor]);
+
+    // getFirstSets(statement);
+    // print_set_elements(&firsts[statement]);
+
     // printParseTable();
     freeGrammar();
 }

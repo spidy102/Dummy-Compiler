@@ -3,9 +3,11 @@
 
 #include <stdbool.h>
 #include "../parser.h"
+#include "tree.h"
+
 typedef struct st_el
 {
-    ruleNode *rule;
+    treenode *symbol;
     struct st_el *next;
 } st_element;
 
@@ -16,14 +18,18 @@ typedef struct STACK
 
 stack *initStack();
 
-ruleNode *top(stack *st);
+treenode *top(stack *st);
 
 st_element *getTopPointer(stack *st);
 
-bool push(stack *st, ruleNode *rule);
+bool push(stack *st, treenode *node);
 
-ruleNode *pop(stack *st);
+treenode *pop(stack *st);
 
 bool isEmpty(stack *st);
+
+void printStack(stack *st);
+
+void pushRecursive(stack *st, ruleNode *rule);
 
 #endif

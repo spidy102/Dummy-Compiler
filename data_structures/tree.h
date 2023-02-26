@@ -1,8 +1,31 @@
+
+#ifndef TREE_H
+#define TREE_H
+
+#include "../parser.h"
+#include <stdbool.h>
+
+typedef struct Symbol
+{
+    union
+    {
+        nonTerminal nt;
+        token_names t;
+    };
+    bool isTerminal;
+} Symbol;
+
 typedef struct treenode
 {
-    char rep;
+    Symbol node;
     struct treenode *child;
     struct treenode *nextSibling;
 } treenode;
 
-treenode *initTree();
+treenode *initNode(Symbol sym);
+
+treenode *addSibling(treenode *node, Symbol sym);
+
+treenode *addChild(treenode *node, Symbol sym);
+
+#endif

@@ -38,9 +38,6 @@ id_num_rnum ID
 id_num_rnum NUM
 id_num_rnum RNUM
 array_element_for_print ID SQBO index_arr SQBC
-var_print id_num_rnum
-var_print boolConstt
-var_print array_element_for_print
 var_print ID p1
 var_print NUM
 var_print RNUM
@@ -96,10 +93,12 @@ term factor n5
 n5 op2 factor n5
 n5 EPSILON
 factor BO arithmeticOrBooleanExpr BC
-factor id_num_rnum
+factor NUM
+factor RNUM
 factor boolConstt
-factor array_element
-array_element ID SQBO element_index_with_expressions SQBC
+factor ID array_element
+array_element SQBO element_index_with_expressions SQBC
+array_element EPSILON
 element_index_with_expressions sign n_10
 element_index_with_expressions arrExpr
 n_10 new_index

@@ -1,15 +1,16 @@
 #include "tree.h"
 #include <stdlib.h>
+#include "tree.h"
 
-treenode *initTree(char rep)
+treenode *initNode(Symbol sym)
 {
     treenode *root = malloc(sizeof(treenode *));
-    root->rep = rep;
+    root->node = sym;
     root->child = NULL;
     root->nextSibling = NULL;
 }
 
-void addSibling(treenode *node, char rep)
+treenode *addSibling(treenode *node, Symbol sym)
 {
     treenode *nextSibling = node->nextSibling;
     while (nextSibling->nextSibling != NULL)
@@ -17,7 +18,14 @@ void addSibling(treenode *node, char rep)
         nextSibling = nextSibling->nextSibling;
     }
     treenode *newSibling = malloc(sizeof(treenode *));
-    newSibling->rep = rep;
+    newSibling->node = sym;
     nextSibling->nextSibling = newSibling;
     newSibling->nextSibling = NULL;
+    return newSibling;
+}
+
+treenode *addChild(treenode *node, Symbol sym)
+{
+    node->child = initNode(sym);
+    return node->child;
 }
