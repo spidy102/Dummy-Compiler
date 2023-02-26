@@ -5,9 +5,9 @@
 #include "./data_structures/set.h"
 #include "./data_structures/token_name.h"
 
-#define NUM_RULES 144
-#define NON_TERMINALS 74
-#define TERMINALS 55
+#define NUM_RULES 141
+#define NON_TERMINALS 77
+#define TERMINALS 57
 
 typedef enum
 {

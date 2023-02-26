@@ -298,6 +298,7 @@ void populateParseTable()
         //     }
         // }
         ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
+        printf("hello?? %d\n", i);
         if (contains_in_set(&first_set, EPSILON))
         {
             remove_from_set(&first_set, EPSILON);
@@ -424,7 +425,7 @@ void parseInputSourceCode(FILE *fp)
                 temp = temp->nextPtr;
             }
 
-            printf("\n\n\n\n");
+            printf("\n");
 
             if (parseTable[top1->node.nt][lookAhead->token] != NULL)
             {
@@ -443,6 +444,7 @@ void parseInputSourceCode(FILE *fp)
             else
             {
                 // report error e2
+                printf("nt at top:%d\n", top1->node.nt);
                 printf("e2\n");
                 exit(0);
             }
@@ -494,24 +496,25 @@ int main()
     populateParseTable();
 
     parseInputSourceCode(fp1);
-    printf("ran well!!\n");
-    ruleNode *ptr = parseTable[factor][ID];
+    // printf("ran well!!\n");
+    // ruleNode *ptr = grammarHeadArray[62];
 
-    while (ptr != NULL)
-    {
-        if (ptr->isTerminal)
-        {
-            printf("terminal: %d\n", ptr->t);
-        }
-        else
-        {
-            printf("non terminal %d\n", ptr->nt);
-        }
-        ptr = ptr->nextPtr;
-    }
+    // while (ptr != NULL)
+    // {
+    //     if (ptr->isTerminal)
+    //     {
+    //         printf("terminal: %d\n", ptr->t);
+    //     }
+    //     else
+    //     {
+    //         printf("non terminal %d\n", ptr->nt);
+    //     }
+    //     ptr = ptr->nextPtr;
+    // }
     // printf("%d", n9);
-    ull first_set = getFirstSetsOneRule(factor, 100);
-    print_set_elements(&first_set);
+    // getFollowSets(n20);
+    // // ull first_set = getFirstSetsOneRule(n20, 61);
+    // print_set_elements(&follows[n20]);
 
     // getFirstSets(factor);
     // print_set_elements(&firsts[factor]);
