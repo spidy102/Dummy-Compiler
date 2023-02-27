@@ -18,6 +18,38 @@ ull follows[NON_TERMINALS + 1];
 
 ruleNode *parseTable[NON_TERMINALS][TERMINALS];
 
+char *EnumToNTString(nonTerminal nt)
+{
+    int i = 0;
+    FILE *fp = fopen("nonterms1.txt", "r");
+    char *buffer = malloc(sizeof(char) * 100);
+    while (fgets(buffer, 100, fp) != NULL)
+    {
+        buffer[strlen(buffer) - 2] = '\0';
+        // printf("%s\n", buffer);
+
+        if (nt == i)
+            return buffer;
+        i++;
+    }
+}
+
+char *EnumToTString(token_names nt)
+{
+    int i = 0;
+    FILE *fp = fopen("tokens.txt", "r");
+    char *buffer = malloc(sizeof(char) * 100);
+    while (fgets(buffer, 100, fp) != NULL)
+    {
+        buffer[strlen(buffer) - 3] = '\0';
+        // printf("%s\n", buffer);
+
+        if (nt == i)
+            return buffer;
+        i++;
+    }
+}
+
 nonTerminal NTStringMappedEnum(char *str)
 {
 
@@ -493,9 +525,11 @@ int main()
 
     FILE *fp1 = fopen("example.erp", "r");
 
-    populateParseTable();
+    // populateParseTable();
 
-    parseInputSourceCode(fp1);
+    // parseInputSourceCode(fp1);
+
+    printf("%s", EnumToTString(1));
     // printf("ran well!!\n");
     // ruleNode *ptr = grammarHeadArray[62];
 
