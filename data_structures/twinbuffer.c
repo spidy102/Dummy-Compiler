@@ -10,9 +10,10 @@ twinbuffer *twinbuffer_init(FILE *fp)
     tb->begin = 0;
     tb->fwd = -1;
     tb->end = false;
+    tb->whichReloaded = -1;
     tb->buffer = malloc(SIZE * sizeof(char));
 
-    // memset(tb->buffer, '\0', SIZE);
+    memset(tb->buffer, '\0', SIZE);
     return tb;
 }
 
@@ -26,10 +27,16 @@ char readOneCharacter(twinbuffer *tb)
     // }
     if (tb->begin == 0 && tb->fwd == -1)
     {
+        tb->whichReloaded = 0;
         int x = fread(tb->buffer, 1, SIZE / 2, fp);
         if (x < SIZE / 2)
         {
             tb->buffer[x] = '\0';
+        }
+
+        for (int i = x; i < SIZE / 2; i++)
+        {
+            tb->buffer[i] = '\0';
         }
         // printf("%d", x);
         // printf("%d\n", read);
@@ -40,30 +47,42 @@ char readOneCharacter(twinbuffer *tb)
         char temp = tb->buffer[++tb->fwd];
         return temp;
     }
-    else if (tb->fwd == SIZE / 2 - 1)
+    else if (tb->fwd == SIZE / 2 - 1 && tb->whichReloaded == 0)
     {
+        tb->whichReloaded = 1;
         int read = fread(&tb->buffer[SIZE / 2], 1, SIZE / 2, fp);
         char temp = tb->buffer[++tb->fwd];
         if (read < SIZE / 2)
         {
             tb->buffer[read + SIZE / 2] = '\0';
         }
+        for (int i = SIZE / 2 + read; i < SIZE; i++)
+        {
+            tb->buffer[i] = '\0';
+        }
         return temp;
     }
-    else if (tb->fwd == SIZE - 1)
+    else if (tb->fwd == SIZE - 1 && tb->whichReloaded == 1)
     {
-        int read = fread(tb->buffer, 1, SIZE / 2, fp);
+        tb->whichReloaded = 0;
+        int read = fread(&tb->buffer[0], 1, SIZE / 2, fp);
         char temp = tb->buffer[0];
         if (read < SIZE / 2)
         {
             tb->buffer[read] = '\0';
+        }
+
+        for (int i = read; i < SIZE / 2; i++)
+        {
+            tb->buffer[i] = '\0';
         }
         tb->fwd = 0;
         return temp;
     }
     else
     {
-        return tb->buffer[(++tb->fwd) % SIZE];
+        tb->fwd = (++tb->fwd) % SIZE;
+        return tb->buffer[tb->fwd];
     }
 }
 

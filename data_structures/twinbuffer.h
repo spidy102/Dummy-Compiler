@@ -13,6 +13,7 @@ typedef struct twinbuffer
     int fwd;
     FILE *fp;
     bool end;
+    int whichReloaded;
 } twinbuffer;
 
 twinbuffer *twinbuffer_init(FILE *fp);

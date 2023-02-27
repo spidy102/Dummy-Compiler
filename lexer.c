@@ -38,7 +38,6 @@ int getSize(twinbuffer *tb)
 
 char *copyLexeme(twinbuffer *tb, int size)
 {
-
     char *lexeme = malloc(sizeof(char) * size);
     if (tb->fwd >= tb->begin)
     {
@@ -61,9 +60,12 @@ char *copyLexeme(twinbuffer *tb, int size)
             lexeme[j++] = tb->buffer[i];
         }
     }
+    // printf("fwd:%d begin %d\n", tb->fwd, tb->begin);
     tb->begin = tb->fwd + 1;
-    // printf("\nfwd:%d beg:%d\n", tb->fwd, tb->begin);
-    // tb->fwd++;
+    if (tb->begin == SIZE)
+        tb->begin = 0;
+    // if (tb->fwd > 0 && tb->fwd < 512)
+    //     printf("\nfwd:%d beg:%d\n", tb->fwd, tb->begin);
     return lexeme;
 }
 
