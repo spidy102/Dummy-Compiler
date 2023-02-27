@@ -5,12 +5,12 @@
 
 twinbuffer *twinbuffer_init(FILE *fp)
 {
-    twinbuffer *tb = malloc(sizeof(twinbuffer *));
+    twinbuffer *tb = malloc(sizeof(twinbuffer));
     tb->fp = fp;
     tb->begin = 0;
     tb->fwd = -1;
     tb->end = false;
-    tb->buffer = malloc(sizeof(SIZE) * sizeof(char));
+    tb->buffer = malloc(SIZE * sizeof(char));
 
     // memset(tb->buffer, '\0', SIZE);
     return tb;
@@ -72,7 +72,7 @@ void retract(int num, twinbuffer *tb)
     int cur_fwd = tb->fwd;
     if (cur_fwd - num < 0)
     {
-        tb->fwd -= SIZE - (cur_fwd - num);
+        tb->fwd = SIZE + (cur_fwd - num);
     }
     else
     {

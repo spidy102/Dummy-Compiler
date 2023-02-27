@@ -22,7 +22,7 @@ hashtable initHashtable()
     hashtable ht;
     for (int i = 0; i < HASHTABLE_SIZE; i++)
     {
-        ht.table[i] = malloc(sizeof(hashtable_node *));
+        ht.table[i] = malloc(sizeof(hashtable_node));
         ht.table[i]->idx = i;
         ht.table[i]->bucket_ptr = NULL;
     }
@@ -36,7 +36,7 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
 
     if (ptr == NULL)
     {
-        ptr = malloc(sizeof(bucket_node *));
+        ptr = malloc(sizeof(bucket_node));
         ptr->str = str;
         ptr->tok = tok;
         ptr->next = NULL;
@@ -51,7 +51,7 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     {
         printf("1hello\n");
     }
-    ptr->next = malloc(sizeof(bucket_node *));
+    ptr->next = malloc(sizeof(bucket_node));
     ptr->next->str = str;
     ptr->next->tok = tok;
     ptr->next->next = NULL;

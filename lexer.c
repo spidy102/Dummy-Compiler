@@ -14,7 +14,7 @@ int line_num;
 
 token *make_token(int line_num, char *lexeme, token_names tok)
 {
-    token *tok1 = malloc(sizeof(token *));
+    token *tok1 = malloc(sizeof(token));
     tok1->line_num = line_num;
     tok1->str = lexeme;
     tok1->token = tok;
@@ -296,7 +296,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
             int size2 = getSize(tb);
             char *lexeme2 = copyLexeme(tb, size2);
             int correspondingNumber = atoi(lexeme2);
-            token *tk = malloc(sizeof(token *));
+            token *tk = malloc(sizeof(token));
             tk->line_num = line_num;
             tk->integer = correspondingNumber;
             tk->token = NUM;
@@ -327,7 +327,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
             char *lexeme3 = copyLexeme(tb, size3);
             int x = atoi(lexeme3);
 
-            token *tk2 = malloc(sizeof(token *));
+            token *tk2 = malloc(sizeof(token));
             tk2->line_num = line_num;
             tk2->integer = x;
             tk2->token = NUM;
@@ -357,7 +357,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
             char *lexeme4 = copyLexeme(tb, size4);
 
             float rnum = atof(lexeme4);
-            token *tk1 = malloc(sizeof(token *));
+            token *tk1 = malloc(sizeof(token));
             tk1->line_num = line_num;
             tk1->rnum = rnum;
             tk1->token = RNUM;
@@ -415,7 +415,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
             retract(1, tb);
             char *lexeme5 = copyLexeme(tb, getSize(tb));
             float x1 = atof(lexeme5);
-            token *tk3 = malloc(sizeof(token *));
+            token *tk3 = malloc(sizeof(token));
             tk3->line_num = line_num;
             tk3->rnum = x1; // maybe lexeme better?
             tk3->token = RNUM;
@@ -634,54 +634,60 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
     }
 }
 
-// int main()
-// {
-//     FILE *fp = fopen("example.erp", "r");
-//     if (fp == NULL)
-//     {
-//         printf("File cannot be openened");
-//     }
-//     twinbuffer *tb;
-//     hashtable ht;
-//     line_num = 1;
-//     tb = twinbuffer_init(fp);
-//     ht = initHashtable();
-//     populate_hashtable(&ht);
-//     // printf("%c", readOneCharacter(tb));
-//     while (1)
-//     {
-//         token *tk = getNextToken(ht, tb);
-//         if (tk->token == NUM)
-//         {
-//             printf("%d\n", tk->integer);
-//         }
-//         else
-//         {
-//             printf("%s\n", tk->str);
-//         }
-//     }
+int main()
+{
+    FILE *fp = fopen("example.erp", "r");
+    if (fp == NULL)
+    {
+        printf("File cannot be openened");
+    }
+    twinbuffer *tb;
+    hashtable ht;
+    line_num = 1;
+    tb = twinbuffer_init(fp);
+    ht = initHashtable();
+    populate_hashtable(&ht);
+    // printf("%c", readOneCharacter(tb));
+    while (1)
+    {
+        token *tk = getNextToken(ht, tb);
+        if (tk == NULL)
+            break;
+        if (tk->token == NUM)
+        {
+            printf("%d\n", tk->integer);
+        }
+        else if (tk->token == RNUM)
+        {
+            printf("%lf\n", tk->rnum);
+        }
+        else
+        {
+            printf("%s\n", tk->str);
+        }
+    }
 
-//     // printf("%s", tb->buffer);
+    // printf("%s", tb->buffer);
 
-//     // populate_hashtable(&ht);
-//     // bucket_node *ptr1 = ht.table[536]->bucket_ptr;
+    // populate_hashtable(&ht);
+    // bucket_node *ptr1 = ht.table[536]->bucket_ptr;
 
-//     // while (ptr1 != NULL)
-//     // {
-//     //     printf("\n%s\n", ptr1->str);
-//     //     ptr1 = ptr1->next;
-//     // }
+    // while (ptr1 != NULL)
+    // {
+    //     printf("\n%s\n", ptr1->str);
+    //     ptr1 = ptr1->next;
+    // }
 
-//     // exists(ht, "module", 6);
-//     // exists(ht, "mod1", 4);
-//     // exists(ht, "takes", 5);
-//     // exists(ht, "index", 5);
+    // exists(ht, "module", 6);
+    // exists(ht, "mod1", 4);
+    // exists(ht, "takes", 5);
+    // exists(ht, "index", 5);
 
-//     // ptr1 = ht.table[536]->bucket_ptr;
+    // ptr1 = ht.table[536]->bucket_ptr;
 
-//     // while (ptr1 != NULL)
-//     // {
-//     //     printf("\n%s\n", ptr1->str);
-//     //     ptr1 = ptr1->next;
-//     // }
-// }
+    // while (ptr1 != NULL)
+    // {
+    //     printf("\n%s\n", ptr1->str);
+    //     ptr1 = ptr1->next;
+    // }
+}
