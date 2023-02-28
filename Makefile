@@ -2,7 +2,7 @@
 CC = gcc
 
 # The compiler flags
-CFLAGS = -g -Wall 
+CFLAGS = -g
 
 all: driver
 

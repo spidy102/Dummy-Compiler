@@ -10,10 +10,10 @@
 
 int line_num;
 
-void removeComments(twinbuffer *tb)
+FILE* removeComments(twinbuffer *tb, char* filename)
 {
     char c = readOneCharacter(tb);
-    FILE *fp1 = fopen("clean.erp", "w");
+    FILE *fp1 = fopen(filename, "w+");
     int s = 0;
     while (1)
     {
@@ -85,6 +85,7 @@ void removeComments(twinbuffer *tb)
             break;
         }
     }
+    return fp1;
 }
 
 // void twinbuffer()
@@ -100,6 +101,8 @@ token *make_token(int line_num, char *lexeme, token_names tok)
 
 int getSize(twinbuffer *tb)
 {
+    //this should just return tb->buffer_size right?
+    
     int size = 0;
     if (tb->fwd >= tb->begin)
     {
@@ -108,7 +111,7 @@ int getSize(twinbuffer *tb)
     }
     else
     {
-        size = SIZE - tb->begin + tb->fwd + 1;
+        size = tb->buffer_size - tb->begin + tb->fwd + 1;
     }
     return size;
 }
@@ -127,7 +130,7 @@ char *copyLexeme(twinbuffer *tb, int size)
     else
     {
         int j = 0;
-        for (int i = tb->begin; i < SIZE; i++)
+        for (int i = tb->begin; i < tb->buffer_size; i++)
         {
             lexeme[j++] = tb->buffer[i];
         }
@@ -139,7 +142,7 @@ char *copyLexeme(twinbuffer *tb, int size)
     }
     // printf("fwd:%d begin %d\n", tb->fwd, tb->begin);
     tb->begin = tb->fwd + 1;
-    if (tb->begin == SIZE)
+    if (tb->begin == tb->buffer_size)
         tb->begin = 0;
     // if (tb->fwd > 0 && tb->fwd < 512)
     //     printf("\nfwd:%d beg:%d\n", tb->fwd, tb->begin);

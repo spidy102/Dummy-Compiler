@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lexerDef.h"
+#include "./data_structures/token_name.h"
+#include "./data_structures/tree.h"
+#include "parser.h"
+#include "parserDef.h"
+
+
 
 void displayImplementationStatus(){
   printf("____________________________________________________________\n");
@@ -24,6 +31,16 @@ void displayMenu(){
 
 }
 
+void displayFile(FILE* fp){
+  printf("Displaying the file...\n");
+  char c;
+  fseek(fp, 0, SEEK_SET);
+  while((c = fgetc(fp)) != EOF){
+    printf("%c", c);
+  }
+  printf("\n");
+}
+
 int takeInput(){
   int choice;
   while(1){
@@ -35,6 +52,31 @@ int takeInput(){
     }
   }
   return choice;
+}
+
+FILE* openfile(char *filename, char *mode){
+  FILE *fp = fopen(filename, mode);
+  if (fp == NULL){
+    printf("Error opening file. Exiting.\n");
+    exit(1);
+  }
+  return fp;
+}
+
+char *EnumToString(token_names nt)
+{
+    int i = 0;
+    FILE *fp = fopen("tokens.txt", "r");
+    char *buffer = malloc(sizeof(char) * 100);
+    while (fgets(buffer, 100, fp) != NULL)
+    {
+        buffer[strlen(buffer) - 3] = '\0';
+        // printf("%s\n", buffer);
+
+        if (nt == i)
+            return buffer;
+        i++;
+    }
 }
 
 int main(int argc, char *argv[]){
@@ -57,6 +99,11 @@ int main(int argc, char *argv[]){
   char *parsetreeOutFile = argv[2];
   int size_of_buffer = atoi(argv[3]);
 
+  //construct the twinbuffer
+  twinbuffer* twin_buf;
+  twin_buf = twinbuffer_init(openfile(testcase, "r"), size_of_buffer);
+  hashtable ht = initHashtable();
+  populate_hashtable(&ht);
 
   displayImplementationStatus();
   displayMenu();
@@ -65,15 +112,41 @@ int main(int argc, char *argv[]){
 
     if (choice == 0) exit(0);
     else if (choice == 1){
-      printf("You chose 1\n");
+      FILE* fp1 = removeComments(twin_buf, testcase);
+      //print the comment free source code
+      
+      displayFile(fp1);
+      fclose(fp1);
       break;
     }
     else if (choice == 2){
-      printf("You chose 2\n");
+
+      token* tk = getNextToken(ht,twin_buf);
+      while(tk!=NULL) {
+        if (tk->token==NUM) {
+          printf("%d %d %s\n",tk->integer,tk->line_num, EnumToString(tk->token));
+          tk = getNextToken(ht,twin_buf);
+          continue;
+        }
+        else if (tk->token==RNUM) {
+          printf("%f %d %s\n",tk->rnum,tk->line_num,EnumToString(tk->token));
+          tk = getNextToken(ht,twin_buf);
+          continue;
+        }
+        printf("%s %d %s\n",tk->str,tk->line_num,EnumToString(tk->token));
+        tk = getNextToken(ht,twin_buf);
+      }
       break;
     }
     else if (choice == 3){
-      printf("You chose 3\n");
+      FILE* fg = openfile("Grammar.txt", "r");
+      fill_grammar(fg);
+
+      populateParseTable();
+      treenode* root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
+      printParseTree(root, openfile(parsetreeOutFile, "w+"));
+
+
       break;
     }
     else if (choice == 4){

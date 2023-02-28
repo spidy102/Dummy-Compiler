@@ -3,7 +3,7 @@
 #include <string.h>
 #include "twinbuffer.h"
 
-twinbuffer *twinbuffer_init(FILE *fp)
+twinbuffer *twinbuffer_init(FILE *fp, int buffer_size)
 {
     twinbuffer *tb = malloc(sizeof(twinbuffer));
     tb->fp = fp;
@@ -11,9 +11,10 @@ twinbuffer *twinbuffer_init(FILE *fp)
     tb->fwd = -1;
     tb->end = false;
     tb->whichReloaded = -1;
-    tb->buffer = malloc(SIZE * sizeof(char));
+    tb->buffer_size = buffer_size;
+    tb->buffer = malloc(tb->buffer_size * sizeof(char));
 
-    memset(tb->buffer, '\0', SIZE);
+    memset(tb->buffer, '\0', tb->buffer_size);
     return tb;
 }
 
@@ -28,13 +29,13 @@ char readOneCharacter(twinbuffer *tb)
     if (tb->begin == 0 && tb->fwd == -1)
     {
         tb->whichReloaded = 0;
-        int x = fread(tb->buffer, 1, SIZE / 2, fp);
-        if (x < SIZE / 2)
+        int x = fread(tb->buffer, 1, tb->buffer_size / 2, fp);
+        if (x < tb->buffer_size / 2)
         {
             tb->buffer[x] = '\0';
         }
 
-        for (int i = x; i < SIZE / 2; i++)
+        for (int i = x; i < tb->buffer_size / 2; i++)
         {
             tb->buffer[i] = '\0';
         }
@@ -47,32 +48,32 @@ char readOneCharacter(twinbuffer *tb)
         char temp = tb->buffer[++tb->fwd];
         return temp;
     }
-    else if (tb->fwd == SIZE / 2 - 1 && tb->whichReloaded == 0)
+    else if (tb->fwd == tb->buffer_size / 2 - 1 && tb->whichReloaded == 0)
     {
         tb->whichReloaded = 1;
-        int read = fread(&tb->buffer[SIZE / 2], 1, SIZE / 2, fp);
+        int read = fread(&tb->buffer[tb->buffer_size / 2], 1, tb->buffer_size / 2, fp);
         char temp = tb->buffer[++tb->fwd];
-        if (read < SIZE / 2)
+        if (read < tb->buffer_size / 2)
         {
-            tb->buffer[read + SIZE / 2] = '\0';
+            tb->buffer[read + tb->buffer_size / 2] = '\0';
         }
-        for (int i = SIZE / 2 + read; i < SIZE; i++)
+        for (int i = tb->buffer_size/ 2 + read; i < tb->buffer_size; i++)
         {
             tb->buffer[i] = '\0';
         }
         return temp;
     }
-    else if (tb->fwd == SIZE - 1 && tb->whichReloaded == 1)
+    else if (tb->fwd == tb->buffer_size - 1 && tb->whichReloaded == 1)
     {
         tb->whichReloaded = 0;
-        int read = fread(&tb->buffer[0], 1, SIZE / 2, fp);
+        int read = fread(&tb->buffer[0], 1, tb->buffer_size / 2, fp);
         char temp = tb->buffer[0];
-        if (read < SIZE / 2)
+        if (read < tb->buffer_size / 2)
         {
             tb->buffer[read] = '\0';
         }
 
-        for (int i = read; i < SIZE / 2; i++)
+        for (int i = read; i < tb->buffer_size/ 2; i++)
         {
             tb->buffer[i] = '\0';
         }
@@ -81,7 +82,7 @@ char readOneCharacter(twinbuffer *tb)
     }
     else
     {
-        tb->fwd = (++tb->fwd) % SIZE;
+        tb->fwd = (++tb->fwd) % tb->buffer_size;
         return tb->buffer[tb->fwd];
     }
 }
@@ -91,7 +92,7 @@ void retract(int num, twinbuffer *tb)
     int cur_fwd = tb->fwd;
     if (cur_fwd - num < 0)
     {
-        tb->fwd = SIZE + (cur_fwd - num);
+        tb->fwd = tb->buffer_size + (cur_fwd - num);
     }
     else
     {
