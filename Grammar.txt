@@ -37,12 +37,16 @@ boolConstt FALSE
 id_num_rnum ID
 id_num_rnum NUM
 id_num_rnum RNUM
-array_element_for_print ID SQBO index_arr SQBC
-var_print ID p1
+var_print ID var_print_dash
 var_print NUM
 var_print RNUM
 var_print boolConstt
+<<<<<<< HEAD
 var_print array_element_for_print
+=======
+var_print_dash p1
+var_print_dash SQBO index_arr SQBC
+>>>>>>> e18c1013ab77dda805579e8dcbaea5821389bc86
 p1 SQBO new_index SQBC
 p1 EPSILON
 simpleStmt assignmentStmt

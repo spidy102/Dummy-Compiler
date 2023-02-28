@@ -141,11 +141,9 @@ int main(int argc, char *argv[]){
     else if (choice == 3){
       FILE* fg = openfile("Grammar.txt", "r");
       fill_grammar(fg);
-
       populateParseTable();
       treenode* root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
-      printParseTree(root, openfile(parsetreeOutFile, "w+"));
-
+      printParseTree(root, openfile(parsetreeOutFile, "w"));
 
       break;
     }
