@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "./data_structures/set.h"
@@ -397,6 +398,16 @@ void printParseTable()
     }
 }
 
+
+char *tolowercase(char *str)
+{
+    for (int i = 0; i < strlen(str); i++)
+    {
+        str[i] = (char)tolower(str[i]);
+    }
+    return str;
+}
+
 treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
 {
     line_num = 1;
@@ -416,7 +427,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
         if (top1 == NULL)
         {
             // report error E4
-            printf("e4\n");
+            printf("Error: top of the stack is empty\n");
             exit(0);
         }
         else if (top1->node.isTerminal)
@@ -429,10 +440,26 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
             }
             else
             {
-                printf("what terminal: %d??\n", top1->node.t);
                 // report error e1;
-                printf("e1\n");
-                break;
+                if (lookAhead->token == NUM)
+                    printf("Error: %s was expected at line number %d, got %d instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->integer);
+                else if (lookAhead->token == RNUM)
+                    printf("Error: %s was expected at line number %d, got %lf instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->rnum);
+                else
+                    printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->str);
+
+                // error recovery
+
+                // popping one token till does not match
+
+                treenode *node = pop(st);
+                node->tk = lookAhead;
+
+                if (node == NULL)
+                {
+                    printf("Error recovery not possible\n");
+                    return start;
+                }
             }
         }
         else if (!top1->node.isTerminal)
@@ -462,7 +489,14 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
                 // excluding epsilon
                 if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
                 {
-                    pop(st);
+                    treenode *parent = pop(st);
+                    // adding epsilon in the leaf nodes
+                    Symbol sym;
+                    sym.isTerminal = true;
+                    sym.t = EPSILON;
+                    treenode *epsilonNode = initNode(sym);
+                    parent->child = epsilonNode;
+                    epsilonNode->parent = parent;
                     continue;
                 }
                 treenode *parent = pop(st);
@@ -475,9 +509,34 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
             else
             {
                 // report error e2
-                printf("nt at top:%d\n", top1->node.nt);
-                printf("e2\n");
-                exit(0);
+                printf("Error: Rule entry in the parse table is empty!\n");
+                ull synchronisation_set;
+                getFirstSets(top1->node.nt);
+                union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
+                getFollowSets(top1->node.nt);
+                union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
+                // being extra cautious in the sync set
+                add_in_set(&synchronisation_set, SEMICOL);
+                add_in_set(&synchronisation_set, END);
+                add_in_set(&synchronisation_set, ENDDEF);
+                add_in_set(&synchronisation_set, DRIVERENDDEF);
+
+                while (top(st) != NULL)
+                {
+                    if (top(st)->node.isTerminal && contains_in_set(&synchronisation_set, top(st)->node.t))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        pop(st);
+                    }
+                }
+
+                if (top(st) == NULL)
+                {
+                    return start;
+                }
             }
         }
     }
@@ -522,18 +581,28 @@ void printParseTree(treenode *root, FILE *fp)
     printParseTree(root->child, fp);
     if (root->node.isTerminal)
     {
-        token *tk = root->tk;
-        if (tk->token == NUM)
+        if (root->node.t == EPSILON)
         {
-            fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %d parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->integer, EnumToNTString(root->parent->node.nt));
-        }
-        else if (tk->token == RNUM)
-        {
-            fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %lf parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->rnum, EnumToNTString(root->parent->node.nt));
+
+            fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:Yes NodeSymbol: %s\n", EnumToNTString(root->parent->node.nt), EnumToTString(root->node.t));
         }
         else
         {
-            fprintf(fp, "lexeme: %s line number: %d token_name: %s value: ---- parentNode: %s isLeaf:Yes\n", tk->str, tk->line_num, EnumToTString(tk->token), EnumToNTString(root->parent->node.nt));
+
+            token *tk = root->tk;
+            if (tk->token == NUM)
+            {
+                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %d parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->integer, EnumToNTString(root->parent->node.nt));
+            }
+            else if (tk->token == RNUM)
+            {
+                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %lf parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->rnum, EnumToNTString(root->parent->node.nt));
+            }
+
+            else
+            {
+                fprintf(fp, "lexeme: %s line number: %d token_name: %s value: ---- parentNode: %s isLeaf:Yes\n", tk->str, tk->line_num, EnumToTString(tk->token), EnumToNTString(root->parent->node.nt));
+            }
         }
         // fprintf(fp, "TERMINAL: %s\n", EnumToTString(root->tk->token));
     }
@@ -543,7 +612,15 @@ void printParseTree(treenode *root, FILE *fp)
         fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:No NodeSymbol: %s\n", EnumToNTString(root->parent->node.nt), EnumToNTString(root->node.nt));
         // fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
     }
-    printParseTree(root->nextSibling, fp);
+    if (root->child != NULL)
+    {
+        treenode *temp = root->child->nextSibling;
+        while (temp != NULL)
+        {
+            printParseTree(temp, fp);
+            temp = temp->nextSibling;
+        }
+    }
 }
 
 /* int main()
