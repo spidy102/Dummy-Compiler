@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
-int displayMenu(){
+void displayMenu(){
   printf("0. Exit\n");
   printf("1. Remove comments and display the comment free source code\n");
   printf("2. Display the token list\n");
@@ -11,9 +12,10 @@ int displayMenu(){
 
   printf("Enter your choice [0-4]: ");
 
-  //Take the input
-  int choice;
+}
 
+int takeInput(){
+  int choice;
   while(1){
     if(scanf("%d", &choice) == 1) break;
     else{
@@ -22,18 +24,33 @@ int displayMenu(){
       while(getchar() != '\n');
     }
   }
-  
   return choice;
-
 }
 
+int main(int argc, char *argv[]){
 
+  //expect 2 strings and an integer as arguments
+  if (argc != 4){
+    printf("Invalid number of arguments. Expected 3 arguments. Exiting.\n");
+    exit(1);
+  }
+  //ensure that the size of buffer is a valid integer
+  for (int i = 0; i < strlen(argv[3]); i++){
+    if (argv[3][i] < '0' || argv[3][i] > '9'){
+      printf("Invalid size of buffer. Expected an integer. Exiting.\n");
+      exit(1);
+    }
+  }
 
-int main(){
+  //parse the arguments
+  char *testcase = argv[1];
+  char *parsetreeOutFile = argv[2];
+  int size_of_buffer = atoi(argv[3]);
 
+  displayMenu();
+  int choice = takeInput();
   while(1){
 
-    int choice = displayMenu();
     if (choice == 0) exit(0);
     else if (choice == 1){
       printf("You chose 1\n");
@@ -53,6 +70,8 @@ int main(){
     }
     else{
       printf("Invalid choice. Please try again.\n");
+      printf("Enter your choice [0-4]: ");
+      choice = takeInput();
     } 
   }
 
