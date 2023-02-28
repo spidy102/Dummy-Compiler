@@ -426,7 +426,8 @@ void parseInputSourceCode(FILE *fp)
         {
             if (top1->node.t == lookAhead->token)
             {
-                pop(st);
+                treenode *parent = pop(st);
+                parent->tk = lookAhead;
                 lookAhead = getNextToken(ht, tb);
             }
             else

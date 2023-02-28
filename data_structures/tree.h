@@ -20,6 +20,7 @@ typedef struct treenode
     Symbol node;
     struct treenode *child;
     struct treenode *nextSibling;
+    token *tk;
 } treenode;
 
 treenode *initNode(Symbol sym);
