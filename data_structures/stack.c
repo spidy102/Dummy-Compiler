@@ -6,7 +6,7 @@
 
 stack *initStack()
 {
-    stack *st = malloc(sizeof(stack *));
+    stack *st = malloc(sizeof(stack));
     st->top = NULL;
     return st;
 }
@@ -26,9 +26,9 @@ st_element *getTopPointer(stack *st)
 bool push(stack *st, treenode *node)
 {
     st_element *currentTop = getTopPointer(st);
-    st_element *newTop = malloc(sizeof(st_element *));
+    st_element *newTop = malloc(sizeof(st_element));
     newTop->symbol = node;
-    newTop->next = malloc(sizeof(st_element *));
+    newTop->next = malloc(sizeof(st_element));
     newTop->next = currentTop;
     st->top = newTop;
     return true;

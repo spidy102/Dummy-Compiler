@@ -4,7 +4,7 @@
 
 treenode *initNode(Symbol sym)
 {
-    treenode *root = malloc(sizeof(treenode *));
+    treenode *root = malloc(sizeof(treenode));
     root->node = sym;
     root->child = NULL;
     root->nextSibling = NULL;
@@ -18,7 +18,7 @@ treenode *addSibling(treenode *node, Symbol sym)
     {
         nextSibling = nextSibling->nextSibling;
     }
-    treenode *newSibling = malloc(sizeof(treenode *));
+    treenode *newSibling = malloc(sizeof(treenode));
     newSibling->node = sym;
     nextSibling->nextSibling = newSibling;
     newSibling->nextSibling = NULL;

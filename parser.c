@@ -104,7 +104,7 @@ void fill_grammar(FILE *fp)
     while (fgets(buffer, 100, fp) != NULL)
     {
         buffer[strlen(buffer) - 2] = '\0';
-        grammarHeadArray[i] = malloc(sizeof(ruleNode *));
+        grammarHeadArray[i] = malloc(sizeof(ruleNode));
         ruleNode *ptr = grammarHeadArray[i];
         char *tk = strtok(buffer, " \n");
 
@@ -139,7 +139,7 @@ void fill_grammar(FILE *fp)
             else
             {
 
-                ptr->nextPtr = malloc(sizeof(ruleNode *));
+                ptr->nextPtr = malloc(sizeof(ruleNode));
                 ptr = ptr->nextPtr;
             }
         }
@@ -307,6 +307,7 @@ void getFollowSets(nonTerminal nT)
     }
 }
 
+
 void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -345,10 +346,10 @@ void populateParseTable()
             {
                 if (follow_set % 2 == 1)
                 {
-                    ruleNode *new_rule = malloc(sizeof(ruleNode *));
+                    ruleNode *new_rule = malloc(sizeof(ruleNode));
                     new_rule->isTerminal = false;
                     new_rule->nt = grammarHeadArray[i]->nt;
-                    new_rule->nextPtr = malloc(sizeof(ruleNode *));
+                    new_rule->nextPtr = malloc(sizeof(ruleNode));
                     new_rule->nextPtr->isTerminal = true;
                     new_rule->nextPtr->t = EPSILON;
                     new_rule->nextPtr->nextPtr = NULL;
