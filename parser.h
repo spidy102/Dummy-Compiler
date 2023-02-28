@@ -5,7 +5,7 @@
 #include "./data_structures/set.h"
 #include "./data_structures/token_name.h"
 
-#define NUM_RULES 149
+#define NUM_RULES 150
 #define NON_TERMINALS 78
 #define TERMINALS 57
 

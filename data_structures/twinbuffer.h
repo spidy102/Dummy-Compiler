@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define SIZE 512
+#define SIZE 50
 
 typedef struct twinbuffer
 {

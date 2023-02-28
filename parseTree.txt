@@ -1,41 +1,41 @@
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDeclarations isLeaf:Yes NodeSymbol: EPSILON
+lexeme: declare line number: 1 token_name: DECLARE value: ---- parentNode: moduleDeclaration isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDeclarations isLeaf:No NodeSymbol: moduleDeclaration
+lexeme: module line number: 1 token_name: MODULE value: ---- parentNode: moduleDeclaration isLeaf:Yes
+lexeme: readArr line number: 1 token_name: ID value: ---- parentNode: moduleDeclaration isLeaf:Yes
+lexeme: ; line number: 1 token_name: SEMICOL value: ---- parentNode: moduleDeclaration isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: program isLeaf:No NodeSymbol: moduleDeclarations
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDeclarations isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDeclarations isLeaf:No NodeSymbol: moduleDeclarations
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: program isLeaf:No NodeSymbol: program
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: otherModules isLeaf:Yes NodeSymbol: EPSILON
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: program isLeaf:No NodeSymbol: otherModules
-lexeme: <<< line number: 2 token_name: DRIVERDEF value: ---- parentNode: driverModule isLeaf:Yes
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: program isLeaf:No NodeSymbol: driverModule
-lexeme: driver line number: 2 token_name: DRIVER value: ---- parentNode: driverModule isLeaf:Yes
-lexeme: program line number: 2 token_name: PROGRAM value: ---- parentNode: driverModule isLeaf:Yes
-lexeme: >>> line number: 2 token_name: DRIVERENDDEF value: ---- parentNode: driverModule isLeaf:Yes
-lexeme: start line number: 3 token_name: START value: ---- parentNode: moduleDef isLeaf:Yes
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: driverModule isLeaf:No NodeSymbol: moduleDef
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:Yes NodeSymbol: EPSILON
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDef isLeaf:No NodeSymbol: statements
-lexeme: end line number: 5 token_name: END value: ---- parentNode: moduleDef isLeaf:Yes
-lexeme: << line number: 6 token_name: DEF value: ---- parentNode: module isLeaf:Yes
+lexeme: << line number: 3 token_name: DEF value: ---- parentNode: module isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: otherModules isLeaf:No NodeSymbol: module
-lexeme: empty line number: 6 token_name: ID value: ---- parentNode: module isLeaf:Yes
-lexeme: empty line number: 6 token_name: ID value: ---- parentNode: module isLeaf:Yes
-lexeme: >> line number: 6 token_name: ENDDEF value: ---- parentNode: module isLeaf:Yes
-lexeme: takes line number: 7 token_name: TAKES value: ---- parentNode: module isLeaf:Yes
-lexeme: input line number: 7 token_name: INPUT value: ---- parentNode: module isLeaf:Yes
-lexeme: [ line number: 7 token_name: SQBO value: ---- parentNode: module isLeaf:Yes
-lexeme: a line number: 7 token_name: ID value: ---- parentNode: input_plist isLeaf:Yes
+lexeme: module line number: 3 token_name: MODULE value: ---- parentNode: module isLeaf:Yes
+lexeme: arraySum line number: 3 token_name: ID value: ---- parentNode: module isLeaf:Yes
+lexeme: >> line number: 3 token_name: ENDDEF value: ---- parentNode: module isLeaf:Yes
+lexeme: takes line number: 4 token_name: TAKES value: ---- parentNode: module isLeaf:Yes
+lexeme: input line number: 4 token_name: INPUT value: ---- parentNode: module isLeaf:Yes
+lexeme: [ line number: 4 token_name: SQBO value: ---- parentNode: module isLeaf:Yes
+lexeme: list line number: 4 token_name: ID value: ---- parentNode: input_plist isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: module isLeaf:No NodeSymbol: input_plist
-lexeme: : line number: 7 token_name: COLON value: ---- parentNode: input_plist isLeaf:Yes
-lexeme: boolean line number: 7 token_name: BOOLEAN value: ---- parentNode: dataType isLeaf:Yes
+lexeme: : line number: 4 token_name: COLON value: ---- parentNode: input_plist isLeaf:Yes
+lexeme: array line number: 4 token_name: ARRAY value: ---- parentNode: dataType isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: input_plist isLeaf:No NodeSymbol: dataType
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n1 isLeaf:Yes NodeSymbol: EPSILON
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: input_plist isLeaf:No NodeSymbol: n1
-lexeme: ] line number: 7 token_name: SQBC value: ---- parentNode: module isLeaf:Yes
-lexeme: ; line number: 7 token_name: SEMICOL value: ---- parentNode: module isLeaf:Yes
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: ret isLeaf:Yes NodeSymbol: EPSILON
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: module isLeaf:No NodeSymbol: ret
-lexeme: start line number: 8 token_name: START value: ---- parentNode: moduleDef isLeaf:Yes
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: module isLeaf:No NodeSymbol: moduleDef
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:Yes NodeSymbol: EPSILON
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDef isLeaf:No NodeSymbol: statements
-lexeme: end line number: 10 token_name: END value: ---- parentNode: moduleDef isLeaf:Yes
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: program isLeaf:No NodeSymbol: otherModules
-lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: otherModules isLeaf:No NodeSymbol: otherModules
+lexeme: [ line number: 4 token_name: SQBO value: ---- parentNode: dataType isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: sign isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: sign
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: range_arrays isLeaf:No NodeSymbol: index_arr
+lexeme: ---- line number: 4 token_name: NUM value: 1 parentNode: new_index isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: new_index
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: dataType isLeaf:No NodeSymbol: range_arrays
+lexeme: .. line number: 4 token_name: RANGEOP value: ---- parentNode: range_arrays isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: sign isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: sign
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: range_arrays isLeaf:No NodeSymbol: index_arr
+lexeme: ---- line number: 4 token_name: NUM value: 15 parentNode: new_index isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: new_index
+lexeme: ] line number: 4 token_name: SQBC value: ---- parentNode: dataType isLeaf:Yes
+lexeme: of line number: 4 token_name: OF value: ---- parentNode: dataType isLeaf:Yes
+lexeme: real line number: 4 token_name: REAL value: ---- parentNode: type isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: dataType isLeaf:No NodeSymbol: type
+lexeme: , line number: 4 token_name: COMMA value: ---- parentNode: n1 isLeaf:Yes
+lexeme: ---- line number: ---- token_name
