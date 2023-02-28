@@ -57,7 +57,16 @@ new_index ID
 sign PLUS
 sign MINUS
 sign EPSILON
-moduleReuseStmt optional USE MODULE ID WITH PARAMETERS idList SEMICOL
+moduleReuseStmt optional USE MODULE ID WITH PARAMETERS actual_para_list SEMICOL
+actual_para_list sign k actual_para_list_dash
+actual_para_list boolConstt actual_para_list_dash
+actual_para_list_dash COMMA kbool actual_para_list_dash
+kbool sign k
+kbool boolConstt
+actual_para_list_dash EPSILON
+k NUM
+k RNUM
+k ID n_11
 n_11 SQBO element_index_with_expressions SQBC
 n_11 EPSILON
 optional SQBO idList SQBC ASSIGNOP
@@ -133,9 +142,8 @@ default_ DEFAULT COLON statements BREAK SEMICOL
 default_ EPSILON
 iterativeStmt FOR BO ID IN range_for_loop BC START statements END
 iterativeStmt WHILE BO arithmeticOrBooleanExpr BC START statements END
-range_for_loop index_for_loop RANGEOP index_for_loop
 index_for_loop sign_for_loop new_index_for_loop
-new_index_for_loop NUM
+new_index_for_loop  NUM
 sign_for_loop PLUS
 sign_for_loop MINUS
 sign_for_loop EPSILON
