@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include "./data_structures/set.h"
@@ -396,6 +397,15 @@ void printParseTable()
     }
 }
 
+char *tolowercase(char *str)
+{
+    for (int i = 0; i < strlen(str); i++)
+    {
+        str[i] = (char)tolower(str[i]);
+    }
+    return str;
+}
+
 treenode *parseInputSourceCode(FILE *fp)
 {
     hashtable ht;
@@ -420,7 +430,7 @@ treenode *parseInputSourceCode(FILE *fp)
         if (top1 == NULL)
         {
             // report error E4
-            printf("e4\n");
+            printf("Error: top of the stack is empty\n");
             exit(0);
         }
         else if (top1->node.isTerminal)
@@ -433,10 +443,26 @@ treenode *parseInputSourceCode(FILE *fp)
             }
             else
             {
-                printf("what terminal: %d??\n", top1->node.t);
                 // report error e1;
-                printf("e1\n");
-                break;
+                if (lookAhead->token == NUM)
+                    printf("Error: %s was expected at line number %d, got %d instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->integer);
+                else if (lookAhead->token == RNUM)
+                    printf("Error: %s was expected at line number %d, got %lf instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->rnum);
+                else
+                    printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->str);
+
+                // error recovery
+
+                // popping one token till does not match
+
+                treenode *node = pop(st);
+                node->tk = lookAhead;
+
+                if (node == NULL)
+                {
+                    printf("Error recovery not possible\n");
+                    return start;
+                }
             }
         }
         else if (!top1->node.isTerminal)
@@ -486,9 +512,34 @@ treenode *parseInputSourceCode(FILE *fp)
             else
             {
                 // report error e2
-                printf("nt at top:%d\n", top1->node.nt);
-                printf("e2\n");
-                exit(0);
+                printf("Error: Rule entry in the parse table is empty!\n");
+                ull synchronisation_set;
+                getFirstSets(top1->node.nt);
+                union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
+                getFollowSets(top1->node.nt);
+                union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
+                // being extra cautious in the sync set
+                add_in_set(&synchronisation_set, SEMICOL);
+                add_in_set(&synchronisation_set, END);
+                add_in_set(&synchronisation_set, ENDDEF);
+                add_in_set(&synchronisation_set, DRIVERENDDEF);
+
+                while (top(st) != NULL)
+                {
+                    if (top(st)->node.isTerminal && contains_in_set(&synchronisation_set, top(st)->node.t))
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        pop(st);
+                    }
+                }
+
+                if (top(st) == NULL)
+                {
+                    return start;
+                }
             }
         }
     }
