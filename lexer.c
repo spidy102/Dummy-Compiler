@@ -10,6 +10,83 @@
 
 int line_num;
 
+void removeComments(twinbuffer *tb)
+{
+    char c = readOneCharacter(tb);
+    FILE *fp1 = fopen("clean.erp", "w");
+    int s = 0;
+    while (1)
+    {
+        if (c == 0)
+        {
+            break;
+        }
+        switch (s)
+        {
+        case 0:
+            if (c == '*')
+            {
+                s = 17;
+                c = readOneCharacter(tb);
+            }
+            else
+            {
+                fputc(c, fp1);
+                c = readOneCharacter(tb);
+            }
+            break;
+        case 17:
+            if (c == '*')
+            {
+                s = 18;
+                tb->begin = tb->fwd;
+                c = readOneCharacter(tb);
+            }
+            else
+            {
+                s = 21;
+            }
+            break;
+        case 21:
+            fputc('*', fp1);
+            s = 0;
+            // c = readOneCharacter(tb);
+            break;
+        case 18:
+            if (c == '*')
+            {
+                s = 19;
+                c = readOneCharacter(tb);
+            }
+            else
+            {
+                if (c == '\n')
+                    fputc('\n', fp1);
+                c = readOneCharacter(tb);
+            }
+            break;
+        case 19:
+            if (c == '*')
+            {
+                s = 20;
+            }
+            else
+            {
+                s = 18;
+                if (c == '\n')
+                    fputc('\n', fp1);
+                c = readOneCharacter(tb);
+            }
+            break;
+        case 20:
+            copyLexeme(tb, getSize(tb));
+            s = 0;
+            c = readOneCharacter(tb);
+            break;
+        }
+    }
+}
+
 // void twinbuffer()
 
 token *make_token(int line_num, char *lexeme, token_names tok)
@@ -636,60 +713,62 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
     }
 }
 
-// int main()
-// {
-//     FILE *fp = fopen("example.erp", "r");
-//     if (fp == NULL)
-//     {
-//         printf("File cannot be openened");
-//     }
-//     twinbuffer *tb;
-//     hashtable ht;
-//     line_num = 1;
-//     tb = twinbuffer_init(fp);
-//     ht = initHashtable();
-//     populate_hashtable(&ht);
-//     // printf("%c", readOneCharacter(tb));
-//     while (1)
-//     {
-//         token *tk = getNextToken(ht, tb);
-//         if (tk == NULL)
-//             break;
-//         if (tk->token == NUM)
-//         {
-//             printf("%d\n", tk->integer);
-//         }
-//         else if (tk->token == RNUM)
-//         {
-//             printf("%lf\n", tk->rnum);
-//         }
-//         else
-//         {
-//             printf("%s\n", tk->str);
-//         }
-//     }
+int main()
+{
+    FILE *fp = fopen("example.erp", "r");
+    if (fp == NULL)
+    {
+        printf("File cannot be openened");
+    }
+    twinbuffer *tb;
+    hashtable ht;
+    line_num = 1;
+    tb = twinbuffer_init(fp);
+    // ht = initHashtable();
+    // populate_hashtable(&ht);
+    // // printf("%c", readOneCharacter(tb));
+    // while (1)
+    // {
+    //     token *tk = getNextToken(ht, tb);
+    //     if (tk == NULL)
+    //         break;
+    //     if (tk->token == NUM)
+    //     {
+    //         printf("%d\n", tk->integer);
+    //     }
+    //     else if (tk->token == RNUM)
+    //     {
+    //         printf("%lf\n", tk->rnum);
+    //     }
+    //     else
+    //     {
+    //         printf("%s\n", tk->str);
+    //     }
+    // }
 
-//     // printf("%s", tb->buffer);
+    removeComments(tb);
 
-//     // populate_hashtable(&ht);
-//     // bucket_node *ptr1 = ht.table[536]->bucket_ptr;
+    // printf("%s", tb->buffer);
 
-//     // while (ptr1 != NULL)
-//     // {
-//     //     printf("\n%s\n", ptr1->str);
-//     //     ptr1 = ptr1->next;
-//     // }
+    // populate_hashtable(&ht);
+    // bucket_node *ptr1 = ht.table[536]->bucket_ptr;
 
-//     // exists(ht, "module", 6);
-//     // exists(ht, "mod1", 4);
-//     // exists(ht, "takes", 5);
-//     // exists(ht, "index", 5);
+    // while (ptr1 != NULL)
+    // {
+    //     printf("\n%s\n", ptr1->str);
+    //     ptr1 = ptr1->next;
+    // }
 
-//     // ptr1 = ht.table[536]->bucket_ptr;
+    // exists(ht, "module", 6);
+    // exists(ht, "mod1", 4);
+    // exists(ht, "takes", 5);
+    // exists(ht, "index", 5);
 
-//     // while (ptr1 != NULL)
-//     // {
-//     //     printf("\n%s\n", ptr1->str);
-//     //     ptr1 = ptr1->next;
-//     // }
-// }
+    // ptr1 = ht.table[536]->bucket_ptr;
+
+    // while (ptr1 != NULL)
+    // {
+    //     printf("\n%s\n", ptr1->str);
+    //     ptr1 = ptr1->next;
+    // }
+}
