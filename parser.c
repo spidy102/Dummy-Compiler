@@ -396,7 +396,7 @@ void printParseTable()
     }
 }
 
-void parseInputSourceCode(FILE *fp)
+treenode* parseInputSourceCode(FILE *fp)
 {
     hashtable ht;
     twinbuffer *tb;
@@ -491,6 +491,7 @@ void parseInputSourceCode(FILE *fp)
         printf("e3\n");
         // exit(0);
     }
+    return start;
 }
 
 void freeList(ruleNode *head)
