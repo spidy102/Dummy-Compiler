@@ -42,6 +42,7 @@ var_print ID p1
 var_print NUM
 var_print RNUM
 var_print boolConstt
+var_print array_element_for_print
 p1 SQBO new_index SQBC
 p1 EPSILON
 simpleStmt assignmentStmt

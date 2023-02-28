@@ -397,7 +397,6 @@ void printParseTable()
     }
 }
 
-
 char *tolowercase(char *str)
 {
     for (int i = 0; i < strlen(str); i++)
@@ -407,7 +406,7 @@ char *tolowercase(char *str)
     return str;
 }
 
-treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
+treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
 {
     line_num = 1;
     stack *st = initStack();
@@ -465,19 +464,19 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
 
             ruleNode *temp = rule;
 
-            // printf("Rule:\n");
-            // while (temp != NULL)
-            // {
-            //     if (temp->isTerminal)
-            //     {
-            //         printf("terminal: %d\n", temp->t);
-            //     }
-            //     else
-            //     {
-            //         printf("non terminal: %d\n", temp->nt);
-            //     }
-            //     temp = temp->nextPtr;
-            // }
+            printf("Rule:\n");
+            while (temp != NULL)
+            {
+                if (temp->isTerminal)
+                {
+                    printf("terminal: %s\n", EnumToTString(temp->t));
+                }
+                else
+                {
+                    printf("non terminal: %s\n", EnumToNTString(temp->nt));
+                }
+                temp = temp->nextPtr;
+            }
 
             // printf("\n");
 
@@ -650,7 +649,7 @@ void printParseTree(treenode *root, FILE *fp)
     }
 }
 
-/* int main()
+int main()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
     {
@@ -666,13 +665,15 @@ void printParseTree(treenode *root, FILE *fp)
     FILE *fp2 = fopen("parseTree.txt", "w");
 
     populateParseTable();
-
-    treenode *root = parseInputSourceCode(fp1);
+    twinbuffer *tb = twinbuffer_init(fp1, 512);
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    treenode *root = parseInputSourceCode(fp1, tb, ht);
 
     printParseTree(root, fp2);
 
-    // printf("%s", EnumToTString(1));
-    //  printf("ran well!!\n");
+    printf("%s", EnumToTString(1));
+    printf("ran well!!\n");
     //  ruleNode *ptr = grammarHeadArray[62];
 
     // while (ptr != NULL)
@@ -688,9 +689,9 @@ void printParseTree(treenode *root, FILE *fp)
     //     ptr = ptr->nextPtr;
     // }
     // printf("%d", n9);
-    // getFollowSets(n20);
+    getFirstSets(whichStmt);
     // // ull first_set = getFirstSetsOneRule(n20, 61);
-    // print_set_elements(&follows[n20]);
+    print_set_elements(&firsts[whichStmt]);
 
     // getFirstSets(factor);
     // print_set_elements(&firsts[factor]);
@@ -700,4 +701,4 @@ void printParseTree(treenode *root, FILE *fp)
 
     // printParseTable();
     freeGrammar();
-} */
+}

@@ -1,22 +1,60 @@
-** This test case is meant only to test your lexical analyzer 
-   and is not correct syntactically. Use this to verify your lexical analyzer **
+declare module readArr;
+**the following function computes the sum of first n elements of the array**
+<<module arraySum>>
+takes input[list:array[1..15] of    real, n:integer];
+returns  [sum:real];
+start
+	declare index:integer;
+	declare t:boolean;
+	sum:=0.0;
+	for(index in  -10..+15)
+	start
+		t:= index<=n;
+		switch(t)
+		start
+			case true: print(list[+index]);
+				   sum:=sum+list[index];
+				   break;
+			case false: print(sum);
+				    print(index);
+				    **prints the values of sum and index  15-n times**
+				    break;
+		end
+		** no need to increment the value of index as it will be taken care by the semantic rules associated with for construct, but an increment statement does not make its syntax incorrect**
+	end
+	print(sum);
+end
+<<<driver program>>>
+start
+	declare A:array[1..15] of real;
+	declare k:integer;
+	declare s:real;
+	get_value(k);
+	use module readArr with parameters A,k;
+	[s]:= use module arraySum with parameters A,k;
+	print(s);
+end
 
-var_1_, var_2_, _var_3_:integer+AND+declare..-23.7e+12um16789+**18.043**
-123abc123.23-/*+while)for(begin--12.03e+a2<<<<<===>=value_123___16 
-	FJKHDSFSDjshd547637__4234_3423mdfndf+342543.dfsf+case-case1/
+**The following module reads k  values one by one**
+** the array elements are populated with the read values**
+**The array variable is not returned as the translation will**
+**use the same locations for array elements**
 
-/true
+<<module readArr>>
+takes input [arr1:array[-10..25] of real,k:integer];
+start
+	declare tempvar:real;
+	declare i:integer;
 
-;default<=1876..2098+12.....::=30 switch 
-
-	break [A..19] get_value,print,use, boolean 10..in for++array[187.e+12 1.0E-12e34+abcdefghijklmnopqrstuvwx-23*187.0e+12
-
-**ID, COMMA, ID, COMMA, ID, COLON, INTEGER,PLUS, AND, PLUS, DECLARE, RANGEOP, MINUS, RNUM, ID, PLUS, COMMENT(NOT TO BE TOKENIZED), NUM, ID, LEXICAL ERROR(.) , NUM, MINUS, DIV, MUL, PLUS, WHILE, CP, FOR, OP, BEGIN, MINUS, MINUS, LEXICAL ERROR (12.03e+), ID, DRIVERDEF, DEF, EQ, LEXICAL ERROR (=), GE, ID, LEXICAL ERROR (MORE THAN 20 CHARACTERS IN ID), PLUS, LEXICAL ERROR (342543.), ID, PLUS, CASE, MINUS, ID, DIV, DIV, TRUE, SEMCOL, DEFAULT, LE, NUM, RANGEOP, NUM, PLUS, NUM, RANGEOP, RANGEOP, LEXICAL ERROR (.), COLON, ASSIGNOP, NUM, SWITCH, BREAK,SQBO, ID, RANGEOP, NUM, SQBC, GET_VALUE, COMMA, PRINT, COMMA, USE, COMMA, BOOLEAN, NUM, RANGEOP, IN, FOR, PLUS, PLUS, ARRAY, SQBO , LEXICAL ERROR (187.), ID, PLUS, NUM, RNUM, ID, PLUS, ERROR (id LENGTH GREATER THAN 20, THE LEXEME IS abcdefghijklmnopqrstuvwx, NOT TO BE PASSED TO THE PARSER, MINUS, NUM, MUL, RNUM**
-
-**Try to print these in each line on the console in the following format
-      line no     	lexeme		token name
-	4		 var_1_		  ID
-**
-**print also the lexeme for lexical error **
-
-**add more complex combinations and test your lexical analyzer**
+	i:=1;
+	while(i<=k)
+	start
+		get_value(tempvar);
+		arr1[i]:=tempvar;
+                declare B:array[-p..+q] of boolean;
+                tempvar:=-(tempvar+ B[a+b*c]+A[+5]-A[-10]);
+		B[k]:=-10;
+		i:=i+1;
+		** the semantics of while needs an increment and will be taken care of at the second phase**
+	end
+end

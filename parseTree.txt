@@ -38,4 +38,198 @@ lexeme: of line number: 4 token_name: OF value: ---- parentNode: dataType isLeaf
 lexeme: real line number: 4 token_name: REAL value: ---- parentNode: type isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: dataType isLeaf:No NodeSymbol: type
 lexeme: , line number: 4 token_name: COMMA value: ---- parentNode: n1 isLeaf:Yes
-lexeme: ---- line number: ---- token_name
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: input_plist isLeaf:No NodeSymbol: n1
+lexeme: n line number: 4 token_name: ID value: ---- parentNode: n1 isLeaf:Yes
+lexeme: : line number: 4 token_name: COLON value: ---- parentNode: n1 isLeaf:Yes
+lexeme: integer line number: 4 token_name: INTEGER value: ---- parentNode: dataType isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n1 isLeaf:No NodeSymbol: dataType
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n1 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n1 isLeaf:No NodeSymbol: n1
+lexeme: ] line number: 4 token_name: SQBC value: ---- parentNode: module isLeaf:Yes
+lexeme: ; line number: 4 token_name: SEMICOL value: ---- parentNode: module isLeaf:Yes
+lexeme: returns line number: 5 token_name: RETURNS value: ---- parentNode: ret isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: module isLeaf:No NodeSymbol: ret
+lexeme: [ line number: 5 token_name: SQBO value: ---- parentNode: ret isLeaf:Yes
+lexeme: sum line number: 5 token_name: ID value: ---- parentNode: output_plist isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: ret isLeaf:No NodeSymbol: output_plist
+lexeme: : line number: 5 token_name: COLON value: ---- parentNode: output_plist isLeaf:Yes
+lexeme: real line number: 5 token_name: REAL value: ---- parentNode: type isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: output_plist isLeaf:No NodeSymbol: type
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n2 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: output_plist isLeaf:No NodeSymbol: n2
+lexeme: ] line number: 5 token_name: SQBC value: ---- parentNode: ret isLeaf:Yes
+lexeme: ; line number: 5 token_name: SEMICOL value: ---- parentNode: ret isLeaf:Yes
+lexeme: start line number: 6 token_name: START value: ---- parentNode: moduleDef isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: module isLeaf:No NodeSymbol: moduleDef
+lexeme: declare line number: 7 token_name: DECLARE value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: declareStmt
+lexeme: index line number: 7 token_name: ID value: ---- parentNode: idList isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: declareStmt isLeaf:No NodeSymbol: idList
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n3 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: idList isLeaf:No NodeSymbol: n3
+lexeme: : line number: 7 token_name: COLON value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: integer line number: 7 token_name: INTEGER value: ---- parentNode: dataType isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: declareStmt isLeaf:No NodeSymbol: dataType
+lexeme: ; line number: 7 token_name: SEMICOL value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statement
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDef isLeaf:No NodeSymbol: statements
+lexeme: declare line number: 8 token_name: DECLARE value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: declareStmt
+lexeme: t line number: 8 token_name: ID value: ---- parentNode: idList isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: declareStmt isLeaf:No NodeSymbol: idList
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n3 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: idList isLeaf:No NodeSymbol: n3
+lexeme: : line number: 8 token_name: COLON value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: boolean line number: 8 token_name: BOOLEAN value: ---- parentNode: dataType isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: declareStmt isLeaf:No NodeSymbol: dataType
+lexeme: ; line number: 8 token_name: SEMICOL value: ---- parentNode: declareStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statement
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statements
+lexeme: sum line number: 9 token_name: ID value: ---- parentNode: assignmentStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: simpleStmt isLeaf:No NodeSymbol: assignmentStmt
+lexeme: := line number: 9 token_name: ASSIGNOP value: ---- parentNode: lvalueIDStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: whichStmt isLeaf:No NodeSymbol: lvalueIDStmt
+lexeme: ---- line number: 9 token_name: RNUM value: 0.000000 parentNode: factor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: factor
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: term
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: n5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: arithmeticExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: n4
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No NodeSymbol: anyTerm
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n8 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: n8
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: expression isLeaf:No NodeSymbol: arithmeticOrBooleanExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n7 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No NodeSymbol: n7
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: lvalueIDStmt isLeaf:No NodeSymbol: expression
+lexeme: ; line number: 9 token_name: SEMICOL value: ---- parentNode: lvalueIDStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: assignmentStmt isLeaf:No NodeSymbol: whichStmt
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: simpleStmt
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statement
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statements
+lexeme: for line number: 10 token_name: FOR value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: iterativeStmt
+lexeme: ( line number: 10 token_name: BO value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: index line number: 10 token_name: ID value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: in line number: 10 token_name: IN value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: - line number: 10 token_name: MINUS value: ---- parentNode: sign_for_loop isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_for_loop isLeaf:No NodeSymbol: sign_for_loop
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: range_for_loop isLeaf:No NodeSymbol: index_for_loop
+lexeme: ---- line number: 10 token_name: NUM value: 10 parentNode: new_index_for_loop isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_for_loop isLeaf:No NodeSymbol: new_index_for_loop
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: iterativeStmt isLeaf:No NodeSymbol: range_for_loop
+lexeme: .. line number: 10 token_name: RANGEOP value: ---- parentNode: range_for_loop isLeaf:Yes
+lexeme: + line number: 10 token_name: PLUS value: ---- parentNode: sign_for_loop isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_for_loop isLeaf:No NodeSymbol: sign_for_loop
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: range_for_loop isLeaf:No NodeSymbol: index_for_loop
+lexeme: ---- line number: 10 token_name: NUM value: 15 parentNode: new_index_for_loop isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_for_loop isLeaf:No NodeSymbol: new_index_for_loop
+lexeme: ) line number: 10 token_name: BC value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: start line number: 11 token_name: START value: ---- parentNode: iterativeStmt isLeaf:Yes
+lexeme: t line number: 12 token_name: ID value: ---- parentNode: assignmentStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: simpleStmt isLeaf:No NodeSymbol: assignmentStmt
+lexeme: := line number: 12 token_name: ASSIGNOP value: ---- parentNode: lvalueIDStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: whichStmt isLeaf:No NodeSymbol: lvalueIDStmt
+lexeme: index line number: 12 token_name: ID value: ---- parentNode: factor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: factor
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: array_element isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: factor isLeaf:No NodeSymbol: array_element
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: term
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: n5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: arithmeticExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: n4
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No NodeSymbol: anyTerm
+lexeme: <= line number: 12 token_name: LE value: ---- parentNode: relationalOp isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n8 isLeaf:No NodeSymbol: relationalOp
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: n8
+lexeme: n line number: 12 token_name: ID value: ---- parentNode: factor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: factor
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: array_element isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: factor isLeaf:No NodeSymbol: array_element
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: term
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: n5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n8 isLeaf:No NodeSymbol: arithmeticExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: n4
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: expression isLeaf:No NodeSymbol: arithmeticOrBooleanExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n7 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No NodeSymbol: n7
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: lvalueIDStmt isLeaf:No NodeSymbol: expression
+lexeme: ; line number: 12 token_name: SEMICOL value: ---- parentNode: lvalueIDStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: assignmentStmt isLeaf:No NodeSymbol: whichStmt
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: simpleStmt
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statement
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: iterativeStmt isLeaf:No NodeSymbol: statements
+lexeme: switch line number: 13 token_name: SWITCH value: ---- parentNode: condionalStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: condionalStmt
+lexeme: ( line number: 13 token_name: BO value: ---- parentNode: condionalStmt isLeaf:Yes
+lexeme: t line number: 13 token_name: ID value: ---- parentNode: condionalStmt isLeaf:Yes
+lexeme: ) line number: 13 token_name: BC value: ---- parentNode: condionalStmt isLeaf:Yes
+lexeme: start line number: 14 token_name: START value: ---- parentNode: condionalStmt isLeaf:Yes
+lexeme: case line number: 15 token_name: CASE value: ---- parentNode: caseStmts isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: condionalStmt isLeaf:No NodeSymbol: caseStmts
+lexeme: true line number: 15 token_name: TRUE value: ---- parentNode: value isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: caseStmts isLeaf:No NodeSymbol: value
+lexeme: : line number: 15 token_name: COLON value: ---- parentNode: caseStmts isLeaf:Yes
+lexeme: print line number: 15 token_name: PRINT value: ---- parentNode: ioStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statement isLeaf:No NodeSymbol: ioStmt
+lexeme: ( line number: 15 token_name: BO value: ---- parentNode: ioStmt isLeaf:Yes
+lexeme: list line number: 15 token_name: ID value: ---- parentNode: array_element_for_print isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: var_print isLeaf:No NodeSymbol: array_element_for_print
+lexeme: [ line number: 15 token_name: SQBO value: ---- parentNode: array_element_for_print isLeaf:Yes
+lexeme: + line number: 15 token_name: PLUS value: ---- parentNode: sign isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: sign
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: array_element_for_print isLeaf:No NodeSymbol: index_arr
+lexeme: index line number: 15 token_name: ID value: ---- parentNode: new_index isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: index_arr isLeaf:No NodeSymbol: new_index
+lexeme: ] line number: 15 token_name: SQBC value: ---- parentNode: array_element_for_print isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: ioStmt isLeaf:No NodeSymbol: var_print
+lexeme: ) line number: 15 token_name: BC value: ---- parentNode: ioStmt isLeaf:Yes
+lexeme: ; line number: 15 token_name: SEMICOL value: ---- parentNode: ioStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: statements isLeaf:No NodeSymbol: statement
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: caseStmts isLeaf:No NodeSymbol: statements
+lexeme: sum line number: 16 token_name: ID value: ---- parentNode: assignmentStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: simpleStmt isLeaf:No NodeSymbol: assignmentStmt
+lexeme: := line number: 16 token_name: ASSIGNOP value: ---- parentNode: lvalueIDStmt isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: whichStmt isLeaf:No NodeSymbol: lvalueIDStmt
+lexeme: sum line number: 16 token_name: ID value: ---- parentNode: factor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: factor
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: array_element isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: factor isLeaf:No NodeSymbol: array_element
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: term
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: n5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: arithmeticExpr
+lexeme: + line number: 16 token_name: PLUS value: ---- parentNode: op1 isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:No NodeSymbol: op1
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticExpr isLeaf:No NodeSymbol: n4
+lexeme: list line number: 16 token_name: ID value: ---- parentNode: factor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: factor
+lexeme: [ line number: 16 token_name: SQBO value: ---- parentNode: array_element isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: factor isLeaf:No NodeSymbol: array_element
+lexeme: index line number: 16 token_name: ID value: ---- parentNode: arrFactor isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arrTerm isLeaf:No NodeSymbol: arrFactor
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arrExpr isLeaf:No NodeSymbol: arrTerm
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arr_N5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arrTerm isLeaf:No NodeSymbol: arr_N5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: element_index_with_expressions isLeaf:No NodeSymbol: arrExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arr_N4 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arrExpr isLeaf:No NodeSymbol: arr_N4
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: array_element isLeaf:No NodeSymbol: element_index_with_expressions
+lexeme: ] line number: 16 token_name: SQBC value: ---- parentNode: array_element isLeaf:Yes
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:No NodeSymbol: term
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n5 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: term isLeaf:No NodeSymbol: n5
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n4 isLeaf:No NodeSymbol: n4
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No NodeSymbol: anyTerm
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n8 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: anyTerm isLeaf:No NodeSymbol: n8
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: expression isLeaf:No NodeSymbol: arithmeticOrBooleanExpr
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: n7 isLeaf:Yes NodeSymbol: EPSILON
+lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: arithmeticOrBooleanExpr isLeaf:No 
