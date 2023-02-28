@@ -11,3 +11,23 @@ These tokens are then further passed in to the parser for parse tree constructio
 
 to run the lexer file separately - 
 create an ERPLAG file with the token to tokenize and run - gcc lexer.c ./data_structures/hashmap.c ./data_structures/twinbuffer.c
+
+## removeComments
+The removeComments function is to ignore all the comment part of the file
+
+## make_token
+The make_token function is to copy the TOKEN, LEXEME and line number to the data structure for TOKEN and return the data structure
+
+## getSize
+The getSize function is to get the size of the twin buffer passed through the DFA
+
+## copyLexeme
+The copyLexeme function is to copy the string of the token/ the lexeme
+
+## error
+The error function displays the line number of the error
+
+## getNextToken
+The getNextToken function implements all the states of the DFA and its transitions and finally returns the TOKEN data structure that coresponds to the file
+
+
