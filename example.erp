@@ -1,24 +1,30 @@
-** This test case is meant only to test your lexical analyzer 
-   and is not correct syntactically. Use this to verify your lexical analyzer **
+** This testcase demonstrates the syntactic correctness of the constructs such as modules, simple and declaration statements, and expressions**
 
-var_1_, var_2_, _var_3_:integer+AND+declare..-23.7e+12um16789+**18.043**
-123abc123.23-/*+while)for(begin--12.03e+a2<<<<<===>=value_123___16 
-	FJKHDSFSDjshd547637__4234_3423mdfndf+342543.dfsf+case-case1/
+declare module compute;
+<<<driver program>>>
+start
+	declare var_1_, var_2_, var_3_:integer;
+	declare R1_abc: boolean;
+	declare r2_ABC: integer;
+	declare R3_abc: real;
+	get_value(var_1_);
+	var_2_:=10;
+	var_3_:= -(6);
+	[R1_abc, r2_ABC, R3_abc] := use module compute with parameters var_1_, var_2_, var_34;
+	** do not bother that the last variable is not declared. It will be taken care of later in the semantic analysis phase**
+end
+<<module compute>>
+takes input[a:integer, b:integer, c:integer];
+returns [res_1:boolean, res_2_a:integer, res_2__b:real];
+start
+	declare b:boolean;
+	res_2_a:= -(a*b-c/5);
+	res_2__b:= ((res_2_a + a)*12+22.34E-2)/13;
+	b := a <=  b AND c >= a OR  a<0 AND false;
+	res_1:= (true AND c==b)OR(b>p AND (a<=c));
+	** check  rules 27 a to e and redefine to preserve the parentheses needs ** 
+	print(res_1);
+end
 
-/true
-
-;default<=1876..2098+12.....::=30 switch 
-
-	break [A..19] get_value,print,use, boolean 10..in for++array[187.e+12 1.0E-12e34+abcdefghijklmnopqrstuvwx-23*187.0e+12
-
-**ID, COMMA, ID, COMMA, ID, COLON, INTEGER,PLUS, AND, PLUS, DECLARE, RANGEOP, MINUS, RNUM, ID, PLUS, COMMENT(NOT TO BE TOKENIZED), NUM, ID, LEXICAL ERROR(.) , NUM, MINUS, DIV, MUL, PLUS, WHILE, CP, FOR, OP, BEGIN, MINUS, MINUS, LEXICAL ERROR (12.03e+), ID, DRIVERDEF, DEF, EQ, LEXICAL ERROR (=), GE, ID, LEXICAL ERROR (MORE THAN 20 CHARACTERS IN ID), PLUS, LEXICAL ERROR (342543.), ID, PLUS, CASE, MINUS, ID, DIV, DIV, TRUE, SEMCOL, DEFAULT, LE, NUM, RANGEOP, NUM, PLUS, NUM, RANGEOP, RANGEOP, LEXICAL ERROR (.), COLON, ASSIGNOP, NUM, SWITCH, BREAK,SQBO, ID, RANGEOP, NUM, SQBC, GET_VALUE, COMMA, PRINT, COMMA, USE, COMMA, BOOLEAN, NUM, RANGEOP, IN, FOR, PLUS, PLUS, ARRAY, SQBO , LEXICAL ERROR (187.), ID, PLUS, NUM, RNUM, ID, PLUS, ERROR (id LENGTH GREATER THAN 20, THE LEXEME IS abcdefghijklmnopqrstuvwx, NOT TO BE PASSED TO THE PARSER, MINUS, NUM, MUL, RNUM**
-
-**Try to print these in each line on the console in the following format
-      line no     	lexeme		token name
-	4		 var_1_		  ID
-**
-**print also the lexeme for lexical error **
-
-**add more complex combinations and test your lexical analyzer**
-
-
+**verify the output of the lexical analyzer as well**
+**check the correctness of the parse tree**

@@ -307,7 +307,6 @@ void getFollowSets(nonTerminal nT)
     }
 }
 
-
 void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -397,7 +396,7 @@ void printParseTable()
     }
 }
 
-treenode* parseInputSourceCode(FILE *fp)
+treenode *parseInputSourceCode(FILE *fp)
 {
     hashtable ht;
     twinbuffer *tb;
@@ -411,6 +410,7 @@ treenode* parseInputSourceCode(FILE *fp)
     startSymbol.isTerminal = false;
     startSymbol.nt = program;
     treenode *start = initNode(startSymbol);
+    start->parent = initNode(startSymbol);
     push(st, start);
     printf("%s", lookAhead->str);
     while (lookAhead != NULL)
@@ -471,9 +471,10 @@ treenode* parseInputSourceCode(FILE *fp)
                 }
                 treenode *parent = pop(st);
                 ruleNode *rule = parseTable[top1->node.nt][lookAhead->token]->nextPtr;
-                pushRecursive(st, rule);
+                pushRecursive(st, rule, parent);
                 treenode *child = top(st);
                 parent->child = child;
+                child->parent = parent;
             }
             else
             {
@@ -515,22 +516,39 @@ void freeGrammar()
     }
 }
 
-void printParseTree(treenode* root, FILE* fp) {
+void printParseTree(treenode *root, FILE *fp)
+{
 
-    if (root == NULL) {
+    if (root == NULL)
+    {
         return;
     }
     printParseTree(root->child, fp);
-    if (root->node.isTerminal) {
-        fprintf(fp, "TERMINAL: %s\n", EnumToTString(root->tk->token));
+    if (root->node.isTerminal)
+    {
+        token *tk = root->tk;
+        if (tk->token == NUM)
+        {
+            fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %d parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->integer, EnumToNTString(root->parent->node.nt));
+        }
+        else if (tk->token == RNUM)
+        {
+            fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %lf parentNode: %s isLeaf:Yes\n", tk->line_num, EnumToTString(tk->token), tk->rnum, EnumToNTString(root->parent->node.nt));
+        }
+        else
+        {
+            fprintf(fp, "lexeme: %s line number: %d token_name: %s value: ---- parentNode: %s isLeaf:Yes\n", tk->str, tk->line_num, EnumToTString(tk->token), EnumToNTString(root->parent->node.nt));
+        }
+        // fprintf(fp, "TERMINAL: %s\n", EnumToTString(root->tk->token));
     }
-    else {
-        fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
+    else
+    {
+        // if (node)
+        fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:No NodeSymbol: %s\n", EnumToNTString(root->parent->node.nt), EnumToNTString(root->node.nt));
+        // fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
     }
     printParseTree(root->nextSibling, fp);
-    
 }
-
 
 int main()
 {
@@ -545,17 +563,17 @@ int main()
 
     FILE *fp1 = fopen("example.erp", "r");
 
-    FILE* fp2 = fopen("parseTree.txt", "w");
+    FILE *fp2 = fopen("parseTree.txt", "w");
 
     populateParseTable();
 
-    treenode* root = parseInputSourceCode(fp1);
+    treenode *root = parseInputSourceCode(fp1);
 
     printParseTree(root, fp2);
 
-    //printf("%s", EnumToTString(1));
-    // printf("ran well!!\n");
-    // ruleNode *ptr = grammarHeadArray[62];
+    // printf("%s", EnumToTString(1));
+    //  printf("ran well!!\n");
+    //  ruleNode *ptr = grammarHeadArray[62];
 
     // while (ptr != NULL)
     // {

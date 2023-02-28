@@ -30,6 +30,6 @@ bool isEmpty(stack *st);
 
 void printStack(stack *st);
 
-void pushRecursive(stack *st, ruleNode *rule);
+void pushRecursive(stack *st, ruleNode *rule, treenode *parent);
 
 #endif

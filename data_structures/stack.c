@@ -50,11 +50,11 @@ bool isEmpty(stack *st)
     return false;
 }
 
-void pushRecursive(stack *st, ruleNode *rule)
+void pushRecursive(stack *st, ruleNode *rule, treenode *parent)
 {
     if (rule != NULL)
     {
-        pushRecursive(st, rule->nextPtr);
+        pushRecursive(st, rule->nextPtr, parent);
         Symbol sym;
         sym.isTerminal = rule->isTerminal;
         if (rule->isTerminal)
@@ -71,6 +71,7 @@ void pushRecursive(stack *st, ruleNode *rule)
             treenode *sibling = top(st);
             node->nextSibling = sibling;
         }
+        node->parent = parent;
         push(st, node);
     }
 }

@@ -21,6 +21,7 @@ typedef struct treenode
     Symbol node;
     struct treenode *child;
     struct treenode *nextSibling;
+    struct treenode *parent;
     token *tk;
 } treenode;
 

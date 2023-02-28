@@ -8,6 +8,7 @@ treenode *initNode(Symbol sym)
     root->node = sym;
     root->child = NULL;
     root->nextSibling = NULL;
+    root->parent = NULL;
     root->tk = NULL;
 }
 
