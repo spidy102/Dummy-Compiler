@@ -447,10 +447,13 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                     printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->str);
 
                 // error recovery
-                printf("Stack:\n");
-                printStack(st);
+                // printf("Stack:\n");
+                // printStack(st);
 
                 treenode *temp = pop(st);
+
+                temp->tk = lookAhead;
+                // lookAhead = getNextToken(ht, tb);
 
                 if (temp == NULL)
                 {
@@ -464,19 +467,19 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
 
             ruleNode *temp = rule;
 
-            printf("Rule:\n");
-            while (temp != NULL)
-            {
-                if (temp->isTerminal)
-                {
-                    printf("terminal: %s\n", EnumToTString(temp->t));
-                }
-                else
-                {
-                    printf("non terminal: %s\n", EnumToNTString(temp->nt));
-                }
-                temp = temp->nextPtr;
-            }
+            // printf("Rule:\n");
+            // while (temp != NULL)
+            // {
+            //     if (temp->isTerminal)
+            //     {
+            //         printf("terminal: %s\n", EnumToTString(temp->t));
+            //     }
+            //     else
+            //     {
+            //         printf("non terminal: %s\n", EnumToNTString(temp->nt));
+            //     }
+            //     temp = temp->nextPtr;
+            // }
 
             // printf("\n");
 
@@ -505,40 +508,29 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             else
             {
                 // report error e2
-                printf("Stack:\n");
-                printStack(st);
+                // printf("Stack:\n");
+                // printStack(st);
                 printf("Error at line number %d: Rule entry in the parse table is empty!\n", lookAhead->line_num);
-                printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
+                // printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
                 ull synchronisation_set = 0;
                 getFirstSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
                 getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set
-                // add_in_set(&synchronisation_set, SEMICOL);
+                // add_in_set(&synchronisation_set, START);
                 // add_in_set(&synchronisation_set, END);
                 // add_in_set(&synchronisation_set, ENDDEF);
                 // add_in_set(&synchronisation_set, DRIVERENDDEF);
 
-                print_set_elements(&synchronisation_set);
+                // print_set_elements(&synchronisation_set);
 
-                while (lookAhead != NULL)
+                while (lookAhead != NULL && !contains_in_set(&synchronisation_set, lookAhead->token))
                 {
-
-                    if (top(st)->node.isTerminal && contains_in_set(&synchronisation_set, lookAhead->token))
-                    {
-                        break;
-                    }
-
-                    else
-                    {
-                        // printf("top of stack %s\n", EnumToNTString(top(st)->node.nt));
-                        // pop(st);
-                        lookAhead = getNextToken(ht, tb);
-                    }
+                    lookAhead = getNextToken(ht, tb);
                 }
                 // lookAhead = getNextToken(ht, tb);
-
+                pop(st);
                 if (top(st) == NULL)
                 {
                     return start;
@@ -672,8 +664,8 @@ int main()
 
     printParseTree(root, fp2);
 
-    printf("%s", EnumToTString(1));
-    printf("ran well!!\n");
+    // printf("%s", EnumToTString(1));
+    // printf("ran well!!\n");
     //  ruleNode *ptr = grammarHeadArray[62];
 
     // while (ptr != NULL)
@@ -689,9 +681,11 @@ int main()
     //     ptr = ptr->nextPtr;
     // }
     // printf("%d", n9);
-    getFirstSets(whichStmt);
+    // getFirstSets(whichStmt);
+    // getFollowSets(whichStmt);
     // // ull first_set = getFirstSetsOneRule(n20, 61);
-    print_set_elements(&firsts[whichStmt]);
+    // print_set_elements(&firsts[whichStmt]);
+    // print_set_elements(&follows[whichStmt]);
 
     // getFirstSets(factor);
     // print_set_elements(&firsts[factor]);
