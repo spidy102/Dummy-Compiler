@@ -104,7 +104,7 @@ void fill_grammar(FILE *fp)
     while (fgets(buffer, 100, fp) != NULL)
     {
         buffer[strlen(buffer) - 2] = '\0';
-        grammarHeadArray[i] = malloc(sizeof(ruleNode *));
+        grammarHeadArray[i] = malloc(sizeof(ruleNode));
         ruleNode *ptr = grammarHeadArray[i];
         char *tk = strtok(buffer, " \n");
 
@@ -139,7 +139,7 @@ void fill_grammar(FILE *fp)
             else
             {
 
-                ptr->nextPtr = malloc(sizeof(ruleNode *));
+                ptr->nextPtr = malloc(sizeof(ruleNode));
                 ptr = ptr->nextPtr;
             }
         }
@@ -307,6 +307,7 @@ void getFollowSets(nonTerminal nT)
     }
 }
 
+
 void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -345,10 +346,10 @@ void populateParseTable()
             {
                 if (follow_set % 2 == 1)
                 {
-                    ruleNode *new_rule = malloc(sizeof(ruleNode *));
+                    ruleNode *new_rule = malloc(sizeof(ruleNode));
                     new_rule->isTerminal = false;
                     new_rule->nt = grammarHeadArray[i]->nt;
-                    new_rule->nextPtr = malloc(sizeof(ruleNode *));
+                    new_rule->nextPtr = malloc(sizeof(ruleNode));
                     new_rule->nextPtr->isTerminal = true;
                     new_rule->nextPtr->t = EPSILON;
                     new_rule->nextPtr->nextPtr = NULL;
@@ -396,7 +397,7 @@ void printParseTable()
     }
 }
 
-void parseInputSourceCode(FILE *fp)
+treenode* parseInputSourceCode(FILE *fp)
 {
     hashtable ht;
     twinbuffer *tb;
@@ -491,6 +492,7 @@ void parseInputSourceCode(FILE *fp)
         printf("e3\n");
         // exit(0);
     }
+    return start;
 }
 
 void freeList(ruleNode *head)
@@ -513,6 +515,23 @@ void freeGrammar()
     }
 }
 
+void printParseTree(treenode* root, FILE* fp) {
+
+    if (root == NULL) {
+        return;
+    }
+    printParseTree(root->child, fp);
+    if (root->node.isTerminal) {
+        fprintf(fp, "TERMINAL: %s\n", EnumToTString(root->tk->token));
+    }
+    else {
+        fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
+    }
+    printParseTree(root->nextSibling, fp);
+    
+}
+
+
 int main()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
@@ -526,11 +545,15 @@ int main()
 
     FILE *fp1 = fopen("example.erp", "r");
 
-    // populateParseTable();
+    FILE* fp2 = fopen("parseTree.txt", "w");
 
-    // parseInputSourceCode(fp1);
+    populateParseTable();
 
-    printf("%s", EnumToTString(1));
+    treenode* root = parseInputSourceCode(fp1);
+
+    printParseTree(root, fp2);
+
+    //printf("%s", EnumToTString(1));
     // printf("ran well!!\n");
     // ruleNode *ptr = grammarHeadArray[62];
 
