@@ -8,6 +8,7 @@
 #include "./data_structures/token_name.h"
 #include "./data_structures/hashmap.h"
 #include "lexerDef.h"
+#include "parserDef.h"
 #include "./data_structures/twinbuffer.h"
 #include "./data_structures/stack.h"
 #include "./data_structures/tree.h"
@@ -396,6 +397,7 @@ void printParseTable()
     }
 }
 
+
 char *tolowercase(char *str)
 {
     for (int i = 0; i < strlen(str); i++)
@@ -405,15 +407,10 @@ char *tolowercase(char *str)
     return str;
 }
 
-treenode *parseInputSourceCode(FILE *fp)
+treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
 {
-    hashtable ht;
-    twinbuffer *tb;
     line_num = 1;
     stack *st = initStack();
-    tb = twinbuffer_init(fp);
-    ht = initHashtable();
-    populate_hashtable(&ht);
     token *lookAhead = getNextToken(ht, tb);
     Symbol startSymbol;
     startSymbol.isTerminal = false;
@@ -653,7 +650,7 @@ void printParseTree(treenode *root, FILE *fp)
     }
 }
 
-int main()
+/* int main()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
     {
@@ -703,4 +700,4 @@ int main()
 
     // printParseTable();
     freeGrammar();
-}
+} */

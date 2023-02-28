@@ -25,6 +25,7 @@ char *copyLexeme(twinbuffer *tb, int size);
 void populate_hashtable(hashtable *ht);
 void error(twinbuffer *tb, int line_num);
 void populate_hashtable(hashtable *ht);
+FILE* removeComments(twinbuffer *tb, char *filename);
 // void initLexer(FILE *fp, twinbuffer *tb, hashtable ht);
 
 extern int line_num;

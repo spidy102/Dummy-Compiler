@@ -14,9 +14,10 @@ typedef struct twinbuffer
     FILE *fp;
     bool end;
     int whichReloaded;
+    int buffer_size;
 } twinbuffer;
 
-twinbuffer *twinbuffer_init(FILE *fp);
+twinbuffer *twinbuffer_init(FILE *fp, int buffer_size);
 
 char readOneCharacter(twinbuffer *tb);
 
