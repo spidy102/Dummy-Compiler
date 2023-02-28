@@ -514,6 +514,23 @@ void freeGrammar()
     }
 }
 
+void printParseTree(treenode* root, FILE* fp) {
+
+    if (root == NULL) {
+        return;
+    }
+    printParseTree(root->child, fp);
+    if (root->node.isTerminal) {
+        fprintf(fp, "TERMINAL: %s\n", EnumToTString(root->tk->token));
+    }
+    else {
+        fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
+    }
+    printParseTree(root->nextSibling, fp);
+    
+}
+
+
 int main()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
@@ -527,11 +544,15 @@ int main()
 
     FILE *fp1 = fopen("example.erp", "r");
 
-    // populateParseTable();
+    FILE* fp2 = fopen("parseTree.txt", "w");
 
-    // parseInputSourceCode(fp1);
+    populateParseTable();
 
-    printf("%s", EnumToTString(1));
+    treenode* root = parseInputSourceCode(fp1);
+
+    printParseTree(root, fp2);
+
+    //printf("%s", EnumToTString(1));
     // printf("ran well!!\n");
     // ruleNode *ptr = grammarHeadArray[62];
 
