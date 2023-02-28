@@ -15,7 +15,7 @@ lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: moduleDe
 lexeme: end line number: 5 token_name: END value: ---- parentNode: moduleDef isLeaf:Yes
 lexeme: << line number: 6 token_name: DEF value: ---- parentNode: module isLeaf:Yes
 lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: otherModules isLeaf:No NodeSymbol: module
-lexeme: module line number: 6 token_name: MODULE value: ---- parentNode: module isLeaf:Yes
+lexeme: empty line number: 6 token_name: ID value: ---- parentNode: module isLeaf:Yes
 lexeme: empty line number: 6 token_name: ID value: ---- parentNode: module isLeaf:Yes
 lexeme: >> line number: 6 token_name: ENDDEF value: ---- parentNode: module isLeaf:Yes
 lexeme: takes line number: 7 token_name: TAKES value: ---- parentNode: module isLeaf:Yes

@@ -3,7 +3,7 @@
 start
 	
 end
-<<module empty>>
+<<empty>>
 takes input[a:boolean];
 start
 
