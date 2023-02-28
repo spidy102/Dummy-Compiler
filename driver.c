@@ -2,13 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+void displayImplementationStatus(){
+  printf("____________________________________________________________\n");
+  printf("Implementation Status:\n\n");
+  printf("a) FIRST and FOLLOW Sets automated.\n");
+  printf("b) Both lexical and syntax analyser modules are implemented.\n");
+  printf("c) Modules work with the test cases provided.\n");
+  printf("d) Parse Tree is constructed successfully.\n");
+  printf("____________________________________________________________\n");
+}
 
 void displayMenu(){
+
   printf("0. Exit\n");
-  printf("1. Remove comments and display the comment free source code\n");
-  printf("2. Display the token list\n");
-  printf("3. Display the parse tree\n");
-  printf("4. Display time taken to parse the source code\n");
+  printf("1. Remove comments and display the comment free source code.\n");
+  printf("2. Display the token list.\n");
+  printf("3. Display the parse tree.\n");
+  printf("4. Display time taken to parse the source code.\n");
 
   printf("Enter your choice [0-4]: ");
 
@@ -47,6 +57,8 @@ int main(int argc, char *argv[]){
   char *parsetreeOutFile = argv[2];
   int size_of_buffer = atoi(argv[3]);
 
+
+  displayImplementationStatus();
   displayMenu();
   int choice = takeInput();
   while(1){
