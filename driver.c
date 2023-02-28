@@ -120,7 +120,7 @@ int main(int argc, char *argv[]){
       break;
     }
     else if (choice == 2){
-
+      line_num = 1;
       token* tk = getNextToken(ht,twin_buf);
       while(tk!=NULL) {
         if (tk->token==NUM) {

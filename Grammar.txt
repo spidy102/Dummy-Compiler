@@ -147,3 +147,4 @@ new_index_for_loop  NUM
 sign_for_loop PLUS
 sign_for_loop MINUS
 sign_for_loop EPSILON
+range_for_loop index_for_loop RANGEOP index_for_loop

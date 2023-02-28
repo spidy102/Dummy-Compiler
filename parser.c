@@ -332,16 +332,15 @@ void populateParseTable()
         //     }
         // }
         ull first_set = getFirstSetsOneRule(grammarHeadArray[i]->nt, i);
-        printf("hello?? %d\n", i);
         if (contains_in_set(&first_set, EPSILON))
         {
-            remove_from_set(&first_set, EPSILON);
+            // remove_from_set(&first_set, EPSILON);
             getFollowSets(grammarHeadArray[i]->nt);
             ull follow_set = follows[grammarHeadArray[i]->nt];
-            if (contains_in_set(&follow_set, EPSILON))
-            {
-                remove_from_set(&follow_set, EPSILON);
-            }
+            // if (contains_in_set(&follow_set, EPSILON))
+            // {
+            //     remove_from_set(&follow_set, EPSILON);
+            // }
             int j = 0;
             while (follow_set != 0)
             {
@@ -419,16 +418,16 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
     treenode *start = initNode(startSymbol);
     start->parent = initNode(startSymbol);
     push(st, start);
-    printf("%s", lookAhead->str);
+    // printf("%s", lookAhead->str);
     while (lookAhead != NULL)
     {
-        printf("token passed?%d\n", lookAhead->token);
+        // printf("token passed?%s\n", EnumToTString(lookAhead->token));
         treenode *top1 = top(st);
         if (top1 == NULL)
         {
             // report error E4
-            printf("Error: top of the stack is empty\n");
-            exit(0);
+            printf("Error at line number %d: top of the stack is empty\n", lookAhead->line_num);
+            return start;
         }
         else if (top1->node.isTerminal)
         {
@@ -449,15 +448,13 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
                     printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(EnumToTString(top1->node.t)), lookAhead->line_num, lookAhead->str);
 
                 // error recovery
+                printf("Stack:\n");
+                printStack(st);
 
-                // popping one token till does not match
+                treenode *temp = pop(st);
 
-                treenode *node = pop(st);
-                node->tk = lookAhead;
-
-                if (node == NULL)
+                if (temp == NULL)
                 {
-                    printf("Error recovery not possible\n");
                     return start;
                 }
             }
@@ -468,21 +465,21 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
 
             ruleNode *temp = rule;
 
-            printf("Rule:\n");
-            while (temp != NULL)
-            {
-                if (temp->isTerminal)
-                {
-                    printf("terminal: %d\n", temp->t);
-                }
-                else
-                {
-                    printf("non terminal: %d\n", temp->nt);
-                }
-                temp = temp->nextPtr;
-            }
+            // printf("Rule:\n");
+            // while (temp != NULL)
+            // {
+            //     if (temp->isTerminal)
+            //     {
+            //         printf("terminal: %d\n", temp->t);
+            //     }
+            //     else
+            //     {
+            //         printf("non terminal: %d\n", temp->nt);
+            //     }
+            //     temp = temp->nextPtr;
+            // }
 
-            printf("\n");
+            // printf("\n");
 
             if (parseTable[top1->node.nt][lookAhead->token] != NULL)
             {
@@ -509,29 +506,39 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
             else
             {
                 // report error e2
-                printf("Error: Rule entry in the parse table is empty!\n");
-                ull synchronisation_set;
+                printf("Stack:\n");
+                printStack(st);
+                printf("Error at line number %d: Rule entry in the parse table is empty!\n", lookAhead->line_num);
+                printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
+                ull synchronisation_set = 0;
                 getFirstSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
                 getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set
-                add_in_set(&synchronisation_set, SEMICOL);
-                add_in_set(&synchronisation_set, END);
-                add_in_set(&synchronisation_set, ENDDEF);
-                add_in_set(&synchronisation_set, DRIVERENDDEF);
+                // add_in_set(&synchronisation_set, SEMICOL);
+                // add_in_set(&synchronisation_set, END);
+                // add_in_set(&synchronisation_set, ENDDEF);
+                // add_in_set(&synchronisation_set, DRIVERENDDEF);
 
-                while (top(st) != NULL)
+                print_set_elements(&synchronisation_set);
+
+                while (lookAhead != NULL)
                 {
-                    if (top(st)->node.isTerminal && contains_in_set(&synchronisation_set, top(st)->node.t))
+
+                    if (top(st)->node.isTerminal && contains_in_set(&synchronisation_set, lookAhead->token))
                     {
                         break;
                     }
+
                     else
                     {
-                        pop(st);
+                        // printf("top of stack %s\n", EnumToNTString(top(st)->node.nt));
+                        // pop(st);
+                        lookAhead = getNextToken(ht, tb);
                     }
                 }
+                // lookAhead = getNextToken(ht, tb);
 
                 if (top(st) == NULL)
                 {
@@ -540,12 +547,32 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer* tb, hashtable ht)
             }
         }
     }
-    printStack(st);
+    // printStack(st);
 
     if (!isEmpty(st))
     {
         // report error E3;
-        printf("e3\n");
+        treenode *top1 = top(st);
+        while (top1 != NULL && !top1->node.isTerminal)
+        {
+            if (parseTable[top1->node.nt][EPSILON] != NULL)
+            {
+
+                Symbol sym;
+                sym.isTerminal = true;
+                sym.t = EPSILON;
+                top1->child = initNode(sym);
+                top1->child->parent = top1;
+                pop(st);
+                top1 = top(st);
+            }
+            else
+            {
+                break;
+            }
+        }
+        if (!isEmpty(st))
+            printf("Error: Input source code has been consumed but stack is non empty\n");
         // exit(0);
     }
     return start;
