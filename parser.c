@@ -641,58 +641,58 @@ void printParseTree(treenode *root, FILE *fp)
     }
 }
 
-int main()
-{
-    for (int i = 0; i <= NON_TERMINALS; i++)
-    {
-        firsts[i] = (ull)0;
-        follows[i] = (ull)0;
-    }
+// int main()
+// {
+//     for (int i = 0; i <= NON_TERMINALS; i++)
+//     {
+//         firsts[i] = (ull)0;
+//         follows[i] = (ull)0;
+//     }
 
-    FILE *fp = fopen("Grammar.txt", "r");
-    fill_grammar(fp);
+//     FILE *fp = fopen("Grammar.txt", "r");
+//     fill_grammar(fp);
 
-    FILE *fp1 = fopen("example.erp", "r");
+//     FILE *fp1 = fopen("example.erp", "r");
 
-    FILE *fp2 = fopen("parseTree.txt", "w");
+//     FILE *fp2 = fopen("parseTree.txt", "w");
 
-    populateParseTable();
-    twinbuffer *tb = twinbuffer_init(fp1, 512);
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    treenode *root = parseInputSourceCode(fp1, tb, ht);
+//     populateParseTable();
+//     twinbuffer *tb = twinbuffer_init(fp1, 512);
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     treenode *root = parseInputSourceCode(fp1, tb, ht);
 
-    printParseTree(root, fp2);
+//     printParseTree(root, fp2);
 
-    // printf("%s", EnumToTString(1));
-    // printf("ran well!!\n");
-    //  ruleNode *ptr = grammarHeadArray[62];
+//     // printf("%s", EnumToTString(1));
+//     // printf("ran well!!\n");
+//     //  ruleNode *ptr = grammarHeadArray[62];
 
-    // while (ptr != NULL)
-    // {
-    //     if (ptr->isTerminal)
-    //     {
-    //         printf("terminal: %d\n", ptr->t);
-    //     }
-    //     else
-    //     {
-    //         printf("non terminal %d\n", ptr->nt);
-    //     }
-    //     ptr = ptr->nextPtr;
-    // }
-    // printf("%d", n9);
-    // getFirstSets(whichStmt);
-    // getFollowSets(whichStmt);
-    // // ull first_set = getFirstSetsOneRule(n20, 61);
-    // print_set_elements(&firsts[whichStmt]);
-    // print_set_elements(&follows[whichStmt]);
+//     // while (ptr != NULL)
+//     // {
+//     //     if (ptr->isTerminal)
+//     //     {
+//     //         printf("terminal: %d\n", ptr->t);
+//     //     }
+//     //     else
+//     //     {
+//     //         printf("non terminal %d\n", ptr->nt);
+//     //     }
+//     //     ptr = ptr->nextPtr;
+//     // }
+//     // printf("%d", n9);
+//     // getFirstSets(whichStmt);
+//     // getFollowSets(whichStmt);
+//     // // ull first_set = getFirstSetsOneRule(n20, 61);
+//     // print_set_elements(&firsts[whichStmt]);
+//     // print_set_elements(&follows[whichStmt]);
 
-    // getFirstSets(factor);
-    // print_set_elements(&firsts[factor]);
+//     // getFirstSets(factor);
+//     // print_set_elements(&firsts[factor]);
 
-    // getFirstSets(statement);
-    // print_set_elements(&firsts[statement]);
+//     // getFirstSets(statement);
+//     // print_set_elements(&firsts[statement]);
 
-    // printParseTable();
-    freeGrammar();
-}
+//     // printParseTable();
+//     freeGrammar();
+// }

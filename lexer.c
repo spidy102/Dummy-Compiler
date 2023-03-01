@@ -10,7 +10,7 @@
 
 int line_num;
 
-FILE* removeComments(twinbuffer *tb, char* filename)
+FILE *removeComments(twinbuffer *tb, char *filename)
 {
     char c = readOneCharacter(tb);
     FILE *fp1 = fopen(filename, "w+");
@@ -101,8 +101,8 @@ token *make_token(int line_num, char *lexeme, token_names tok)
 
 int getSize(twinbuffer *tb)
 {
-    //this should just return tb->buffer_size right?
-    
+    // this should just return tb->buffer_size right?
+
     int size = 0;
     if (tb->fwd >= tb->begin)
     {
@@ -340,6 +340,15 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
         case 2:
             retract(1, tb);
             int size1 = getSize(tb);
+            if (size1 > 20)
+            {
+
+                char *temp = copyLexeme(tb, size1);
+                printf("Lexical error at line %d, lexeme %s is of length greater than 20\n", line_num, temp);
+                s = 0;
+                c = readOneCharacter(tb);
+                break;
+            }
             char *lexeme1 = copyLexeme(tb, size1);
             // printf("lexeme1:%s %d %c\n", lexeme1, size1, c);
             if (exists(&ht, lexeme1, size1))
