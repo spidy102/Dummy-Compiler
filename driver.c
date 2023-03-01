@@ -56,8 +56,7 @@ int takeInput()
     {
       printf("Invalid choice. Please try again.\n");
       printf("Enter your choice [0-4]: ");
-      while (getchar() != '\n')
-        ;
+      while (getchar() != '\n');
     }
   }
   return choice;
@@ -113,6 +112,12 @@ int main(int argc, char *argv[]){
   char *testcase = argv[1];
   char *parsetreeOutFile = argv[2];
   int size_of_buffer = atoi(argv[3]);
+
+  if (size_of_buffer % 2 != 0)
+  {
+    printf("Invalid size of buffer. Expected an even integer. Exiting.\n");
+    exit(1);
+  }
 
   // construct the twinbuffer
 
@@ -190,8 +195,6 @@ int main(int argc, char *argv[]){
       fclose(ft);
       fclose(fg);
       fclose(fpt);
-
-
     }
     else if (choice == 4)
     {
@@ -218,7 +221,6 @@ int main(int argc, char *argv[]){
       fclose(ft);
       fclose(fg);
       fclose(fpt);
-
       printf("Time taken to parse the source code: %lf seconds\n", total_CPU_time_in_seconds);
     }
     else
