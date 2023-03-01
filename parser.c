@@ -23,7 +23,12 @@ ruleNode *parseTable[NON_TERMINALS][TERMINALS];
 char *EnumToNTString(nonTerminal nt)
 {
     int i = 0;
-    FILE *fp = fopen("nonterms1.txt", "r");
+    FILE *fp = fopen("nonterms.txt", "r");
+    if (fp == NULL)
+    {
+        printf("Cannot open");
+        exit(0);
+    }
     char *buffer = malloc(sizeof(char) * 100);
     while (fgets(buffer, 100, fp) != NULL)
     {
@@ -56,7 +61,7 @@ nonTerminal NTStringMappedEnum(char *str)
 {
 
     int i = 0;
-    FILE *fp = fopen("nonterms1.txt", "r");
+    FILE *fp = fopen("nonterms.txt", "r");
     char buffer[100];
     while (fgets(buffer, 100, fp) != NULL)
     {
@@ -513,8 +518,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 printf("Error at line number %d: Rule entry in the parse table is empty!\n", lookAhead->line_num);
                 // printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
                 ull synchronisation_set = 0;
-                getFirstSets(top1->node.nt);
-                union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
+                // getFirstSets(top1->node.nt);
+                // union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
                 getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set

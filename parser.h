@@ -5,10 +5,9 @@
 #include <stdio.h>
 #include "./data_structures/token_name.h"
 
-
 typedef enum
 {
-#include "nonterms1.txt"
+#include "nonterms.txt"
 } nonTerminal;
 
 typedef struct ruleNode
@@ -21,7 +20,5 @@ typedef struct ruleNode
     struct ruleNode *nextPtr;
     bool isTerminal;
 } ruleNode;
-
-
 
 #endif

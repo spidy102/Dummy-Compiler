@@ -215,7 +215,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
         // }
         if (c == 0 && tb->begin == tb->fwd)
         {
-            printf("Nothing else to tokenize!");
+            // printf("Nothing else to tokenize!");
             return NULL;
         }
         prev = c;
