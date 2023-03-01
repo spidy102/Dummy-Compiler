@@ -6,8 +6,7 @@
 #include "./data_structures/tree.h"
 #include "parser.h"
 #include "parserDef.h"
-
-
+#include <time.h>
 
 void displayImplementationStatus(){
   printf("____________________________________________________________\n");
@@ -108,13 +107,16 @@ int main(int argc, char *argv[]){
   displayImplementationStatus();
   displayMenu();
   int choice = takeInput();
+
+
+  clock_t start_time, end_time;
+  double total_CPU_time, total_CPU_time_in_seconds;
+  
   while(1){
 
     if (choice == 0) exit(0);
     else if (choice == 1){
       FILE* fp1 = removeComments(twin_buf, testcase);
-      //print the comment free source code
-      
       displayFile(fp1);
       fclose(fp1);
       break;
@@ -140,15 +142,25 @@ int main(int argc, char *argv[]){
     }
     else if (choice == 3){
       FILE* fg = openfile("Grammar.txt", "r");
+
+      start_time = clock();
+      // invoke your lexer and parser here
       fill_grammar(fg);
       populateParseTable();
       treenode* root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
       printParseTree(root, openfile(parsetreeOutFile, "w"));
 
+      end_time = clock();
+      total_CPU_time = (double) (end_time - start_time);
+      total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
+
+      fclose(fg);
+
       break;
     }
     else if (choice == 4){
       printf("You chose 4\n");
+      printf("Time taken to parse the source code: %lf seconds\n", total_CPU_time_in_seconds);
       break;
     }
     else{
