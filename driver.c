@@ -205,6 +205,7 @@ int main(int argc, char *argv[]){
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
       printParseTree(root, fpt);
+      freeGrammar();
 
       fclose(ft);
       fclose(fg);
