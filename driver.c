@@ -22,11 +22,13 @@ void displayImplementationStatus()
 void displayMenu()
 {
 
+  printf("____________________________________________________________\n");
   printf("0. Exit\n");
   printf("1. Remove comments and display the comment free source code.\n");
   printf("2. Display the token list.\n");
   printf("3. Display the parse tree.\n");
   printf("4. Display time taken to parse the source code.\n");
+  printf("____________________________________________________________\n");
 
   printf("Enter your choice [0-4]: ");
 }
@@ -88,8 +90,8 @@ char *EnumToString(token_names nt)
   }
 }
 
-int main(int argc, char *argv[])
-{
+
+int main(int argc, char *argv[]){
 
   // expect 2 strings and an integer as arguments
   if (argc != 4)
@@ -113,10 +115,7 @@ int main(int argc, char *argv[])
   int size_of_buffer = atoi(argv[3]);
 
   // construct the twinbuffer
-  twinbuffer *twin_buf;
-  twin_buf = twinbuffer_init(openfile(testcase, "r"), size_of_buffer);
-  hashtable ht = initHashtable();
-  populate_hashtable(&ht);
+
 
   displayImplementationStatus();
   displayMenu();
@@ -132,13 +131,23 @@ int main(int argc, char *argv[])
       exit(0);
     else if (choice == 1)
     {
+      twinbuffer *twin_buf;
+      FILE* fp = openfile(testcase, "r");
+      twin_buf = twinbuffer_init(fp, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
       FILE *fp1 = removeComments(twin_buf, testcase);
       displayFile(fp1);
       fclose(fp1);
-      break;
+      fclose(fp);
     }
     else if (choice == 2)
     {
+      twinbuffer *twin_buf;
+      FILE* fp = openfile(testcase, "r");
+      twin_buf = twinbuffer_init(fp, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
       line_num = 1;
       token *tk = getNextToken(ht, twin_buf);
       while (tk != NULL)
@@ -158,47 +167,59 @@ int main(int argc, char *argv[])
         printf("%s %d %s\n", tk->str, tk->line_num, EnumToString(tk->token));
         tk = getNextToken(ht, twin_buf);
       }
-      break;
+      fclose(fp);
+
     }
     else if (choice == 3)
     {
-      FILE *fg = openfile("Grammar.txt", "r");
 
-      // start_time = clock();
-      // invoke your lexer and parser here
+      FILE* ft = openfile(testcase, "r+");
+      FILE* fg = openfile("Grammar.txt", "r");
+      FILE* fpt = openfile(parsetreeOutFile, "w");
+
+      twinbuffer* twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
+
       fill_grammar(fg);
       populateParseTable();
-      treenode *root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
-      printParseTree(root, openfile(parsetreeOutFile, "w"));
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      printParseTree(root, fpt);
 
-      // end_time = clock();
-      // total_CPU_time = (double)(end_time - start_time);
-      // total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
-
+      fclose(ft);
       fclose(fg);
+      fclose(fpt);
 
-      break;
+
     }
     else if (choice == 4)
     {
-      printf("You chose 4\n");
-      FILE *fg = openfile("Grammar.txt", "r");
+      FILE* ft = openfile(testcase, "r+");
+      FILE* fg = openfile("Grammar.txt", "r");
+      FILE* fpt = openfile(parsetreeOutFile, "w");
+
+      twinbuffer* twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
 
       start_time = clock();
       // invoke your lexer and parser here
       fill_grammar(fg);
       populateParseTable();
-      treenode *root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
-      printParseTree(root, openfile(parsetreeOutFile, "w"));
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      printParseTree(root, fpt);
 
       end_time = clock();
       total_CPU_time = (double)(end_time - start_time);
       total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
 
+      fclose(ft);
       fclose(fg);
+      fclose(fpt);
 
       printf("Time taken to parse the source code: %lf seconds\n", total_CPU_time_in_seconds);
-      break;
     }
     else
     {
@@ -206,6 +227,10 @@ int main(int argc, char *argv[])
       printf("Enter your choice [0-4]: ");
       choice = takeInput();
     }
+
+    displayMenu();
+    choice = takeInput();
+
   }
 
   return 0;
