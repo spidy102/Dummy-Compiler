@@ -89,6 +89,16 @@ char *EnumToString(token_names nt)
   }
 }
 
+void copyFile(FILE* fp1, FILE* fp2)
+{
+  char c;
+  fseek(fp1, 0, SEEK_SET);
+  fseek(fp2, 0, SEEK_SET);
+  while ((c = fgetc(fp1)) != EOF)
+  {
+    fputc(c, fp2);
+  }
+}
 
 int main(int argc, char *argv[]){
 
@@ -119,9 +129,6 @@ int main(int argc, char *argv[]){
     exit(1);
   }
 
-  // construct the twinbuffer
-
-
   displayImplementationStatus();
   displayMenu();
   int choice = takeInput();
@@ -138,10 +145,17 @@ int main(int argc, char *argv[]){
     {
       twinbuffer *twin_buf;
       FILE* fp = openfile(testcase, "r");
+
+      //copy the file to a new file
+      FILE* fp2 = openfile("copy", "w+");
+      copyFile(fp, fp2);
+      fclose(fp2);
+
+      fseek(fp, 0, SEEK_SET);
       twin_buf = twinbuffer_init(fp, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
-      FILE *fp1 = removeComments(twin_buf, testcase);
+      FILE* fp1 = removeComments(twin_buf, "copy");
       displayFile(fp1);
       fclose(fp1);
       fclose(fp);
