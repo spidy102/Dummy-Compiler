@@ -211,6 +211,9 @@ int main(int argc, char *argv[]){
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
 
+      // start_time = clock();
+      // invoke your lexer and parser here
+      computeFirstAndFollowSets();
       fill_grammar(fg);
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
@@ -234,6 +237,7 @@ int main(int argc, char *argv[]){
 
       start_time = clock();
       // invoke your lexer and parser here
+      computeFirstAndFollowSets();
       fill_grammar(fg);
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
