@@ -132,14 +132,14 @@ int main(int argc, char *argv[]){
   // parse the arguments
   char *testcase = argv[1];
   char *parsetreeOutFile = argv[2];
-  int size_of_buffer = atoi(argv[3]);
+  int size_of_buffer = 2 * atoi(argv[3]);
 
-  if (size_of_buffer % 2 != 0)
+/*   if (size_of_buffer % 2 != 0)
   {
     printf("Invalid size of buffer. Expected an even integer. Exiting.\n");
     exit(1);
   }
-
+ */
   displayImplementationStatus();
   displayMenu();
   int choice = takeInput();
@@ -251,6 +251,7 @@ int main(int argc, char *argv[]){
       fclose(ft);
       fclose(fg);
       fclose(fpt);
+      printf("The number of CPU ticks taken to parse the source code: %lf\n", total_CPU_time);
       printf("Time taken to parse the source code: %lf seconds\n", total_CPU_time_in_seconds);
     }
     else
