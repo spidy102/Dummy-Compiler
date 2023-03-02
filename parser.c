@@ -340,7 +340,7 @@ void populateParseTable()
         if (contains_in_set(&first_set, EPSILON))
         {
             // remove_from_set(&first_set, EPSILON);
-            getFollowSets(grammarHeadArray[i]->nt);
+            // getFollowSets(grammarHeadArray[i]->nt);
             ull follow_set = follows[grammarHeadArray[i]->nt];
             // if (contains_in_set(&follow_set, EPSILON))
             // {
@@ -520,7 +520,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 ull synchronisation_set = 0;
                 // getFirstSets(top1->node.nt);
                 // union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
-                getFollowSets(top1->node.nt);
+                // getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set
                 // add_in_set(&synchronisation_set, START);
@@ -646,6 +646,17 @@ void printParseTree(treenode *root, FILE *fp)
     }
 }
 
+void computeFirstAndFollowSets()
+{
+    for (int i = 0; i <= NON_TERMINALS; i++)
+    {
+        firsts[i] = (ull)0;
+        getFirstSets(i);
+        follows[i] = (ull)0;
+        getFollowSets(i);
+    }
+}
+
 // int main()
 // {
 //     for (int i = 0; i <= NON_TERMINALS; i++)
@@ -656,6 +667,9 @@ void printParseTree(treenode *root, FILE *fp)
 
 //     FILE *fp = fopen("Grammar.txt", "r");
 //     fill_grammar(fp);
+
+//     computeFirstAndFollowSets();
+//     // printf("computed");
 
 //     FILE *fp1 = fopen("example.erp", "r");
 
@@ -670,7 +684,7 @@ void printParseTree(treenode *root, FILE *fp)
 //     printParseTree(root, fp2);
 
 //     // printf("%s", EnumToTString(1));
-//     // printf("ran well!!\n");
+//     printf("ran well!!\n");
 //     //  ruleNode *ptr = grammarHeadArray[62];
 
 //     // while (ptr != NULL)
