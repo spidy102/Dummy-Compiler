@@ -9,7 +9,6 @@ Dilip Venkatesh - 2020A7PS1203P
 
 */
 
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -130,7 +129,7 @@ int getSize(twinbuffer *tb)
 
 char *copyLexeme(twinbuffer *tb, int size)
 {
-    char *lexeme = malloc(sizeof(char) * size);
+    char *lexeme = malloc(sizeof(char) * (size + 1));
     if (tb->fwd >= tb->begin)
     {
         int i = 0;
@@ -138,6 +137,7 @@ char *copyLexeme(twinbuffer *tb, int size)
         {
             lexeme[i++] = tb->buffer[j];
         }
+        lexeme[i] = '\0';
     }
     else
     {
@@ -151,7 +151,9 @@ char *copyLexeme(twinbuffer *tb, int size)
         {
             lexeme[j++] = tb->buffer[i];
         }
+        lexeme[j] = '\0';
     }
+
     // printf("fwd:%d begin %d\n", tb->fwd, tb->begin);
     tb->begin = tb->fwd + 1;
     if (tb->begin == tb->buffer_size)

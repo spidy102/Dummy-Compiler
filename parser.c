@@ -351,7 +351,7 @@ void populateParseTable()
         if (contains_in_set(&first_set, EPSILON))
         {
             // remove_from_set(&first_set, EPSILON);
-            // getFollowSets(grammarHeadArray[i]->nt);
+            getFollowSets(grammarHeadArray[i]->nt);
             ull follow_set = follows[grammarHeadArray[i]->nt];
             // if (contains_in_set(&follow_set, EPSILON))
             // {
@@ -441,6 +441,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
         if (top1 == NULL)
         {
             // report error E4
+
             printf("Error at line number %d: top of the stack is empty\n", lookAhead->line_num);
             return start;
         }
@@ -531,7 +532,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 ull synchronisation_set = 0;
                 // getFirstSets(top1->node.nt);
                 // union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
-                // getFollowSets(top1->node.nt);
+                getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set
                 // add_in_set(&synchronisation_set, START);
@@ -661,7 +662,9 @@ void computeFirstAndFollowSets()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
     {
+
         firsts[i] = (ull)0;
+        printf("%d\nhello", i);
         getFirstSets(i);
         follows[i] = (ull)0;
         getFollowSets(i);
