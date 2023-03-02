@@ -458,24 +458,27 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             else
             {
                 // report error e1;
-                if (lookAhead->token == NUM){
-                    char* nt = EnumToTString(top1->node.t);
+                if (lookAhead->token == NUM)
+                {
+                    char *nt = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %d instead\n", tolowercase(nt), lookAhead->line_num, lookAhead->integer);
                     free(nt);
                 }
-        
-                else if (lookAhead->token == RNUM){
-                    char* t = EnumToTString(top1->node.t);
+
+                else if (lookAhead->token == RNUM)
+                {
+                    char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %lf instead\n", tolowercase(t), lookAhead->line_num, lookAhead->rnum);
                     free(t);
                 }
-                    
-                else{
-                    char* t = EnumToTString(top1->node.t);
+
+                else
+                {
+                    char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(t), lookAhead->line_num, lookAhead->str);
                     free(t);
                 }
-            
+
                 // error recovery
                 // printf("Stack:\n");
                 // printStack(st);
@@ -632,12 +635,11 @@ void printParseTree(treenode *root, FILE *fp)
         if (root->node.t == EPSILON)
         {
             char *nt = EnumToNTString(root->parent->node.nt);
-            char* t = EnumToTString(root->node.t);
+            char *t = EnumToTString(root->node.t);
 
-            fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:Yes NodeSymbol: %s\n", nt, t);
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:  Yes NodeSymbol: %s\n", nt, t);
             free(nt);
             free(t);
- 
         }
         else
         {
@@ -645,26 +647,26 @@ void printParseTree(treenode *root, FILE *fp)
             token *tk = root->tk;
             if (tk->token == NUM)
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %d parentNode: %s isLeaf:Yes\n", tk->line_num, t, tk->integer, nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: ----- line number: %5d token_name: %5s value: %5d parentNode: %5s isLeaf:  Yes\n", tk->line_num, t, tk->integer, nt);
                 free(nt);
                 free(t);
             }
             else if (tk->token == RNUM)
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %lf parentNode: %s isLeaf:Yes\n", tk->line_num, t, tk->rnum, nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: ----- line number: %5d token_name: %5s value: %5lf parentNode: %s isLeaf:  Yes\n", tk->line_num, t, tk->rnum, nt);
                 free(nt);
                 free(t);
             }
 
             else
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: %s line number: %d token_name: %s value: ---- parentNode: %s isLeaf:Yes\n", tk->str, tk->line_num, t , nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: %5s line number: %5d token_name: %5s value: ----- parentNode: %s isLeaf:  Yes\n", tk->str, tk->line_num, t, nt);
                 free(nt);
                 free(t);
             }
@@ -673,10 +675,15 @@ void printParseTree(treenode *root, FILE *fp)
     }
     else
     {
-        char* nt = EnumToNTString(root->parent->node.nt);
-        char* t = EnumToNTString(root->node.nt);
+        char *nt = EnumToNTString(root->parent->node.nt);
+        char *t = EnumToNTString(root->node.nt);
         // if (node)
-        fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:No NodeSymbol: %s\n", nt, t);
+        if (root->node.nt == program)
+        {
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:   No NodeSymbol: %s\n", "ROOT", t);
+        }
+        else
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:   No NodeSymbol: %5s\n", nt, t);
         free(nt);
         free(t);
         // fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));

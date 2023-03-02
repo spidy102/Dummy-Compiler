@@ -67,7 +67,8 @@ int takeInput()
     {
       printf("Invalid choice. Please try again.\n");
       printf("Enter your choice [0-4]: ");
-      while (getchar() != '\n');
+      while (getchar() != '\n')
+        ;
     }
   }
   return choice;
@@ -100,7 +101,7 @@ char *EnumToString(token_names nt)
   }
 }
 
-void copyFile(FILE* fp1, FILE* fp2)
+void copyFile(FILE *fp1, FILE *fp2)
 {
   char c;
   fseek(fp1, 0, SEEK_SET);
@@ -111,7 +112,8 @@ void copyFile(FILE* fp1, FILE* fp2)
   }
 }
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
 
   // expect 2 strings and an integer as arguments
   if (argc != 4)
@@ -134,12 +136,12 @@ int main(int argc, char *argv[]){
   char *parsetreeOutFile = argv[2];
   int size_of_buffer = 2 * atoi(argv[3]);
 
-/*   if (size_of_buffer % 2 != 0)
-  {
-    printf("Invalid size of buffer. Expected an even integer. Exiting.\n");
-    exit(1);
-  }
- */
+  /*   if (size_of_buffer % 2 != 0)
+    {
+      printf("Invalid size of buffer. Expected an even integer. Exiting.\n");
+      exit(1);
+    }
+   */
   displayImplementationStatus();
   displayMenu();
   int choice = takeInput();
@@ -155,10 +157,10 @@ int main(int argc, char *argv[]){
     else if (choice == 1)
     {
       twinbuffer *twin_buf;
-      FILE* fp = openfile(testcase, "r");
+      FILE *fp = openfile(testcase, "r");
 
-      //copy the file to a new file
-      FILE* fp2 = openfile("copy", "w+");
+      // copy the file to a new file
+      FILE *fp2 = openfile("copy", "w+");
       copyFile(fp, fp2);
       fclose(fp2);
 
@@ -166,7 +168,7 @@ int main(int argc, char *argv[]){
       twin_buf = twinbuffer_init(fp, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
-      FILE* fp1 = removeComments(twin_buf, "copy");
+      FILE *fp1 = removeComments(twin_buf, "copy");
       displayFile(fp1);
       fclose(fp1);
       fclose(fp);
@@ -174,40 +176,40 @@ int main(int argc, char *argv[]){
     else if (choice == 2)
     {
       twinbuffer *twin_buf;
-      FILE* fp = openfile(testcase, "r");
+      FILE *fp = openfile(testcase, "r");
       twin_buf = twinbuffer_init(fp, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
       line_num = 1;
       token *tk = getNextToken(ht, twin_buf);
+      printf("%20s %20s %20s\n", "Lexeme", "Line number", "Token");
       while (tk != NULL)
       {
         if (tk->token == NUM)
         {
-          printf("%d %d %s\n", tk->integer, tk->line_num, EnumToString(tk->token));
+          printf("%20d %20d %20s\n", tk->integer, tk->line_num, EnumToString(tk->token));
           tk = getNextToken(ht, twin_buf);
           continue;
         }
         else if (tk->token == RNUM)
         {
-          printf("%f %d %s\n", tk->rnum, tk->line_num, EnumToString(tk->token));
+          printf("%20f %20d %20s\n", tk->rnum, tk->line_num, EnumToString(tk->token));
           tk = getNextToken(ht, twin_buf);
           continue;
         }
-        printf("%s %d %s\n", tk->str, tk->line_num, EnumToString(tk->token));
+        printf("%20s %20d %20s\n", tk->str, tk->line_num, EnumToString(tk->token));
         tk = getNextToken(ht, twin_buf);
       }
       fclose(fp);
-
     }
     else if (choice == 3)
     {
 
-      FILE* ft = openfile(testcase, "r+");
-      FILE* fg = openfile("Grammar.txt", "r");
-      FILE* fpt = openfile(parsetreeOutFile, "w");
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+      FILE *fpt = openfile(parsetreeOutFile, "w");
 
-      twinbuffer* twin_buf = twinbuffer_init(ft, size_of_buffer);
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
 
@@ -227,11 +229,11 @@ int main(int argc, char *argv[]){
     }
     else if (choice == 4)
     {
-      FILE* ft = openfile(testcase, "r+");
-      FILE* fg = openfile("Grammar.txt", "r");
-      FILE* fpt = openfile(parsetreeOutFile, "w");
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+      FILE *fpt = openfile(parsetreeOutFile, "w");
 
-      twinbuffer* twin_buf = twinbuffer_init(ft, size_of_buffer);
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
 
@@ -263,7 +265,6 @@ int main(int argc, char *argv[]){
 
     displayMenu();
     choice = takeInput();
-
   }
 
   return 0;
