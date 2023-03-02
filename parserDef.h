@@ -9,7 +9,7 @@ Dilip Venkatesh - 2020A7PS1203P
 
 */
 
-ifndef __PARSER_DEF_H__
+#ifndef __PARSER_DEF_H__
 #define __PARSER_DEF_H__
 
 #include "parser.h"
