@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
 
       // start_time = clock();
       // invoke your lexer and parser here
+      computeFirstAndFollowSets();
       fill_grammar(fg);
       populateParseTable();
       treenode *root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);
@@ -197,6 +198,7 @@ int main(int argc, char *argv[])
 
       start_time = clock();
       // invoke your lexer and parser here
+      computeFirstAndFollowSets();
       fill_grammar(fg);
       populateParseTable();
       treenode *root = parseInputSourceCode(openfile(testcase, "r+"), twin_buf, ht);

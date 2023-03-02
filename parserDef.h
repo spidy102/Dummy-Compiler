@@ -42,5 +42,6 @@ void fill_grammar(FILE *fp);
 bool isTerminal(char *str);
 token_names TStringMappedEnum(char *str);
 nonTerminal NTStringMappedEnum(char *str);
+void computeFirstAndFollowSets();
 
 #endif
