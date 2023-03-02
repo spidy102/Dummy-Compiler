@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "./data_structures/hashmap.h"
-#include "./data_structures/twinbuffer.h"
+#include "hashmap.h"
+#include "twinbuffer.h"
 #include "lexerDef.h"
 
 // typedef enum

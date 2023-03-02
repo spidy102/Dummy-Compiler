@@ -2,8 +2,8 @@
 #define LEXERDEF_H
 
 #include <stdio.h>
-#include "./data_structures/hashmap.h"
-#include "./data_structures/twinbuffer.h"
+#include "hashmap.h"
+#include "twinbuffer.h"
 
 typedef struct TOKEN
 {

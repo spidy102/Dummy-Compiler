@@ -4,14 +4,14 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "./data_structures/set.h"
-#include "./data_structures/token_name.h"
-#include "./data_structures/hashmap.h"
+#include "set.h"
+#include "token_name.h"
+#include "hashmap.h"
 #include "lexerDef.h"
 #include "parserDef.h"
-#include "./data_structures/twinbuffer.h"
-#include "./data_structures/stack.h"
-#include "./data_structures/tree.h"
+#include "twinbuffer.h"
+#include "stack.h"
+#include "tree.h"
 
 ruleNode *grammarHeadArray[NUM_RULES];
 

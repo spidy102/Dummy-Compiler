@@ -3,7 +3,7 @@
 
 typedef enum token_names
 {
-#include "../tokens.txt"
+#include "tokens.txt"
 } token_names;
 
 #endif

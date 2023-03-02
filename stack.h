@@ -2,7 +2,7 @@
 #define STACK_H
 
 #include <stdbool.h>
-#include "../parser.h"
+#include "parser.h"
 #include "tree.h"
 
 typedef struct st_el
