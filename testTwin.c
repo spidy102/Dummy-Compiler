@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "./data_structures/twinbuffer.h"
+#include "twinbuffer.h"
 
 int main()
 {

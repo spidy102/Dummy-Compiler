@@ -2,8 +2,8 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "../parser.h"
-#include "../lexerDef.h"
+#include "parser.h"
+#include "lexerDef.h"
 #include <stdbool.h>
 
 typedef struct Symbol

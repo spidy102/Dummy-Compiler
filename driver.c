@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "lexerDef.h"
-#include "./data_structures/token_name.h"
-#include "./data_structures/tree.h"
+#include "token_name.h"
+#include "tree.h"
 #include "parser.h"
 #include "parserDef.h"
 #include <time.h>

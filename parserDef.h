@@ -2,8 +2,8 @@
 #define __PARSER_DEF_H__
 
 #include "parser.h"
-#include "./data_structures/set.h"
-#include "./data_structures/tree.h"
+#include "set.h"
+#include "tree.h"
 
 #define NUM_RULES 151
 #define NON_TERMINALS 78

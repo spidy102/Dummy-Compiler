@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "./data_structures/token_name.h"
+#include "token_name.h"
 
 typedef enum
 {
