@@ -12,6 +12,7 @@ Dilip Venkatesh - 2020A7PS1203P
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lexer.h"
 #include "lexerDef.h"
 #include "token_name.h"
 #include "tree.h"

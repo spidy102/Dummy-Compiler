@@ -15,6 +15,7 @@ Dilip Venkatesh - 2020A7PS1203P
 #include <stdlib.h>
 #include "hashmap.h"
 #include "twinbuffer.h"
+#include "lexer.h"
 #include "lexerDef.h"
 
 // typedef enum
