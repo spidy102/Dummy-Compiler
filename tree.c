@@ -21,6 +21,7 @@ treenode *initNode(Symbol sym)
     root->nextSibling = NULL;
     root->parent = NULL;
     root->tk = NULL;
+    root->rule_No = -1;
 }
 
 treenode *addSibling(treenode *node, Symbol sym)

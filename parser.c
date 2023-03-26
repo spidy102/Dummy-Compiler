@@ -327,6 +327,23 @@ void getFollowSets(nonTerminal nT)
     }
 }
 
+ruleNode *getEpsilonRule(nonTerminal nt)
+{
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+        if (grammarHeadArray[i]->nt == nt)
+        {
+            ruleNode *rule = grammarHeadArray[i];
+            if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
+            {
+                return rule;
+            }
+        }
+    }
+    // should not reach here
+    return NULL;
+}
+
 void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -360,18 +377,24 @@ void populateParseTable()
             //     remove_from_set(&follow_set, EPSILON);
             // }
             int j = 0;
+            ruleNode *epsilonRule = getEpsilonRule(grammarHeadArray[i]->nt);
+            // if (epsilonRule == NULL)
+            // {
+            //     printf("hello we have a problem at %s non terminal\n", EnumToNTString(grammarHeadArray[i]->nt));
+            // }
             while (follow_set != 0)
             {
                 if (follow_set % 2 == 1)
                 {
-                    ruleNode *new_rule = malloc(sizeof(ruleNode));
-                    new_rule->isTerminal = false;
-                    new_rule->nt = grammarHeadArray[i]->nt;
-                    new_rule->nextPtr = malloc(sizeof(ruleNode));
-                    new_rule->nextPtr->isTerminal = true;
-                    new_rule->nextPtr->t = EPSILON;
-                    new_rule->nextPtr->nextPtr = NULL;
-                    parseTable[grammarHeadArray[i]->nt][j] = new_rule;
+                    // printf("what number:%d, nt: %s\n", i, EnumToNTString(grammarHeadArray[i]->nt));
+                    // ruleNode *new_rule = malloc(sizeof(ruleNode));
+                    // new_rule->isTerminal = false;
+                    // new_rule->nt = grammarHeadArray[i]->nt;
+                    // new_rule->nextPtr = malloc(sizeof(ruleNode));
+                    // new_rule->nextPtr->isTerminal = true;
+                    // new_rule->nextPtr->t = EPSILON;
+                    // new_rule->nextPtr->nextPtr = NULL;
+                    parseTable[grammarHeadArray[i]->nt][j] = epsilonRule;
                 }
                 follow_set /= 2;
                 j++;
@@ -422,6 +445,21 @@ char *tolowercase(char *str)
         str[i] = (char)tolower(str[i]);
     }
     return str;
+}
+
+int getRuleNumber(ruleNode *rule)
+{
+
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+
+        if (grammarHeadArray[i] == rule)
+        {
+            return i;
+        }
+    }
+    // should not reach here
+    return -1;
 }
 
 treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
@@ -500,6 +538,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
 
             ruleNode *temp = rule;
 
+            // int ruleNo = getRuleNumber(rule);
+
             // printf("Rule:\n");
             // while (temp != NULL)
             // {
@@ -522,6 +562,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
                 {
                     treenode *parent = pop(st);
+
+                    parent->rule_No = getRuleNumber(parseTable[top1->node.nt][lookAhead->token]);
                     // adding epsilon in the leaf nodes
                     Symbol sym;
                     sym.isTerminal = true;
@@ -533,6 +575,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 }
                 treenode *parent = pop(st);
                 ruleNode *rule = parseTable[top1->node.nt][lookAhead->token]->nextPtr;
+                int ruleNo = getRuleNumber(parseTable[top1->node.nt][lookAhead->token]);
+                parent->rule_No = ruleNo;
                 pushRecursive(st, rule, parent);
                 treenode *child = top(st);
                 parent->child = child;
@@ -630,6 +674,7 @@ void printParseTree(treenode *root, FILE *fp)
         return;
     }
     printParseTree(root->child, fp);
+
     if (root->node.isTerminal)
     {
         if (root->node.t == EPSILON)

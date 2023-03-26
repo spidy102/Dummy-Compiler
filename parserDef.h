@@ -16,7 +16,7 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "set.h"
 #include "tree.h"
 
-#define NUM_RULES 151
+#define NUM_RULES 149
 #define NON_TERMINALS 78
 #define TERMINALS 57
 

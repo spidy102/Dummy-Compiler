@@ -33,6 +33,7 @@ typedef struct treenode
     struct treenode *nextSibling;
     struct treenode *parent;
     token *tk;
+    int rule_No;
 } treenode;
 
 treenode *initNode(Symbol sym);
