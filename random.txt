@@ -1,0 +1,15 @@
+declare module compute;
+declare module compute;
+
+<< module compute >>
+    takes input [x:integer];
+returns [value:integer];
+start
+    print(z[2]);
+print(true);
+a := a[x+y/2-x*7];
+end
+
+    <<<driver program>>>
+        start
+            end

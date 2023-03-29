@@ -1,0 +1,1110 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
+#include <stdlib.h>
+#include <string.h>
+#include "parserDef.h"
+#include "parser.h"
+#include "ast.h"
+
+astNode *append_at_end(astNode *head, astNode *append)
+{
+    astNode *temp = head;
+    if (head == NULL)
+    {
+        astNode *new_head = append;
+        append->nextSibling = NULL;
+        return new_head;
+    }
+    while (head->nextSibling != NULL)
+    {
+        head = head->nextSibling;
+    }
+    head->nextSibling = append;
+    append->nextSibling = NULL;
+    return temp;
+}
+
+astNode *initASTNode(astNodeLabel label, astNode *leftChild)
+{
+    astNode *node = malloc(sizeof(astNode));
+    node->label = label;
+    node->leftChild = leftChild;
+    node->nextSibling = NULL; // need to check;
+    return node;
+}
+
+char *EnumToASTString(astNodeLabel nt)
+{
+    int i = 0;
+    FILE *fp = fopen("astLabels.txt", "r");
+    char *buffer = malloc(sizeof(char) * 100);
+    while (fgets(buffer, 100, fp) != NULL)
+    {
+        buffer[strlen(buffer) - 2] = '\0';
+        // printf("%s\n", buffer);
+
+        if (nt == i)
+            return buffer;
+        i++;
+    }
+    fclose(fp);
+}
+
+void freeRHSList(treenode *root)
+{
+    treenode *children = root->child;
+    while (children != NULL)
+    {
+        treenode *temp = children->nextSibling;
+        free(children);
+        children = temp;
+    }
+}
+
+treenode *getNodeWithSymbol(nonTerminal nt, treenode *rootPass)
+{
+    treenode *root = rootPass->child;
+    while (root != NULL)
+    {
+        if (root->node.isTerminal)
+            printf("heret: %s\n", EnumToTString(root->node.t));
+        else
+            printf("here: %s\n", EnumToNTString(root->node.nt));
+        if (!root->node.isTerminal && root->node.nt == nt)
+        {
+            return root;
+        }
+        root = root->nextSibling;
+    }
+    // should not reach here
+    printf("smth went wrong %s %s\n", EnumToNTString(nt), EnumToNTString(rootPass->child->node.nt));
+    return NULL;
+}
+
+astNode *constructAST(treenode *root)
+{
+    printf("rule number:%d %d t:%d %s\n", root->rule_No, root->node.nt, root->node.t, EnumToNTString(root->node.nt));
+    switch (root->rule_No)
+    {
+    case 0: // program moduleDeclarations otherModules(2) driverModule otherModules(1)
+        treenode *mds = getNodeWithSymbol(moduleDeclarations, root);
+        treenode *oms2 = getNodeWithSymbol(otherModules, root);
+        treenode *drimod = getNodeWithSymbol(driverModule, root);
+        treenode *oms1 = root->child->nextSibling->nextSibling->nextSibling;
+        oms2->inh = NULL;
+        oms1->inh = NULL;
+        mds->inh = NULL;
+
+        astNode *mdsNode = constructAST(mds);
+        astNode *oms2Node = constructAST(oms2);
+        astNode *oms1Node = constructAST(oms1);
+
+        astNode *driModNode = constructAST(drimod);
+
+        // make linkedlist of these nodes
+        astNode *programNode = initASTNode(AST_PROGRAM, NULL);
+        if (mdsNode != NULL)
+        {
+            programNode->leftChild = append_at_end(programNode->leftChild, mdsNode);
+        }
+        if (oms2Node != NULL)
+        {
+            programNode->leftChild = append_at_end(programNode->leftChild, oms2Node);
+        }
+
+        programNode->leftChild = append_at_end(programNode->leftChild, driModNode);
+        freeRHSList(root);
+        return programNode;
+    case 1: // moduleDeclarations moduleDeclaration moduleDeclarations(1)
+    {
+        treenode *md = getNodeWithSymbol(moduleDeclaration, root);
+        treenode *mds1 = getNodeWithSymbol(moduleDeclarations, root);
+
+        astNode *mdNode = constructAST(md);
+
+        mds1->inh = append_at_end(root->inh, mdNode);
+
+        constructAST(mds1);
+
+        root->syn = mds1->syn;
+        freeRHSList(root);
+        return initASTNode(AST_MODULE_DECLARATIONS, root->syn);
+    }
+    case 2: // moduleDeclarations EPSILON
+    {
+        root->syn = root->inh;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 3:
+    {
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        freeRHSList(root);
+        return initASTNode(AST_MODULE_DECLARATION, idNode);
+    }
+    case 4: // otherModules module otherModules(1)
+    {
+        treenode *mdl = getNodeWithSymbol(module, root);
+        treenode *oms1 = getNodeWithSymbol(otherModules, root);
+        astNode *mdlNode = constructAST(mdl);
+        oms1->inh = append_at_end(root->inh, mdlNode);
+        constructAST(oms1);
+        root->syn = oms1->syn;
+        freeRHSList(root);
+        return initASTNode(AST_OTHERMODULES, root->syn);
+    }
+    case 5:
+    {
+        root->syn = root->inh;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 6: // driverModule DRIVERDEF DRIVER PROGRAM DRIVERENDDEF module
+
+    {
+        treenode *modDef = getNodeWithSymbol(moduleDef, root);
+        astNode *modDefNode = constructAST(modDef);
+        freeRHSList(root);
+        return initASTNode(AST_DRIVERMODULE, modDefNode);
+    }
+    case 7:
+    {
+        treenode *inputParaList = getNodeWithSymbol(input_plist, root);
+        treenode *retP = getNodeWithSymbol(ret, root);
+        treenode *modDef = getNodeWithSymbol(moduleDef, root);
+
+        astNode *retNode = constructAST(retP);
+        astNode *modDefNode = constructAST(modDef);
+        astNode *inputParaListNode = constructAST(inputParaList);
+
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->nextSibling->nextSibling->tk;
+
+        inputParaList->inh = NULL;
+
+        astNode *moduleNode = initASTNode(AST_MODULE, NULL);
+        moduleNode->leftChild = append_at_end(moduleNode->leftChild, idNode);
+        if (inputParaListNode != NULL)
+        {
+            moduleNode->leftChild = append_at_end(moduleNode->leftChild, inputParaListNode);
+        }
+        if (retNode != NULL)
+        {
+            moduleNode->leftChild = append_at_end(moduleNode->leftChild, retNode);
+        }
+        if (modDefNode != NULL)
+        {
+            moduleNode->leftChild = append_at_end(moduleNode->leftChild, modDefNode);
+        }
+
+        freeRHSList(root);
+        return moduleNode;
+    }
+    case 8:
+    {
+        treenode *outputParaList = getNodeWithSymbol(output_plist, root);
+        astNode *outputParaListNode = constructAST(outputParaList);
+        freeRHSList(root);
+        return outputParaListNode;
+        // return initASTNode(AST_RET, outputParaListNode);
+    }
+    case 9:
+    {
+        freeRHSList(root);
+        return initASTNode(AST_RET, NULL);
+    }
+    case 10:
+    {
+        treenode *dt = getNodeWithSymbol(dataType, root);
+        treenode *n_1 = getNodeWithSymbol(n1, root);
+        astNode *dtNode = constructAST(dt);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        dtNode->nextSibling = idNode;
+        astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
+
+        n_1->inh = append_at_end(root->inh, input_para_1);
+
+        constructAST(n_1);
+
+        root->syn = n_1->syn;
+        freeRHSList(root);
+        return initASTNode(AST_INPUT_PARA_LIST, root->syn);
+    }
+    case 11:
+    {
+        treenode *dt = getNodeWithSymbol(dataType, root);
+        treenode *n_1 = getNodeWithSymbol(n1, root);
+        astNode *dtNode = constructAST(dt);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->nextSibling->tk;
+        dtNode->nextSibling = idNode;
+        astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
+        n_1->inh = append_at_end(root->inh, input_para_1);
+        root->syn = n_1->syn;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 12:
+    {
+        root->syn = root->inh;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 13:
+    {
+        treenode *dt = getNodeWithSymbol(type, root);
+        treenode *n_1 = getNodeWithSymbol(n2, root);
+        astNode *dtNode = constructAST(dt);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        dtNode->nextSibling = idNode;
+        astNode *output_para_1 = initASTNode(AST_OUTPUT_PARA, dtNode);
+
+        n_1->inh = append_at_end(root->inh, output_para_1);
+
+        constructAST(n_1);
+
+        root->syn = n_1->syn;
+        freeRHSList(root);
+        return initASTNode(AST_OUTPUT_PARA_LIST, root->syn);
+    }
+    case 14:
+    {
+        treenode *dt = getNodeWithSymbol(dataType, root);
+        treenode *n_1 = getNodeWithSymbol(n2, root);
+        astNode *dtNode = constructAST(dt);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->nextSibling->tk;
+        dtNode->nextSibling = idNode;
+        astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
+        n_1->inh = append_at_end(root->inh, input_para_1);
+        root->syn = n_1->syn;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 15:
+    {
+        root->syn = root->inh;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 16 ... 18:
+    {
+        astNode *dt = initASTNode(AST_DATATYPE, NULL);
+        dt->tk = root->child->tk;
+        return dt;
+    }
+    case 19:
+    {
+        astNode *dt = initASTNode(AST_DATATYPE, NULL);
+        treenode *range_arr = getNodeWithSymbol(range_arrays, root);
+        treenode *type1 = getNodeWithSymbol(type, root);
+        astNode *dt1 = constructAST(type1);
+        astNode *range_arrNode = constructAST(range_arr);
+        dt1->nextSibling = range_arrNode;
+        dt->leftChild = dt1;
+        freeRHSList(root);
+        return dt;
+    }
+    case 20:
+    {
+        treenode *index_arr1 = getNodeWithSymbol(index_arr, root);
+        treenode *index_arr2 = index_arr1->nextSibling->nextSibling;
+        astNode *index_arr1Node = constructAST(index_arr1);
+        astNode *index_arr2Node = constructAST(index_arr2);
+
+        index_arr1Node->nextSibling = index_arr2Node;
+
+        return initASTNode(AST_RANGE, index_arr1Node);
+    }
+    case 21 ... 23:
+    {
+        astNode *dt = initASTNode(AST_DATATYPE, NULL);
+        dt->tk = root->child->tk;
+        return dt;
+    }
+
+    case 24:
+    {
+        treenode *stmts = getNodeWithSymbol(statements, root);
+        stmts->inh = NULL;
+
+        constructAST(stmts);
+
+        root->syn = stmts->syn;
+        freeRHSList(root);
+        return initASTNode(AST_MODULEDEF, root->syn);
+    }
+    case 25: // statements(2) statement statements(1)
+    {
+        treenode *stmt = getNodeWithSymbol(statement, root);
+        treenode *stmts1 = getNodeWithSymbol(statements, root);
+        astNode *stmtNode = constructAST(stmt);
+        stmts1->inh = append_at_end(root->inh, stmtNode);
+        constructAST(stmts1);
+        root->syn = stmts1->syn;
+        freeRHSList(root);
+        return initASTNode(AST_STATEMENTS, root->syn);
+    }
+    case 26:
+    {
+        root->syn = root->inh;
+        freeRHSList(root);
+        return NULL;
+    }
+    case 27 ... 31:
+    {
+
+        astNode *ioStmtNode = constructAST(root->child);
+        freeRHSList(root);
+        return ioStmtNode;
+    }
+    case 32:
+    {
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->nextSibling->nextSibling->tk;
+        freeRHSList(root);
+        return initASTNode(AST_IOSTMT, idNode);
+    }
+    case 33: // ioStmt PRINT BO var_print BC SEMICOL
+    {
+        astNode *varPrintNode = constructAST(getNodeWithSymbol(var_print, root));
+        freeRHSList(root);
+        return initASTNode(AST_IOSTMT, varPrintNode);
+    }
+    case 34 ... 35:
+    {
+        astNode *boolNode = initASTNode(AST_BOOL, NULL);
+        boolNode->tk = root->child->tk;
+        freeRHSList(root);
+        return boolNode;
+    }
+    case 36:
+    {
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        freeRHSList(root);
+        return idNode;
+    }
+    case 37:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        freeRHSList(root);
+        return numNode;
+    }
+    case 38:
+    {
+        astNode *rnumNode = initASTNode(AST_RNUM, NULL);
+        rnumNode->tk = root->child->tk;
+        freeRHSList(root);
+        return rnumNode;
+    }
+    case 39:
+    {
+        treenode *varPrintDash = getNodeWithSymbol(var_print_dash, root);
+        astNode *varPrintDashNode = constructAST(varPrintDash);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        if (varPrintDashNode == NULL)
+        {
+            freeRHSList(root);
+            return idNode;
+        }
+        else
+        {
+            astNode *arr_ele = initASTNode(AST_ARRAY_ELEMENT, NULL);
+            arr_ele->leftChild = idNode;
+            idNode->nextSibling = varPrintDashNode;
+            freeRHSList(root);
+            return arr_ele;
+        }
+    }
+    case 40:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        return numNode;
+    }
+    case 41:
+    {
+        astNode *rnumNode = initASTNode(AST_RNUM, NULL);
+        rnumNode->tk = root->child->tk;
+        return rnumNode;
+    }
+    case 42:
+    {
+        astNode *boolNode = constructAST(root->child);
+        return boolNode;
+    }
+    case 43:
+    {
+        return NULL;
+    }
+    case 44:
+    {
+        treenode *indexArr = getNodeWithSymbol(index_arr, root);
+        astNode *indexArrNode = constructAST(indexArr);
+        return indexArrNode;
+    }
+    case 45 ... 46:
+    {
+        astNode *child = constructAST(root->child);
+        freeRHSList(root);
+        return child;
+    }
+    case 47:
+    {
+        treenode *whichSt = getNodeWithSymbol(whichStmt, root);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        whichSt->inh = idNode;
+        constructAST(whichSt);
+        astNode *assignNode = initASTNode(AST_ASSIGNOP, NULL);
+        assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->syn);
+        assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->addr);
+        return assignNode;
+    }
+    case 48:
+    {
+        treenode *lvalueIDStmt1 = getNodeWithSymbol(lvalueIDStmt, root);
+        astNode *lvalueIDStmt1Node = constructAST(lvalueIDStmt1);
+        root->addr = lvalueIDStmt1->addr;
+        root->syn = root->inh;
+        return NULL;
+    }
+    case 49:
+    {
+        treenode *lvalueARRStmt1 = getNodeWithSymbol(lvalueARRStmt, root);
+        lvalueARRStmt1->inh = root->inh;
+        astNode *node = constructAST(lvalueARRStmt1);
+        root->syn = lvalueARRStmt1->syn;
+        root->addr = lvalueARRStmt1->addr;
+        return NULL;
+    }
+    case 50:
+    {
+        treenode *expression1 = getNodeWithSymbol(expression, root);
+        constructAST(expression1);
+        root->addr = expression1->addr;
+        return NULL;
+    }
+    case 51:
+    {
+        treenode *element_index_with_expressions1 = getNodeWithSymbol(element_index_with_expressions, root);
+        astNode *node = initASTNode(AST_ARRAY_ELEMENT, NULL);
+        node->leftChild = append_at_end(node->leftChild, root->inh);
+        node->leftChild = append_at_end(node->leftChild, element_index_with_expressions1->addr);
+        treenode *expression1 = getNodeWithSymbol(expression, root);
+        root->addr = expression1->addr;
+        return NULL;
+    }
+    case 52:
+    {
+        treenode *sign1 = getNodeWithSymbol(sign, root);
+        treenode *new_index1 = getNodeWithSymbol(new_index, root);
+        astNode *signNode = constructAST(sign1);
+        astNode *new_indexNode = constructAST(new_index1);
+        if (signNode == NULL)
+        {
+            return new_indexNode;
+        }
+        else
+        {
+            signNode->leftChild = new_indexNode;
+            astNode *node = initASTNode(AST_SIGNED, signNode);
+            return node;
+        }
+    }
+    case 53:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        return numNode;
+    }
+    case 54:
+    {
+        astNode *numNode = initASTNode(AST_ID, NULL);
+        numNode->tk = root->child->tk;
+        return numNode;
+    }
+    case 55 ... 56:
+    {
+        astNode *node = initASTNode(AST_SIGN, NULL);
+        node->tk = root->child->tk;
+        return node;
+    }
+    case 57:
+    {
+        freeRHSList(root);
+        return NULL;
+    }
+    case 75:
+    {
+        constructAST(root->child);
+        root->addr = root->child->addr;
+        return NULL;
+    }
+    case 76:
+    {
+        constructAST(root->child);
+        root->addr = root->child->addr;
+        return NULL;
+    }
+    case 77:
+    {
+        astNode *node = initASTNode(AST_SIGNED, NULL);
+        treenode *unary = getNodeWithSymbol(unary_op, root);
+        constructAST(unary);
+        constructAST(root->child->nextSibling);
+        node->leftChild = append_at_end(node->leftChild, unary->addr);
+        node->leftChild = append_at_end(node->leftChild, root->child->nextSibling->addr);
+        root->addr = node;
+        return NULL;
+    }
+    case 78:
+    {
+        constructAST(root->child->nextSibling);
+        root->addr = root->child->nextSibling->addr;
+        return NULL;
+    }
+    case 79:
+    {
+        constructAST(root->child);
+        root->addr = root->child->addr;
+        return NULL;
+    }
+    case 80:
+    {
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        root->addr = idNode;
+        return NULL;
+    }
+    case 81:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        root->addr = numNode;
+        return NULL;
+    }
+    case 82:
+    {
+        astNode *rnumNode = initASTNode(AST_RNUM, NULL);
+        rnumNode->tk = root->child->tk;
+        root->addr = rnumNode;
+        return NULL;
+    }
+    case 83 ... 84:
+    {
+        astNode *signNode = initASTNode(AST_SIGN, NULL);
+        signNode->tk = root->child->tk;
+        root->addr = signNode;
+        return NULL;
+    }
+    case 85:
+    {
+        treenode *n71 = getNodeWithSymbol(n7, root);
+        treenode *anyTerm1 = getNodeWithSymbol(anyTerm, root);
+        constructAST(anyTerm1);
+        n71->inh = anyTerm1->addr;
+        constructAST(n71);
+        root->addr = n71->addr;
+        return NULL;
+    }
+    case 86:
+    {
+        treenode *logOp = getNodeWithSymbol(logicalOp, root);
+        treenode *anyTerm1 = getNodeWithSymbol(anyTerm, root);
+        treenode *n71 = getNodeWithSymbol(n7, root);
+        constructAST(anyTerm1);
+        n71->inh = anyTerm1->addr;
+        constructAST(n71);
+        constructAST(logOp);
+        if (logOp->addr->tk->token == AND)
+        {
+            astNode *node = initASTNode(AST_AND, NULL);
+
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+
+            node->leftChild = append_at_end(node->leftChild, n71->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (logOp->addr->tk->token == OR)
+        {
+            astNode *node = initASTNode(AST_OR, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, n71->addr);
+            root->addr = node;
+            return NULL;
+        }
+    }
+    case 87:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 88:
+    {
+        treenode *arithmeticExpr1 = getNodeWithSymbol(arithmeticExpr, root);
+        treenode *n81 = getNodeWithSymbol(n8, root);
+        constructAST(arithmeticExpr1);
+        n81->inh = arithmeticExpr1->addr;
+        constructAST(n81);
+        root->addr = n81->addr;
+        return NULL;
+    }
+    case 89:
+    {
+        root->addr = constructAST(root->child);
+        return NULL;
+    }
+    case 90:
+    {
+        treenode *relOp = getNodeWithSymbol(relationalOp, root);
+        treenode *arithmeticExpr1 = getNodeWithSymbol(arithmeticExpr, root);
+        constructAST(relOp);
+        constructAST(arithmeticExpr1);
+        if (relOp->addr->tk->token == LT)
+        {
+            astNode *node = initASTNode(AST_LT, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (relOp->addr->tk->token == LE)
+        {
+            astNode *node = initASTNode(AST_LE, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (relOp->addr->tk->token == GT)
+        {
+            astNode *node = initASTNode(AST_GT, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (relOp->addr->tk->token == GE)
+        {
+            astNode *node = initASTNode(AST_GE, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (relOp->addr->tk->token == EQ)
+        {
+            astNode *node = initASTNode(AST_EQ, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+        else if (relOp->addr->tk->token == NE)
+        {
+            astNode *node = initASTNode(AST_NE, NULL);
+            node->leftChild = append_at_end(node->leftChild, root->inh);
+            node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
+            root->addr = node;
+            return NULL;
+        }
+    }
+    case 91:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 92:
+    {
+        treenode *termNode = getNodeWithSymbol(term, root);
+        treenode *n41 = termNode->nextSibling;
+        constructAST(termNode);
+        n41->inh = termNode->addr;
+        constructAST(n41);
+        if (n41->addr != n41->inh)
+        {
+            root->addr = n41->addr;
+        }
+        else
+        {
+            root->addr = termNode->addr;
+        }
+        return NULL;
+    }
+    case 93:
+    {
+        treenode *op1Node = root->child;
+        treenode *term1 = op1Node->nextSibling;
+        treenode *n41 = term1->nextSibling;
+        constructAST(term1);
+        n41->inh = term1->addr;
+        constructAST(n41);
+        constructAST(op1Node);
+
+        if (n41->inh != n41->addr)
+        {
+
+            if (op1Node->addr->tk->token == PLUS)
+            {
+
+                root->addr = initASTNode(AST_PLUS, NULL);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, n41->addr);
+            }
+            else
+            {
+                root->addr = initASTNode(AST_MINUS, NULL);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, n41->addr);
+            }
+        }
+        else
+        {
+
+            if (op1Node->addr->tk->token == PLUS)
+            {
+
+                root->addr = initASTNode(AST_PLUS, NULL);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+
+                root->addr->leftChild = append_at_end(root->addr->leftChild, term1->addr);
+            }
+            else
+            {
+                root->addr = initASTNode(AST_MINUS, NULL);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+                root->addr->leftChild = append_at_end(root->addr->leftChild, term1->addr);
+            }
+        }
+        return NULL;
+    }
+    case 94:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 95:
+    {
+        treenode *factorNode = root->child;
+        treenode *n51 = factorNode->nextSibling;
+        constructAST(factorNode);
+        n51->inh = factorNode->addr;
+        constructAST(n51);
+        if (n51->addr != n51->inh)
+        {
+            root->addr = n51->addr;
+        }
+        else
+        {
+            root->addr = factorNode->addr;
+        }
+        return NULL;
+    }
+    case 96:
+    {
+        treenode *op2Node = root->child;
+        treenode *factorNode = op2Node->nextSibling;
+        treenode *n51 = factorNode->nextSibling;
+        constructAST(factorNode);
+        n51->inh = factorNode->addr;
+        constructAST(n51);
+        constructAST(op2Node);
+        if (op2Node->addr->tk->token == MUL)
+        {
+
+            root->addr = initASTNode(AST_MUL, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
+        }
+        else
+        {
+            root->addr = initASTNode(AST_DIV, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
+        }
+        return NULL;
+    }
+    case 97:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 98:
+    {
+        treenode *node = root->child->nextSibling;
+        constructAST(node);
+        root->addr = node->addr;
+        return NULL;
+    }
+    //
+    case 99:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        root->addr = numNode;
+        return NULL;
+    }
+    case 100:
+    {
+        astNode *numNode = initASTNode(AST_RNUM, NULL);
+        numNode->tk = root->child->tk;
+        root->addr = numNode;
+        return NULL;
+    }
+    // case 101:
+    // {
+    //     astNode *node = constructAST(root->child);
+    //     root->addr = node;
+    //     return NULL;
+    // }//omit this rule
+    case 101:
+    {
+        treenode *arr_ele = root->child->nextSibling;
+        constructAST(arr_ele);
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        if (arr_ele->addr == NULL)
+        {
+            printf("hello yo here!!??\n");
+
+            root->addr = idNode;
+            return NULL;
+        }
+        else
+        {
+            astNode *node = initASTNode(AST_ARRAY_ELEMENT, NULL);
+            node->leftChild = append_at_end(node->leftChild, idNode);
+            node->leftChild = append_at_end(node->leftChild, arr_ele->addr);
+            root->addr = node;
+            return NULL;
+        }
+    }
+    case 102:
+    {
+        treenode *index_with_exp = root->child->nextSibling;
+        constructAST(index_with_exp);
+        root->addr = index_with_exp->addr;
+        return NULL;
+    }
+    case 103:
+    {
+        root->addr = NULL;
+        return NULL;
+    }
+    case 104:
+    {
+        treenode *signNode = root->child;
+        treenode *n10 = signNode->nextSibling;
+        astNode *signNode1 = constructAST(signNode);
+        constructAST(n10);
+        astNode *node = initASTNode(AST_SIGNED, NULL);
+        node->leftChild = append_at_end(node->leftChild, signNode1);
+        node->leftChild = append_at_end(node->leftChild, n10->addr);
+        root->addr = node;
+        return NULL;
+    }
+    case 105:
+    {
+        treenode *arrE = root->child;
+        constructAST(arrE);
+        root->addr = arrE->addr;
+        return NULL;
+    }
+    case 106:
+    {
+        astNode *boolNode = constructAST(root->child);
+        root->addr = boolNode;
+        return NULL;
+    }
+    case 107:
+    {
+        constructAST(root->child);
+        root->addr = root->child->addr;
+        return NULL;
+    }
+    case 108:
+    {
+        constructAST(root->child->nextSibling);
+        root->addr = root->child->nextSibling->addr;
+        return NULL;
+    }
+    case 109:
+    {
+        treenode *arrT = root->child;
+        treenode *arrN4 = arrT->nextSibling;
+        constructAST(arrT);
+        arrN4->inh = arrT->addr;
+        constructAST(arrN4);
+        root->addr = arrN4->addr;
+        if (root->addr == NULL)
+        {
+            printf("hjfoidsl!\n");
+        }
+        return NULL;
+    }
+    case 110:
+    {
+        astNode *boolNode = constructAST(root->child);
+        root->addr = boolNode;
+        return NULL;
+    }
+    case 111:
+    {
+        treenode *op1Node = root->child;
+        treenode *arrT = op1Node->nextSibling;
+        treenode *arrN4 = arrT->nextSibling;
+        constructAST(arrT);
+        arrN4->inh = arrT->addr;
+        constructAST(arrN4);
+        constructAST(op1Node);
+        if (op1Node->addr->tk->token == PLUS)
+        {
+
+            root->addr = initASTNode(AST_PLUS, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, arrN4->addr);
+        }
+        else
+        {
+
+            root->addr = initASTNode(AST_MINUS, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, arrN4->addr);
+        }
+        return NULL;
+    }
+    case 112:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 113:
+    {
+        treenode *factorNode = root->child;
+        treenode *n51 = factorNode->nextSibling;
+        constructAST(factorNode);
+        n51->inh = factorNode->addr;
+        constructAST(n51);
+        if (n51->addr != n51->inh)
+        {
+            root->addr = n51->addr;
+        }
+        else
+        {
+            printf("yha hone chaiye ho!\n");
+            root->addr = factorNode->addr;
+        }
+        return NULL;
+    }
+    case 114:
+    {
+        treenode *op2Node = root->child;
+        treenode *factorNode = op2Node->nextSibling;
+        treenode *n51 = factorNode->nextSibling;
+        constructAST(factorNode);
+        n51->inh = factorNode->addr;
+        constructAST(n51);
+        constructAST(op2Node);
+        if (op2Node->addr->tk->token == MUL)
+        {
+
+            root->addr = initASTNode(AST_MUL, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
+        }
+        else
+        {
+            root->addr = initASTNode(AST_DIV, NULL);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
+            root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
+        }
+        return NULL;
+    }
+    case 115:
+    {
+        root->addr = root->inh;
+        return NULL;
+    }
+    case 116:
+    {
+        astNode *idNode = initASTNode(AST_ID, NULL);
+        idNode->tk = root->child->tk;
+        root->addr = idNode;
+        return NULL;
+    }
+    case 117:
+    {
+        astNode *numNode = initASTNode(AST_NUM, NULL);
+        numNode->tk = root->child->tk;
+        root->addr = numNode;
+        return NULL;
+    }
+    case 118:
+    {
+        treenode *expr = root->child->nextSibling;
+        constructAST(expr);
+        root->addr = expr->addr;
+        return NULL;
+    }
+    case 119 ... 130:
+    {
+        root->addr = initASTNode(AST_ID, NULL);
+
+        root->addr->tk = root->child->tk;
+
+        return NULL;
+    }
+    }
+}
+
+void inorder_ast(astNode *root)
+{
+    if (root == NULL)
+        return;
+    inorder_ast(root->leftChild);
+    if (root->label == AST_NUM)
+    {
+        printf("Number here:%d", root->tk->integer);
+        // printf("line number at this token %d\n", root->tk->line_num);
+    }
+    printf("%s\n", EnumToASTString(root->label));
+    if (root->leftChild != NULL)
+    {
+        astNode *leftOut = root->leftChild->nextSibling;
+        while (leftOut != NULL)
+        {
+            inorder_ast(leftOut);
+            leftOut = leftOut->nextSibling;
+        }
+    }
+}
+
+int main()
+{
+    FILE *fp = fopen("random.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
+    astNode *astRoot = constructAST(root);
+    inorder_ast(astRoot);
+}

@@ -5,7 +5,8 @@
     "*.txt": "c",
     "token_name.h": "c",
     "stdbool.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "parser.h": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

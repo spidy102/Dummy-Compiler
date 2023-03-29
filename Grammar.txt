@@ -87,7 +87,7 @@ arithmeticOrBooleanExpr anyTerm n7
 n7 logicalOp anyTerm n7
 n7 EPSILON
 anyTerm arithmeticExpr n8
-anyTerm boolConstt n8
+anyTerm boolConstt
 n8 relationalOp arithmeticExpr
 n8 EPSILON
 arithmeticExpr term n4
@@ -99,15 +99,16 @@ n5 EPSILON
 factor BO arithmeticOrBooleanExpr BC
 factor NUM
 factor RNUM
-factor boolConstt
 factor ID array_element
 array_element SQBO element_index_with_expressions SQBC
 array_element EPSILON
 element_index_with_expressions sign n_10
 element_index_with_expressions arrExpr
+element_index_with_expressions boolConstt
 n_10 new_index
 n_10 BO arrExpr BC
 arrExpr arrTerm arr_N4
+arrExpr boolConstt
 arr_N4 op1 arrTerm arr_N4
 arr_N4 EPSILON
 arrTerm arrFactor arr_N5
@@ -115,7 +116,6 @@ arr_N5 op2 arrFactor arr_N5
 arr_N5 EPSILON
 arrFactor ID
 arrFactor NUM
-arrFactor boolConstt
 arrFactor BO arrExpr BC
 op1 PLUS
 op1 MINUS

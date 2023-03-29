@@ -14,6 +14,7 @@ Dilip Venkatesh - 2020A7PS1203P
 
 #include "parser.h"
 #include "lexerDef.h"
+#include "ast.h"
 #include <stdbool.h>
 
 typedef struct Symbol
@@ -34,6 +35,9 @@ typedef struct treenode
     struct treenode *parent;
     token *tk;
     int rule_No;
+    astNode *addr;
+    astNode *inh;
+    astNode *syn;
 } treenode;
 
 treenode *initNode(Symbol sym);
