@@ -5,11 +5,25 @@ declare module compute;
     takes input [x:integer];
 returns [value:integer];
 start
-    print(z[2]);
-print(true);
 a := a[x+y/2-x*7];
 declare x,y,z:integer;
 use module mod1 with parameters true, -5, -x[2+8*z];
+switch(flag)
+start
+case false :print(100);
+break;
+case true :use module mod1 with parameters a, b;
+break;
+case 1: 
+get_value(a);
+a:=b+c;
+break;
+end
+for( k in 2..8)
+start
+a:=(num - k)*(num-k);
+print(a);
+end
 end
 
     <<<driver program>>>
