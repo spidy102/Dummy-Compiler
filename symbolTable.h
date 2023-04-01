@@ -42,6 +42,7 @@ typedef struct list
     };
     token *tk;
     int width;
+    bool isArray;
     struct list *next;
 } list;
 
@@ -59,6 +60,7 @@ typedef struct SymTablePointer
         types typeIfNotArray;
         array_type typeIfArray;
     };
+    bool isArray;
     list *input_para_list;
     list *output_para_list;
     hashtable *corrHashtable;

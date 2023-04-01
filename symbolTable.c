@@ -11,6 +11,53 @@
 
 SymTablePointer *globalSymbolTable;
 
+int getOffset(SymTablePointer *pointer, int *offset)
+{
+    if (!pointer->isArray)
+    {
+        if (pointer->typeIfNotArray == TYPE_INTEGER)
+        {
+            int ret = *offset;
+            *offset += INT_WIDTH;
+            return ret;
+        }
+        else if (pointer->typeIfNotArray == TYPE_BOOLEAN)
+        {
+            int ret = *offset;
+            *offset += BOOL_WIDTH;
+            return ret;
+        }
+        else
+        {
+            int ret = *offset;
+            *offset += REAL_WIDTH;
+            return ret;
+        }
+    }
+    else
+    {
+        array_type type = pointer->typeIfArray;
+        if (type.type == TYPE_INTEGER)
+        {
+            int ret = *offset;
+            *offset += (type.high - type.low + 1) * INT_WIDTH;
+            return ret;
+        }
+        else if (type.type == TYPE_BOOLEAN)
+        {
+            int ret = *offset;
+            *offset += (type.high - type.low + 1) * BOOL_WIDTH;
+            return ret;
+        }
+        else
+        {
+            int ret = *offset;
+            *offset += (type.high - type.low + 1) * TYPE_REAL;
+            return ret;
+        }
+    }
+}
+
 SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *append)
 {
     if (head == NULL)
@@ -156,8 +203,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                         pointer->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
                         pointer->typeIfArray.high = arr_type->leftChild->nextSibling->leftChild->nextSibling->tk->integer;
                         pointer->typeIfArray.type = getType(arr_type->leftChild);
-                        *offset += *offset + (pointer->typeIfArray.high - pointer->typeIfArray.low + 1) * (pointer->typeIfArray.type == TYPE_INTEGER ? INT_WIDTH : (pointer->typeIfArray.type == TYPE_BOOLEAN ? (BOOL_WIDTH) : (REAL_WIDTH)));
                         pointer->offset = *offset;
+                        *offset += *offset + (pointer->typeIfArray.high - pointer->typeIfArray.low + 1) * (pointer->typeIfArray.type == TYPE_INTEGER ? INT_WIDTH : (pointer->typeIfArray.type == TYPE_BOOLEAN ? (BOOL_WIDTH) : (REAL_WIDTH)));
                     }
                     else
                     {
@@ -215,7 +262,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             astNode *cases = stmts->leftChild->nextSibling->leftChild;
             while (cases != NULL)
             {
-                populateStmtsSymTable(newPointer, cases->leftChild->nextSibling->leftChild, offset);
+                int offset1 = 0;
+                populateStmtsSymTable(newPointer, cases->leftChild->nextSibling->leftChild, &offset1);
                 cases = cases->nextSibling;
             }
 
@@ -298,12 +346,15 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             hashtable forScopeHashTable = initHashtable();
             forScope->corrHashtable = &forScopeHashTable;
             SymTablePointer *var = initSymTablePointer();
+            var->typeIfNotArray = TYPE_INTEGER;
+            var->isArray = false;
+            var->offset = getOffset(var, offset);
             var->tk = stmts->leftChild->tk;
             var->str = stmts->leftChild->tk->str;
             insertSymTable(forScope->corrHashtable, var);
             astNode *forStmts = stmts->leftChild->nextSibling->nextSibling->leftChild;
-
-            populateStmtsSymTable(forScope, forStmts, offset);
+            int offset1 = 0;
+            populateStmtsSymTable(forScope, forStmts, &offset1);
 
             stmts = stmts->nextSibling;
             break;
@@ -317,7 +368,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             whileScope->corrHashtable = &whileScopeHashTable;
             astNode *whileStmts = stmts->leftChild->nextSibling->leftChild;
             traverse_ast(stmts->leftChild, module);
-            populateStmtsSymTable(whileScope, whileStmts, offset);
+            int offset1 = 0;
+            populateStmtsSymTable(whileScope, whileStmts, &offset1);
 
             stmts = stmts->nextSibling;
             break;
@@ -326,7 +378,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
     }
 }
 
-void populateModuleSymbolTable(SymTablePointer *module, astNode *root)
+void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offset)
 {
     hashtable *moduleST = module->corrHashtable;
     astNode *mdlDef = root->leftChild->nextSibling->nextSibling->nextSibling;
@@ -335,9 +387,8 @@ void populateModuleSymbolTable(SymTablePointer *module, astNode *root)
         return;
     }
     astNode *stmts = mdlDef->leftChild->leftChild;
-    int offset = 0;
 
-    populateStmtsSymTable(module, stmts, &offset);
+    populateStmtsSymTable(module, stmts, offset);
 }
 
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset)
@@ -399,20 +450,22 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     hashtable ht = initHashtable();
                     pointer->corrHashtable = &ht;
                     list *temp = pointer->input_para_list;
+                    int offset = 0;
                     while (temp != NULL)
                     {
-
                         SymTablePointer *var = initSymTablePointer();
+                        var->isArray = temp->isArray;
+                        var->typeIfNotArray = temp->typeIfNotArray;
+                        var->typeIfArray = temp->typeIfArray;
                         var->str = temp->tk->str;
-                        printf("%d\n", iplNode->leftChild->nextSibling->tk->token);
                         var->tk = temp->tk;
-
+                        var->offset = getOffset(var, &offset);
                         insertSymTable(pointer->corrHashtable, var);
                         temp = temp->next;
                     }
                     pointer->typeST = MODULEST;
                     pointer->parentHashTable = global;
-                    populateModuleSymbolTable(pointer, mdls);
+                    populateModuleSymbolTable(pointer, mdls, &offset);
                     temp = pointer->output_para_list;
                     // while (temp != NULL)
                     // {
