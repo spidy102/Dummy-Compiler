@@ -75,10 +75,10 @@ treenode *getNodeWithSymbol(nonTerminal nt, treenode *rootPass)
     treenode *root = rootPass->child;
     while (root != NULL)
     {
-        if (root->node.isTerminal)
-            printf("heret: %s\n", EnumToTString(root->node.t));
-        else
-            printf("here: %s\n", EnumToNTString(root->node.nt));
+        // if (root->node.isTerminal)
+        //     printf("heret: %s\n", EnumToTString(root->node.t));
+        // else
+        //     printf("here: %s\n", EnumToNTString(root->node.nt));
         if (!root->node.isTerminal && root->node.nt == nt)
         {
             return root;
@@ -86,13 +86,11 @@ treenode *getNodeWithSymbol(nonTerminal nt, treenode *rootPass)
         root = root->nextSibling;
     }
     // should not reach here
-    printf("smth went wrong %s %s\n", EnumToNTString(nt), EnumToNTString(rootPass->child->node.nt));
     return NULL;
 }
 
 astNode *constructAST(treenode *root)
 {
-    printf("rule number:%d %d t:%d %s\n", root->rule_No, root->node.nt, root->node.t, EnumToNTString(root->node.nt));
     switch (root->rule_No)
     {
     case 0: // program moduleDeclarations otherModules(2) driverModule otherModules(1)
@@ -120,8 +118,22 @@ astNode *constructAST(treenode *root)
         {
             programNode->leftChild = append_at_end(programNode->leftChild, oms2Node);
         }
+        else
+        {
+            programNode->leftChild = append_at_end(programNode->leftChild, initASTNode(AST_OTHERMODULES, NULL));
+        }
 
         programNode->leftChild = append_at_end(programNode->leftChild, driModNode);
+
+        if (oms1Node != NULL)
+        {
+            programNode->leftChild = append_at_end(programNode->leftChild, oms1Node);
+        }
+        else
+        {
+            programNode->leftChild = append_at_end(programNode->leftChild, initASTNode(AST_OTHERMODULES, NULL));
+        }
+
         freeRHSList(root);
         return programNode;
     case 1: // moduleDeclarations moduleDeclaration moduleDeclarations(1)
@@ -148,7 +160,7 @@ astNode *constructAST(treenode *root)
     case 3:
     {
         astNode *idNode = initASTNode(AST_ID, NULL);
-        idNode->tk = root->child->tk;
+        idNode->tk = root->child->nextSibling->nextSibling->tk;
         freeRHSList(root);
         return initASTNode(AST_MODULE_DECLARATION, idNode);
     }
@@ -238,6 +250,7 @@ astNode *constructAST(treenode *root)
         constructAST(n_1);
 
         root->syn = n_1->syn;
+        astNode *temp = n_1->syn;
         freeRHSList(root);
         return initASTNode(AST_INPUT_PARA_LIST, root->syn);
     }
@@ -246,11 +259,13 @@ astNode *constructAST(treenode *root)
         treenode *dt = getNodeWithSymbol(dataType, root);
         treenode *n_1 = getNodeWithSymbol(n1, root);
         astNode *dtNode = constructAST(dt);
+
         astNode *idNode = initASTNode(AST_ID, NULL);
         idNode->tk = root->child->nextSibling->tk;
         dtNode->nextSibling = idNode;
         astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
         n_1->inh = append_at_end(root->inh, input_para_1);
+        constructAST(n_1);
         root->syn = n_1->syn;
         freeRHSList(root);
         return NULL;
@@ -307,7 +322,7 @@ astNode *constructAST(treenode *root)
     }
     case 19:
     {
-        astNode *dt = initASTNode(AST_DATATYPE, NULL);
+        astNode *dt = initASTNode(AST_ARRAY_DATATYPE, NULL);
         treenode *range_arr = getNodeWithSymbol(range_arrays, root);
         treenode *type1 = getNodeWithSymbol(type, root);
         astNode *dt1 = constructAST(type1);
@@ -342,7 +357,7 @@ astNode *constructAST(treenode *root)
 
         constructAST(stmts);
 
-        root->syn = stmts->syn;
+        root->syn = stmts->addr;
         freeRHSList(root);
         return initASTNode(AST_MODULEDEF, root->syn);
     }
@@ -351,16 +366,13 @@ astNode *constructAST(treenode *root)
         treenode *stmt = getNodeWithSymbol(statement, root);
         treenode *stmts1 = getNodeWithSymbol(statements, root);
         astNode *stmtNode = constructAST(stmt);
-
         stmts1->inh = append_at_end(root->inh, stmt->addr);
         constructAST(stmts1);
         root->syn = stmts1->syn;
+
         freeRHSList(root);
-        if (root->syn->label == AST_IOSTMT)
-        {
-            printf("generated successfully\n");
-        }
         root->addr = initASTNode(AST_STATEMENTS, root->syn);
+        astNode *temp = root->syn;
         return root->addr;
     }
     case 26:
@@ -374,10 +386,6 @@ astNode *constructAST(treenode *root)
 
         astNode *ioStmtNode = constructAST(root->child);
         root->addr = ioStmtNode;
-        if (ioStmtNode == NULL)
-        {
-            printf("is null\n");
-        }
         freeRHSList(root);
         return ioStmtNode;
     }
@@ -490,11 +498,10 @@ astNode *constructAST(treenode *root)
         idNode->tk = root->child->tk;
         whichSt->inh = idNode;
         constructAST(whichSt);
-
         astNode *assignNode = initASTNode(AST_ASSIGNOP, NULL);
         assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->syn);
         assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->addr);
-
+        root->addr = assignNode;
         return assignNode;
     }
     case 48:
@@ -584,8 +591,10 @@ astNode *constructAST(treenode *root)
         idNode->tk = id->tk;
         astNode *actualParaNode = constructAST(actualPara);
         astNode *node = initASTNode(AST_MODULE_REUSE, NULL);
-        if (optionalNode1 != NULL)
-            node->leftChild = append_at_end(node->leftChild, optionalNode1);
+        if (optionalNode->addr != NULL)
+        {
+            node->leftChild = append_at_end(node->leftChild, optionalNode->addr);
+        }
         node->leftChild = append_at_end(node->leftChild, idNode);
         if (actualPara->addr != NULL)
         {
@@ -712,7 +721,8 @@ astNode *constructAST(treenode *root)
     }
     case 70:
     {
-        root->addr = root->child->nextSibling->syn;
+        constructAST(root->child->nextSibling);
+        root->addr = initASTNode(AST_OPTIONAL, root->child->nextSibling->syn);
         return NULL;
     }
     case 71:
@@ -1277,7 +1287,6 @@ astNode *constructAST(treenode *root)
         root->addr = initASTNode(AST_DECLARE, NULL);
         root->addr->leftChild = root->syn;
         root->addr->leftChild->nextSibling = dt;
-        // for declare, the children are the ids, and the datatype is stored in the astnode itself(tk field)
         return NULL;
     }
     case 132:
@@ -1296,10 +1305,6 @@ astNode *constructAST(treenode *root)
         {
             astNode *newNode = initASTNode(AST_CASES, NULL);
             newNode->leftChild = caseStmtsNode->syn;
-            if (newNode->leftChild->nextSibling == NULL)
-            {
-                printf("smth went wrong1\n");
-            }
             node->leftChild = append_at_end(node->leftChild, newNode);
         }
         if (defNode->addr != NULL)
@@ -1399,7 +1404,7 @@ astNode *constructAST(treenode *root)
         treenode *stmts = arOrB->nextSibling->nextSibling->nextSibling;
         constructAST(arOrB);
         constructAST(stmts);
-        root->addr = initASTNode(AST_FOR, NULL);
+        root->addr = initASTNode(AST_WHILE, NULL);
         root->addr->leftChild = append_at_end(root->addr->leftChild, arOrB->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
         return NULL;
@@ -1446,7 +1451,7 @@ astNode *constructAST(treenode *root)
         treenode *index2 = index1->nextSibling->nextSibling;
         constructAST(index1);
         constructAST(index2);
-        astNode *node = initASTNode(AST_RANGEOP, NULL);
+        astNode *node = initASTNode(AST_RANGE, NULL);
         node->leftChild = append_at_end(node->leftChild, index1->addr);
         node->leftChild = append_at_end(node->leftChild, index2->addr);
         root->addr = node;
@@ -1462,7 +1467,7 @@ void inorder_ast(astNode *root)
     inorder_ast(root->leftChild);
     if (root->label == AST_NUM)
     {
-        printf("Number here:%d", root->tk->integer);
+        printf("num: %d", root->tk->integer);
         // printf("line number at this token %d\n", root->tk->line_num);
     }
     printf("%s\n", EnumToASTString(root->label));
@@ -1477,15 +1482,15 @@ void inorder_ast(astNode *root)
     }
 }
 
-int main()
-{
-    FILE *fp = fopen("random.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-}
+// int main()
+// {
+//     FILE *fp = fopen("random.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+// }

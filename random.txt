@@ -1,31 +1,48 @@
 declare module compute;
-declare module compute;
+declare module ullo;
+
 
 << module compute >>
-    takes input [x:integer];
+    takes input [y: integer];
 returns [value:integer];
 start
-a := a[x+y/2-x*7];
 declare x,y,z:integer;
-use module mod1 with parameters true, -5, -x[2+8*z];
+declare shaurya: integer;
+declare abc,def,ghi,jkl, flag,b:integer;
+declare t:integer;
+[abc]:=use module hello with parameters def,-ghi,jkl;
 switch(flag)
 start
 case false :print(100);
 break;
-case true :use module mod1 with parameters a, b;
-break;
-case 1: 
-get_value(a);
-a:=b+c;
+case true :use module hello with parameters x, b;
 break;
 end
-for( k in 2..8)
+declare op:integer;
+for (k in 2..10)
 start
-a:=(num - k)*(num-k);
-print(a);
+declare op:integer;
+op:=k+t1;
+end
+declare op1:integer;
+op:=1;
+while(x)
+start
+x:=y+z1;
 end
 end
 
     <<<driver program>>>
         start
+declare a,b,c,d:integer;
+a:=b+c;
+b:=d+e;
             end
+
+<< module hello1 >>
+    takes input [y: array [2..10] of real];
+returns [value:integer];
+start
+declare x,y,z:integer;
+declare a:array [2..10] of real;
+end

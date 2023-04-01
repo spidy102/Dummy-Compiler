@@ -16,13 +16,13 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "hashmap.h"
 #include "token_name.h"
 
-int hash(char *str, int length)
+int hash(void *str, int length)
 {
     // printf("what is the string read:%s %d\n", str, length);
     int corr_hash = 0;
     for (int i = 0; i < length; i++)
     {
-        corr_hash += (int)str[i];
+        corr_hash += *((char *)str + i);
     }
     // printf("hash:%d\n", corr_hash % HASHTABLE_SIZE);
     return corr_hash % HASHTABLE_SIZE;
@@ -40,7 +40,7 @@ hashtable initHashtable()
     return ht;
 }
 
-bool insert(hashtable *ht, char *str, int length, token_names tok)
+bool insert(hashtable *ht, void *str, int length, token_names tok)
 {
     int getHash = hash(str, length);
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
@@ -69,7 +69,7 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     return false;
 }
 
-bool exists(hashtable *ht, char *str, int length)
+bool exists(hashtable *ht, void *str, int length)
 {
     int getHash = hash(str, length);
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
@@ -84,7 +84,7 @@ bool exists(hashtable *ht, char *str, int length)
     return false;
 }
 
-bool delete(hashtable ht, char *str, int length)
+bool delete(hashtable ht, void *str, int length)
 {
     if (!exists(&ht, str, length))
         return false;
@@ -113,7 +113,7 @@ bool delete(hashtable ht, char *str, int length)
     return false;
 }
 
-token_names get(hashtable *ht, char *str, int length)
+token_names get(hashtable *ht, void *str, int length)
 {
     int getHash = hash(str, length);
 
