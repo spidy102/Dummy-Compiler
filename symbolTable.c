@@ -11,6 +11,125 @@
 
 SymTablePointer *globalSymbolTable;
 
+void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
+{
+    if (temp->label == AST_ARRAY_DATATYPE)
+    {
+        pointer->isArray = true;
+        if (temp->leftChild->tk->token == INTEGER)
+        {
+            astNode *rangeNode = temp->leftChild->nextSibling;
+            astNode *range1 = rangeNode->leftChild;
+            astNode *range2 = range1->nextSibling;
+            if (range1->label == AST_NUM && range2->label == AST_NUM)
+            {
+                pointer->typeIfArray.low = range1->tk->integer;
+                if (range1->isNegative)
+                {
+                    pointer->typeIfArray.low = -range1->tk->integer;
+                }
+                pointer->typeIfArray.high = range2->tk->integer;
+                if (range2->isNegative)
+                {
+                    pointer->typeIfArray.high = -range2->tk->integer;
+                }
+            }
+            else
+            {
+                if (range1->label == AST_ID)
+                {
+                    pointer->typeIfArray.low_ = true;
+                }
+                if (range2->label == AST_ID)
+                {
+                    pointer->typeIfArray.high_ = true;
+                }
+            }
+            pointer->typeIfArray.type = TYPE_INTEGER;
+        }
+        else if (temp->leftChild->tk->token == BOOLEAN)
+        {
+            astNode *rangeNode = temp->leftChild->nextSibling;
+            astNode *range1 = rangeNode->leftChild;
+            astNode *range2 = range1->nextSibling;
+            if (range1->label == AST_NUM && range2->label == AST_NUM)
+            {
+                pointer->typeIfArray.low = range1->tk->integer;
+                if (range1->isNegative)
+                {
+                    pointer->typeIfArray.low = -range1->tk->integer;
+                }
+                pointer->typeIfArray.high = range2->tk->integer;
+                if (range2->isNegative)
+                {
+                    pointer->typeIfArray.high = -range2->tk->integer;
+                }
+            }
+            else
+            {
+                if (range1->label == AST_ID)
+                {
+                    pointer->typeIfArray.low_ = true;
+                }
+                if (range2->label == AST_ID)
+                {
+                    pointer->typeIfArray.high_ = true;
+                }
+            }
+            pointer->typeIfArray.type = TYPE_BOOLEAN;
+        }
+        else if (temp->leftChild->tk->token == REAL)
+        {
+            astNode *rangeNode = temp->leftChild->nextSibling;
+            astNode *range1 = rangeNode->leftChild;
+            astNode *range2 = range1->nextSibling;
+            if (range1->label == AST_NUM && range2->label == AST_NUM)
+            {
+                pointer->typeIfArray.low = range1->tk->integer;
+                if (range1->isNegative)
+                {
+                    pointer->typeIfArray.low = -range1->tk->integer;
+                }
+                pointer->typeIfArray.high = range2->tk->integer;
+                if (range2->isNegative)
+                {
+                    pointer->typeIfArray.high = -range2->tk->integer;
+                }
+            }
+            else
+            {
+                if (range1->label == AST_ID)
+                {
+                    pointer->typeIfArray.low_ = true;
+                }
+                if (range2->label == AST_ID)
+                {
+                    pointer->typeIfArray.high_ = true;
+                }
+            }
+            pointer->typeIfArray.type = TYPE_REAL;
+        }
+    }
+    else
+    {
+        pointer->isArray = false;
+
+        if (temp->tk->token == INTEGER)
+        {
+
+            pointer->typeIfNotArray = TYPE_INTEGER;
+        }
+        else if (temp->tk->token == BOOL_WIDTH)
+        {
+            pointer->typeIfNotArray = TYPE_BOOLEAN;
+        }
+        else
+        {
+            pointer->typeIfNotArray = TYPE_REAL;
+        }
+    }
+}
+
 int getOffset(SymTablePointer *pointer, int *offset)
 {
     if (!pointer->isArray)
@@ -188,29 +307,18 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             while (idList != NULL)
             {
 
-                if (existsInAnySymTable(module, idList->tk->str))
+                if (existsInSymTable(module->corrHashtable, idList->tk->str))
                 {
 
                     printf("Error: Redeclaration of variable %s at line number %d\n", idList->tk->str, idList->tk->line_num);
                 }
                 else
                 {
+
                     SymTablePointer *pointer = initSymTablePointer();
                     // pointer->typeExpression = stmts->leftChild->nextSibling;
-                    if (stmts->leftChild->nextSibling->label == AST_ARRAY_DATATYPE)
-                    {
-                        astNode *arr_type = stmts->leftChild->nextSibling;
-                        pointer->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
-                        pointer->typeIfArray.high = arr_type->leftChild->nextSibling->leftChild->nextSibling->tk->integer;
-                        pointer->typeIfArray.type = getType(arr_type->leftChild);
-                        pointer->offset = *offset;
-                        *offset += *offset + (pointer->typeIfArray.high - pointer->typeIfArray.low + 1) * (pointer->typeIfArray.type == TYPE_INTEGER ? INT_WIDTH : (pointer->typeIfArray.type == TYPE_BOOLEAN ? (BOOL_WIDTH) : (REAL_WIDTH)));
-                    }
-                    else
-                    {
-                        pointer->typeIfNotArray = getType(stmts->leftChild->nextSibling);
-                        *offset += *offset + (pointer->typeIfNotArray == TYPE_INTEGER ? INT_WIDTH : (pointer->typeIfNotArray == TYPE_BOOLEAN ? BOOL_WIDTH : REAL_WIDTH));
-                    }
+                    populateTypeInformation(pointer, stmts->leftChild->nextSibling);
+                    pointer->offset = getOffset(pointer, offset);
                     pointer->str = idList->tk->str;
                     pointer->tk = idList->tk;
                     insertSymTable(ht, pointer);
@@ -243,6 +351,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 
             hashtable newScopeHashTable = initHashtable();
             SymTablePointer *newPointer = initSymTablePointer();
+            newPointer->typeST = SCOPEST;
             newPointer->corrHashtable = &newScopeHashTable;
             newPointer->parentHashTable = module;
 
@@ -343,6 +452,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             SymTablePointer *forScope = initSymTablePointer();
             module->childScopeTable = append_scope_pointer(module->childScopeTable, forScope);
             forScope->parentHashTable = module;
+            forScope->typeST = SCOPEST;
             hashtable forScopeHashTable = initHashtable();
             forScope->corrHashtable = &forScopeHashTable;
             SymTablePointer *var = initSymTablePointer();
@@ -381,6 +491,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offset)
 {
     hashtable *moduleST = module->corrHashtable;
+
     astNode *mdlDef = root->leftChild->nextSibling->nextSibling->nextSibling;
     if (mdlDef->leftChild == NULL)
     {
@@ -449,24 +560,22 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     pointer->output_para_list = getListFromAST(oplNode, &offset);
                     hashtable ht = initHashtable();
                     pointer->corrHashtable = &ht;
-                    list *temp = pointer->input_para_list;
+                    astNode *temp = iplNode;
                     int offset = 0;
                     while (temp != NULL)
                     {
-                        SymTablePointer *var = initSymTablePointer();
-                        var->isArray = temp->isArray;
-                        var->typeIfNotArray = temp->typeIfNotArray;
-                        var->typeIfArray = temp->typeIfArray;
-                        var->str = temp->tk->str;
-                        var->tk = temp->tk;
-                        var->offset = getOffset(var, &offset);
-                        insertSymTable(pointer->corrHashtable, var);
-                        temp = temp->next;
+                        SymTablePointer *pointer1 = initSymTablePointer();
+
+                        populateTypeInformation(pointer1, temp->leftChild);
+                        pointer1->offset = getOffset(pointer1, &offset);
+                        pointer1->str = temp->leftChild->nextSibling->tk->str;
+                        insertSymTable(pointer->corrHashtable, pointer1);
+                        temp = temp->nextSibling;
                     }
                     pointer->typeST = MODULEST;
                     pointer->parentHashTable = global;
                     populateModuleSymbolTable(pointer, mdls, &offset);
-                    temp = pointer->output_para_list;
+                    // temp = pointer->output_para_list;
                     // while (temp != NULL)
                     // {
                     //     if (!existsInSymTable(pointer->corrHashtable, temp->tk->str))
@@ -490,9 +599,12 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
             pointer->str = "driver";
             hashtable ht = initHashtable();
             pointer->corrHashtable = &ht;
+            pointer->typeST = MODULEST;
+            pointer->parentHashTable = global;
             astNode *stmts = root->leftChild->leftChild->leftChild;
             populateStmtsSymTable(pointer, stmts, &offset);
             root = root->nextSibling;
+
             break;
         }
         }
@@ -528,6 +640,7 @@ int main()
     populate_hashtable(&ht);
     populateParseTable();
     treenode *root = parseInputSourceCode(fp, tb, ht);
+
     astNode *astRoot = constructAST(root);
     inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);

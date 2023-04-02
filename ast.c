@@ -103,7 +103,9 @@ astNode *constructAST(treenode *root)
         mds->inh = NULL;
 
         astNode *mdsNode = constructAST(mds);
+
         astNode *oms2Node = constructAST(oms2);
+
         astNode *oms1Node = constructAST(oms1);
 
         astNode *driModNode = constructAST(drimod);
@@ -168,7 +170,9 @@ astNode *constructAST(treenode *root)
     {
         treenode *mdl = getNodeWithSymbol(module, root);
         treenode *oms1 = getNodeWithSymbol(otherModules, root);
+
         astNode *mdlNode = constructAST(mdl);
+
         oms1->inh = append_at_end(root->inh, mdlNode);
         constructAST(oms1);
         root->syn = oms1->syn;
@@ -196,7 +200,9 @@ astNode *constructAST(treenode *root)
         treenode *modDef = getNodeWithSymbol(moduleDef, root);
 
         astNode *retNode = constructAST(retP);
+
         astNode *modDefNode = constructAST(modDef);
+
         astNode *inputParaListNode = constructAST(inputParaList);
 
         astNode *idNode = initASTNode(AST_ID, NULL);
@@ -239,8 +245,10 @@ astNode *constructAST(treenode *root)
     {
         treenode *dt = getNodeWithSymbol(dataType, root);
         treenode *n_1 = getNodeWithSymbol(n1, root);
+
         astNode *dtNode = constructAST(dt);
         astNode *idNode = initASTNode(AST_ID, NULL);
+
         idNode->tk = root->child->tk;
         dtNode->nextSibling = idNode;
         astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
@@ -281,7 +289,9 @@ astNode *constructAST(treenode *root)
         treenode *dt = getNodeWithSymbol(type, root);
         treenode *n_1 = getNodeWithSymbol(n2, root);
         astNode *dtNode = constructAST(dt);
+
         astNode *idNode = initASTNode(AST_ID, NULL);
+
         idNode->tk = root->child->tk;
         dtNode->nextSibling = idNode;
         astNode *output_para_1 = initASTNode(AST_OUTPUT_PARA, dtNode);
@@ -296,14 +306,19 @@ astNode *constructAST(treenode *root)
     }
     case 14:
     {
-        treenode *dt = getNodeWithSymbol(dataType, root);
+        treenode *dt = getNodeWithSymbol(type, root);
         treenode *n_1 = getNodeWithSymbol(n2, root);
+
         astNode *dtNode = constructAST(dt);
+
         astNode *idNode = initASTNode(AST_ID, NULL);
+
         idNode->tk = root->child->nextSibling->tk;
         dtNode->nextSibling = idNode;
         astNode *input_para_1 = initASTNode(AST_INPUT_PARA, dtNode);
         n_1->inh = append_at_end(root->inh, input_para_1);
+        constructAST(n_1);
+
         root->syn = n_1->syn;
         freeRHSList(root);
         return NULL;
@@ -535,9 +550,13 @@ astNode *constructAST(treenode *root)
         treenode *element_index_with_expressions1 = getNodeWithSymbol(element_index_with_expressions, root);
         astNode *node = initASTNode(AST_ARRAY_ELEMENT, NULL);
         node->leftChild = append_at_end(node->leftChild, root->inh);
+        constructAST(element_index_with_expressions1);
+
         node->leftChild = append_at_end(node->leftChild, element_index_with_expressions1->addr);
         treenode *expression1 = getNodeWithSymbol(expression, root);
+        constructAST(expression1);
         root->addr = expression1->addr;
+        root->syn = node;
         return NULL;
     }
     case 52:
@@ -552,9 +571,11 @@ astNode *constructAST(treenode *root)
         }
         else
         {
-            signNode->leftChild = new_indexNode;
-            astNode *node = initASTNode(AST_SIGNED, signNode);
-            return node;
+            if (signNode->tk->token == MINUS)
+            {
+                new_indexNode->isNegative = true;
+            }
+            return new_indexNode;
         }
     }
     case 53:
@@ -615,10 +636,14 @@ astNode *constructAST(treenode *root)
             rootDash->inh = append_at_end(rootDash->inh, knode->addr);
         else
         {
-            astNode *node = initASTNode(AST_SIGNED, NULL);
-            node->leftChild = signNode1;
-            signNode1->nextSibling = knode->addr;
-            rootDash->inh = append_at_end(rootDash->inh, node);
+            if (signNode1->tk->token == MINUS)
+            {
+                knode->addr->isNegative = true;
+            }
+            // astNode *node = initASTNode(AST_SIGNED, NULL);
+            // node->leftChild = signNode1;
+            // signNode1->nextSibling = knode->addr;
+            rootDash->inh = append_at_end(rootDash->inh, knode->addr);
         }
         constructAST(rootDash);
         root->addr = rootDash->syn;
@@ -659,10 +684,14 @@ astNode *constructAST(treenode *root)
         }
         else
         {
-            astNode *newSignNode = initASTNode(AST_SIGNED, NULL);
-            newSignNode->leftChild = signASTNode;
-            signASTNode->nextSibling = knode->addr;
-            root->addr = newSignNode;
+            if (signASTNode->tk->token == MINUS)
+            {
+                knode->addr->isNegative = true;
+            }
+            // astNode *newSignNode = initASTNode(AST_SIGNED, NULL);
+            // newSignNode->leftChild = signASTNode;
+            // signASTNode->nextSibling = knode->addr;
+            root->addr = knode->addr;
         }
         return NULL;
     }
@@ -1421,9 +1450,11 @@ astNode *constructAST(treenode *root)
         }
         else
         {
-            astNode *signNode1 = initASTNode(AST_SIGNED, NULL);
-            signNode1->leftChild = append_at_end(signNode1->leftChild, signNode->addr);
-            signNode1->leftChild = append_at_end(signNode1->leftChild, indexFor->addr);
+            indexFor->addr->isNegative = true;
+            root->addr = indexFor->addr;
+            // astNode *signNode1 = initASTNode(AST_SIGNED, NULL);
+            // signNode1->leftChild = append_at_end(signNode1->leftChild, signNode->addr);
+            // signNode1->leftChild = append_at_end(signNode1->leftChild, indexFor->addr);
         }
         return NULL;
     }

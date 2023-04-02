@@ -1,12 +1,12 @@
 declare module compute;
 declare module ullo;
-
+declare module hello;
 
 << module compute >>
-    takes input [y: integer];
+    takes input [y: integer, x: array[-2..10] of real];
 returns [value:integer];
 start
-declare x,y,z:integer;
+declare x,y,z:array [-2..10] of real;
 declare shaurya: integer;
 declare abc,def,ghi,jkl, flag,b:integer;
 declare t:integer;

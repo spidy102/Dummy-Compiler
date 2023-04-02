@@ -12,7 +12,6 @@ Dilip Venkatesh - 2020A7PS1203P
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 #include "lexerDef.h"
-#include "ast.h"
 #include "hashmap.h"
 
 #define INT_WIDTH 4
@@ -30,6 +29,8 @@ typedef struct array_type
 {
     int low;
     int high;
+    bool low_;
+    bool high_;
     types type;
 } array_type;
 

@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "symbolTable.h"
+
 typedef enum
 {
 #include "astLabels.txt"
@@ -12,6 +14,8 @@ typedef struct astNode
     struct astNode *leftChild;
     struct astNode *nextSibling;
     token *tk;
+    bool isNegative;
+    SymTablePointer *symTable;
 } astNode;
 
 #endif

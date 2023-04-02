@@ -6,13 +6,14 @@
 
 bool existsInAnySymTable(SymTablePointer *st, char *str)
 {
-    while (st != NULL)
+    while (st->typeST != GLOBALST)
     {
+
         if (existsInSymTable(st->corrHashtable, str))
         {
-
             return true;
         }
+
         st = st->parentHashTable;
     }
 
