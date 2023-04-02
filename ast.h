@@ -16,6 +16,7 @@ typedef struct astNode
     token *tk;
     bool isNegative;
     SymTablePointer *symTable;
+    types type;
 } astNode;
 
 #endif

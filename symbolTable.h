@@ -23,6 +23,7 @@ typedef enum
     TYPE_INTEGER,
     TYPE_REAL,
     TYPE_BOOLEAN,
+    TYPE_ERROR,
 } types;
 
 typedef struct array_type

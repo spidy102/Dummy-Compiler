@@ -58,7 +58,9 @@ bool existsInSymTable(hashtable *ht, char *str)
 SymTablePointer *getFromSymTable(hashtable *ht, char *str)
 {
     int getHash = hash(str, strlen(str));
+
     SymTablePointer *ptr = ht->table[getHash]->bucket_ptr;
+
     while (ptr != NULL)
     {
         if (strcmp(ptr->str, str) == 0)

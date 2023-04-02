@@ -14,7 +14,7 @@ Dilip Venkatesh - 2020A7PS1203P
 
 #include "token_name.h"
 #include <stdbool.h>
-#define HASHTABLE_SIZE 1000
+#define HASHTABLE_SIZE 100
 
 typedef struct BUCKET_NODE
 {
@@ -45,5 +45,7 @@ bool exists(hashtable *ht, void *str, int length);
 bool delete(hashtable ht, void *str, int length);
 
 token_names get(hashtable *ht, void *str, int length);
+
+hashtable *initHashtableForSymTable();
 
 #endif

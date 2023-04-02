@@ -1,0 +1,14 @@
+<<module one>>
+takes input [x: integer, y:real];
+returns [z:real];
+start
+declare ty:integer;
+x:=1+1.2;
+end
+
+<<<driver program>>>
+start
+declare a:integer;
+a:=b+c;
+end
+

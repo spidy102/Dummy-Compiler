@@ -39,6 +39,7 @@ astNode *initASTNode(astNodeLabel label, astNode *leftChild)
     node->label = label;
     node->leftChild = leftChild;
     node->nextSibling = NULL; // need to check;
+    node->symTable = NULL;
     return node;
 }
 
@@ -215,7 +216,7 @@ astNode *constructAST(treenode *root)
         if (inputParaListNode != NULL)
         {
             moduleNode->leftChild = append_at_end(moduleNode->leftChild, inputParaListNode);
-        }
+        } // need to add this node here..(if null)
         if (retNode != NULL)
         {
             moduleNode->leftChild = append_at_end(moduleNode->leftChild, retNode);
@@ -333,6 +334,7 @@ astNode *constructAST(treenode *root)
     {
         astNode *dt = initASTNode(AST_DATATYPE, NULL);
         dt->tk = root->child->tk;
+        freeRHSList(root);
         return dt;
     }
     case 19:
@@ -355,13 +357,14 @@ astNode *constructAST(treenode *root)
         astNode *index_arr2Node = constructAST(index_arr2);
 
         index_arr1Node->nextSibling = index_arr2Node;
-
+        freeRHSList(root);
         return initASTNode(AST_RANGE, index_arr1Node);
     }
     case 21 ... 23:
     {
         astNode *dt = initASTNode(AST_DATATYPE, NULL);
         dt->tk = root->child->tk;
+        freeRHSList(root);
         return dt;
     }
 
@@ -408,6 +411,7 @@ astNode *constructAST(treenode *root)
     {
         constructAST(root->child);
         root->addr = root->child->addr;
+        freeRHSList(root);
         return root->addr;
     }
     case 32:
@@ -475,27 +479,32 @@ astNode *constructAST(treenode *root)
     {
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
+        freeRHSList(root);
         return numNode;
     }
     case 41:
     {
         astNode *rnumNode = initASTNode(AST_RNUM, NULL);
         rnumNode->tk = root->child->tk;
+        freeRHSList(root);
         return rnumNode;
     }
     case 42:
     {
         astNode *boolNode = constructAST(root->child);
+        freeRHSList(root);
         return boolNode;
     }
     case 43:
     {
+        freeRHSList(root);
         return NULL;
     }
     case 44:
     {
         treenode *indexArr = getNodeWithSymbol(index_arr, root);
         astNode *indexArrNode = constructAST(indexArr);
+        freeRHSList(root);
         return indexArrNode;
     }
     case 45 ... 46:
@@ -517,6 +526,7 @@ astNode *constructAST(treenode *root)
         assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->syn);
         assignNode->leftChild = append_at_end(assignNode->leftChild, whichSt->addr);
         root->addr = assignNode;
+        freeRHSList(root);
         return assignNode;
     }
     case 48:
@@ -526,6 +536,7 @@ astNode *constructAST(treenode *root)
 
         root->addr = lvalueIDStmt1->addr;
         root->syn = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 49:
@@ -535,6 +546,7 @@ astNode *constructAST(treenode *root)
         astNode *node = constructAST(lvalueARRStmt1);
         root->syn = lvalueARRStmt1->syn;
         root->addr = lvalueARRStmt1->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 50:
@@ -542,7 +554,7 @@ astNode *constructAST(treenode *root)
         treenode *expression1 = getNodeWithSymbol(expression, root);
         constructAST(expression1);
         root->addr = expression1->addr;
-
+        freeRHSList(root);
         return NULL;
     }
     case 51:
@@ -557,6 +569,7 @@ astNode *constructAST(treenode *root)
         constructAST(expression1);
         root->addr = expression1->addr;
         root->syn = node;
+        freeRHSList(root);
         return NULL;
     }
     case 52:
@@ -567,6 +580,7 @@ astNode *constructAST(treenode *root)
         astNode *new_indexNode = constructAST(new_index1);
         if (signNode == NULL)
         {
+            freeRHSList(root);
             return new_indexNode;
         }
         else
@@ -575,6 +589,7 @@ astNode *constructAST(treenode *root)
             {
                 new_indexNode->isNegative = true;
             }
+            freeRHSList(root);
             return new_indexNode;
         }
     }
@@ -582,18 +597,21 @@ astNode *constructAST(treenode *root)
     {
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
+        freeRHSList(root);
         return numNode;
     }
     case 54:
     {
         astNode *numNode = initASTNode(AST_ID, NULL);
         numNode->tk = root->child->tk;
+        freeRHSList(root);
         return numNode;
     }
     case 55 ... 56:
     {
         astNode *node = initASTNode(AST_SIGN, NULL);
         node->tk = root->child->tk;
+        freeRHSList(root);
         return node;
     }
     case 57:
@@ -623,6 +641,7 @@ astNode *constructAST(treenode *root)
             newNode->leftChild = actualPara->addr;
             node->leftChild = append_at_end(node->leftChild, newNode);
         }
+        freeRHSList(root);
         return node;
     }
     case 59:
@@ -647,6 +666,7 @@ astNode *constructAST(treenode *root)
         }
         constructAST(rootDash);
         root->addr = rootDash->syn;
+        freeRHSList(root);
         return NULL;
     }
     case 60:
@@ -657,6 +677,7 @@ astNode *constructAST(treenode *root)
         rootDash->inh = append_at_end(root->inh, boolNode);
         constructAST(rootDash);
         root->addr = rootDash->syn;
+        freeRHSList(root);
         return NULL;
     }
     case 61:
@@ -669,7 +690,7 @@ astNode *constructAST(treenode *root)
         constructAST(root1);
 
         root->syn = root1->syn;
-
+        freeRHSList(root);
         return NULL;
     }
     case 62:
@@ -693,16 +714,19 @@ astNode *constructAST(treenode *root)
             // signASTNode->nextSibling = knode->addr;
             root->addr = knode->addr;
         }
+        freeRHSList(root);
         return NULL;
     }
     case 63:
     {
         root->addr = constructAST(root->child);
+        freeRHSList(root);
         return NULL;
     }
     case 64:
     {
         root->syn = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 65:
@@ -710,6 +734,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 66:
@@ -717,6 +742,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_RNUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 67:
@@ -735,28 +761,33 @@ astNode *constructAST(treenode *root)
             root->addr = initASTNode(AST_ARRAY_ELEMENT, idAstNode);
             root->addr->leftChild = append_at_end(root->addr->leftChild, n11Node->addr);
         }
+        freeRHSList(root);
         return NULL;
     }
     case 68:
     {
         constructAST(root->child->nextSibling);
         root->addr = root->child->nextSibling->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 69:
     {
         root->addr = NULL;
+        freeRHSList(root);
         return NULL;
     }
     case 70:
     {
         constructAST(root->child->nextSibling);
         root->addr = initASTNode(AST_OPTIONAL, root->child->nextSibling->syn);
+        freeRHSList(root);
         return NULL;
     }
     case 71:
     {
         root->addr = NULL;
+        freeRHSList(root);
         return NULL;
     }
     case 72:
@@ -769,6 +800,7 @@ astNode *constructAST(treenode *root)
         constructAST(n3Node);
         astNode *node = initASTNode(AST_IDLIST, n3Node->syn);
         root->syn = node;
+        freeRHSList(root);
         return NULL;
     }
     case 73:
@@ -781,23 +813,27 @@ astNode *constructAST(treenode *root)
         constructAST(n3Node);
 
         root->syn = n3Node->syn;
+        freeRHSList(root);
         return NULL;
     }
     case 74:
     {
         root->syn = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 75:
     {
         constructAST(root->child);
         root->addr = root->child->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 76:
     {
         constructAST(root->child);
         root->addr = root->child->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 77:
@@ -809,18 +845,21 @@ astNode *constructAST(treenode *root)
         node->leftChild = append_at_end(node->leftChild, unary->addr);
         node->leftChild = append_at_end(node->leftChild, root->child->nextSibling->addr);
         root->addr = node;
+        freeRHSList(root);
         return NULL;
     }
     case 78:
     {
         constructAST(root->child->nextSibling);
         root->addr = root->child->nextSibling->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 79:
     {
         constructAST(root->child);
         root->addr = root->child->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 80:
@@ -828,6 +867,7 @@ astNode *constructAST(treenode *root)
         astNode *idNode = initASTNode(AST_ID, NULL);
         idNode->tk = root->child->tk;
         root->addr = idNode;
+        freeRHSList(root);
         return NULL;
     }
     case 81:
@@ -835,6 +875,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 82:
@@ -842,6 +883,7 @@ astNode *constructAST(treenode *root)
         astNode *rnumNode = initASTNode(AST_RNUM, NULL);
         rnumNode->tk = root->child->tk;
         root->addr = rnumNode;
+        freeRHSList(root);
         return NULL;
     }
     case 83 ... 84:
@@ -849,6 +891,7 @@ astNode *constructAST(treenode *root)
         astNode *signNode = initASTNode(AST_SIGN, NULL);
         signNode->tk = root->child->tk;
         root->addr = signNode;
+        freeRHSList(root);
         return NULL;
     }
     case 85:
@@ -860,6 +903,7 @@ astNode *constructAST(treenode *root)
         constructAST(n71);
 
         root->addr = n71->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 86:
@@ -879,6 +923,7 @@ astNode *constructAST(treenode *root)
 
             node->leftChild = append_at_end(node->leftChild, n71->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (logOp->addr->tk->token == OR)
@@ -887,12 +932,14 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, n71->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
     }
     case 87:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 88:
@@ -903,11 +950,13 @@ astNode *constructAST(treenode *root)
         n81->inh = arithmeticExpr1->addr;
         constructAST(n81);
         root->addr = n81->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 89:
     {
         root->addr = constructAST(root->child);
+        freeRHSList(root);
         return NULL;
     }
     case 90:
@@ -922,6 +971,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (relOp->addr->tk->token == LE)
@@ -930,6 +980,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (relOp->addr->tk->token == GT)
@@ -938,6 +989,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (relOp->addr->tk->token == GE)
@@ -946,6 +998,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (relOp->addr->tk->token == EQ)
@@ -954,6 +1007,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
         else if (relOp->addr->tk->token == NE)
@@ -962,12 +1016,14 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, root->inh);
             node->leftChild = append_at_end(node->leftChild, arithmeticExpr1->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
     }
     case 91:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 92:
@@ -985,6 +1041,7 @@ astNode *constructAST(treenode *root)
         {
             root->addr = termNode->addr;
         }
+        freeRHSList(root);
         return NULL;
     }
     case 93:
@@ -1004,12 +1061,14 @@ astNode *constructAST(treenode *root)
             {
 
                 root->addr = initASTNode(AST_PLUS, NULL);
+                root->addr->tk = op1Node->tk;
                 root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
                 root->addr->leftChild = append_at_end(root->addr->leftChild, n41->addr);
             }
             else
             {
                 root->addr = initASTNode(AST_MINUS, NULL);
+                root->addr->tk = op1Node->tk;
                 root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
                 root->addr->leftChild = append_at_end(root->addr->leftChild, n41->addr);
             }
@@ -1021,6 +1080,7 @@ astNode *constructAST(treenode *root)
             {
 
                 root->addr = initASTNode(AST_PLUS, NULL);
+                root->addr->tk = op1Node->tk;
                 root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
 
                 root->addr->leftChild = append_at_end(root->addr->leftChild, term1->addr);
@@ -1028,15 +1088,18 @@ astNode *constructAST(treenode *root)
             else
             {
                 root->addr = initASTNode(AST_MINUS, NULL);
+                root->addr->tk = op1Node->tk;
                 root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
                 root->addr->leftChild = append_at_end(root->addr->leftChild, term1->addr);
             }
         }
+        freeRHSList(root);
         return NULL;
     }
     case 94:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 95:
@@ -1054,6 +1117,7 @@ astNode *constructAST(treenode *root)
         {
             root->addr = factorNode->addr;
         }
+        freeRHSList(root);
         return NULL;
     }
     case 96:
@@ -1069,20 +1133,24 @@ astNode *constructAST(treenode *root)
         {
 
             root->addr = initASTNode(AST_MUL, NULL);
+            root->addr->tk = op2Node->tk;
             root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
             root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
         }
         else
         {
             root->addr = initASTNode(AST_DIV, NULL);
+            root->addr->tk = op2Node->tk;
             root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
             root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
         }
+        freeRHSList(root);
         return NULL;
     }
     case 97:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 98:
@@ -1090,6 +1158,7 @@ astNode *constructAST(treenode *root)
         treenode *node = root->child->nextSibling;
         constructAST(node);
         root->addr = node->addr;
+        freeRHSList(root);
         return NULL;
     }
     //
@@ -1098,6 +1167,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 100:
@@ -1105,6 +1175,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_RNUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     // case 101:
@@ -1123,6 +1194,7 @@ astNode *constructAST(treenode *root)
         {
 
             root->addr = idNode;
+            freeRHSList(root);
             return NULL;
         }
         else
@@ -1131,6 +1203,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, idNode);
             node->leftChild = append_at_end(node->leftChild, arr_ele->addr);
             root->addr = node;
+            freeRHSList(root);
             return NULL;
         }
     }
@@ -1139,11 +1212,13 @@ astNode *constructAST(treenode *root)
         treenode *index_with_exp = root->child->nextSibling;
         constructAST(index_with_exp);
         root->addr = index_with_exp->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 103:
     {
         root->addr = NULL;
+        freeRHSList(root);
         return NULL;
     }
     case 104:
@@ -1156,6 +1231,7 @@ astNode *constructAST(treenode *root)
         node->leftChild = append_at_end(node->leftChild, signNode1);
         node->leftChild = append_at_end(node->leftChild, n10->addr);
         root->addr = node;
+        freeRHSList(root);
         return NULL;
     }
     case 105:
@@ -1163,24 +1239,28 @@ astNode *constructAST(treenode *root)
         treenode *arrE = root->child;
         constructAST(arrE);
         root->addr = arrE->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 106:
     {
         astNode *boolNode = constructAST(root->child);
         root->addr = boolNode;
+        freeRHSList(root);
         return NULL;
     }
     case 107:
     {
         constructAST(root->child);
         root->addr = root->child->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 108:
     {
         constructAST(root->child->nextSibling);
         root->addr = root->child->nextSibling->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 109:
@@ -1191,12 +1271,14 @@ astNode *constructAST(treenode *root)
         arrN4->inh = arrT->addr;
         constructAST(arrN4);
         root->addr = arrN4->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 110:
     {
         astNode *boolNode = constructAST(root->child);
         root->addr = boolNode;
+        freeRHSList(root);
         return NULL;
     }
     case 111:
@@ -1222,11 +1304,13 @@ astNode *constructAST(treenode *root)
             root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
             root->addr->leftChild = append_at_end(root->addr->leftChild, arrN4->addr);
         }
+        freeRHSList(root);
         return NULL;
     }
     case 112:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 113:
@@ -1244,6 +1328,7 @@ astNode *constructAST(treenode *root)
         {
             root->addr = factorNode->addr;
         }
+        freeRHSList(root);
         return NULL;
     }
     case 114:
@@ -1268,11 +1353,13 @@ astNode *constructAST(treenode *root)
             root->addr->leftChild = append_at_end(root->addr->leftChild, root->inh);
             root->addr->leftChild = append_at_end(root->addr->leftChild, n51->addr);
         }
+        freeRHSList(root);
         return NULL;
     }
     case 115:
     {
         root->addr = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 116:
@@ -1280,6 +1367,7 @@ astNode *constructAST(treenode *root)
         astNode *idNode = initASTNode(AST_ID, NULL);
         idNode->tk = root->child->tk;
         root->addr = idNode;
+        freeRHSList(root);
         return NULL;
     }
     case 117:
@@ -1287,6 +1375,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 118:
@@ -1294,6 +1383,7 @@ astNode *constructAST(treenode *root)
         treenode *expr = root->child->nextSibling;
         constructAST(expr);
         root->addr = expr->addr;
+        freeRHSList(root);
         return NULL;
     }
     case 119 ... 130:
@@ -1301,7 +1391,7 @@ astNode *constructAST(treenode *root)
         root->addr = initASTNode(AST_ID, NULL);
 
         root->addr->tk = root->child->tk;
-
+        freeRHSList(root);
         return NULL;
     }
     case 131:
@@ -1316,6 +1406,7 @@ astNode *constructAST(treenode *root)
         root->addr = initASTNode(AST_DECLARE, NULL);
         root->addr->leftChild = root->syn;
         root->addr->leftChild->nextSibling = dt;
+        freeRHSList(root);
         return NULL;
     }
     case 132:
@@ -1341,6 +1432,7 @@ astNode *constructAST(treenode *root)
             node->leftChild = append_at_end(node->leftChild, defNode->addr);
         }
         root->addr = node;
+        freeRHSList(root);
         return NULL;
     }
     case 133:
@@ -1360,6 +1452,7 @@ astNode *constructAST(treenode *root)
         n9Node->inh = append_at_end(root->inh, caseNode);
         constructAST(n9Node);
         root->syn = n9Node->syn;
+        freeRHSList(root);
         return NULL;
     }
     case 134:
@@ -1378,11 +1471,13 @@ astNode *constructAST(treenode *root)
         n9Node->inh = append_at_end(root->inh, caseNode);
         constructAST(n9Node);
         root->syn = n9Node->syn;
+        freeRHSList(root);
         return NULL;
     }
     case 135:
     {
         root->syn = root->inh;
+        freeRHSList(root);
         return NULL;
     }
     case 136:
@@ -1390,6 +1485,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 137 ... 138:
@@ -1397,6 +1493,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_BOOL, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 139:
@@ -1405,11 +1502,13 @@ astNode *constructAST(treenode *root)
         astNode *stmtsAST = constructAST(stmtsNode);
         astNode *newNode = initASTNode(AST_DEFAULT, NULL);
         newNode->leftChild = stmtsAST;
+        freeRHSList(root);
         return NULL;
     }
     case 140:
     {
         root->addr = NULL;
+        freeRHSList(root);
         return NULL;
     }
     case 141:
@@ -1425,6 +1524,7 @@ astNode *constructAST(treenode *root)
         root->addr->leftChild = append_at_end(root->addr->leftChild, idAST);
         root->addr->leftChild = append_at_end(root->addr->leftChild, rangeFor->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
+        freeRHSList(root);
         return NULL;
     }
     case 142:
@@ -1436,6 +1536,7 @@ astNode *constructAST(treenode *root)
         root->addr = initASTNode(AST_WHILE, NULL);
         root->addr->leftChild = append_at_end(root->addr->leftChild, arOrB->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
+        freeRHSList(root);
         return NULL;
     }
     case 143:
@@ -1456,6 +1557,7 @@ astNode *constructAST(treenode *root)
             // signNode1->leftChild = append_at_end(signNode1->leftChild, signNode->addr);
             // signNode1->leftChild = append_at_end(signNode1->leftChild, indexFor->addr);
         }
+        freeRHSList(root);
         return NULL;
     }
     case 144:
@@ -1463,6 +1565,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         root->addr = numNode;
+        freeRHSList(root);
         return NULL;
     }
     case 145 ... 146:
@@ -1470,10 +1573,12 @@ astNode *constructAST(treenode *root)
         astNode *node = initASTNode(AST_SIGN, NULL);
         node->tk = root->child->tk;
         root->addr = node;
+        freeRHSList(root);
         return NULL;
     }
     case 147:
     {
+        freeRHSList(root);
         return NULL;
     }
     case 148:
@@ -1486,6 +1591,7 @@ astNode *constructAST(treenode *root)
         node->leftChild = append_at_end(node->leftChild, index1->addr);
         node->leftChild = append_at_end(node->leftChild, index2->addr);
         root->addr = node;
+        freeRHSList(root);
         return NULL;
     }
     }

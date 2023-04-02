@@ -40,6 +40,18 @@ hashtable initHashtable()
     return ht;
 }
 
+hashtable *initHashtableForSymTable()
+{
+    hashtable *ht = malloc(sizeof(hashtable));
+    for (int i = 0; i < HASHTABLE_SIZE; i++)
+    {
+        ht->table[i] = malloc(sizeof(hashtable_node));
+        ht->table[i]->idx = i;
+        ht->table[i]->bucket_ptr = NULL;
+    }
+    return ht;
+}
+
 bool insert(hashtable *ht, void *str, int length, token_names tok)
 {
     int getHash = hash(str, length);

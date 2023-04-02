@@ -8,6 +8,7 @@
 #include "astDef.h"
 #include "symTableUtil.h"
 #include "symbolTable.h"
+#include "symbolTableDef.h"
 
 SymTablePointer *globalSymbolTable;
 
@@ -349,11 +350,13 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 printf("Error: variable %s at line number %d is not defined in this scope\n", idNode->tk->str, idNode->tk->line_num);
             }
 
-            hashtable newScopeHashTable = initHashtable();
+            hashtable *newScopeHashTable = initHashtableForSymTable();
             SymTablePointer *newPointer = initSymTablePointer();
             newPointer->typeST = SCOPEST;
-            newPointer->corrHashtable = &newScopeHashTable;
+            newPointer->corrHashtable = newScopeHashTable;
             newPointer->parentHashTable = module;
+
+            stmts->symTable = newPointer; // attach sym table with ast node;
 
             if (module->childScopeTable == NULL)
             {
@@ -453,8 +456,9 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             module->childScopeTable = append_scope_pointer(module->childScopeTable, forScope);
             forScope->parentHashTable = module;
             forScope->typeST = SCOPEST;
-            hashtable forScopeHashTable = initHashtable();
-            forScope->corrHashtable = &forScopeHashTable;
+            stmts->symTable = forScope; // attach sym table with for's new scope;
+            hashtable *forScopeHashTable = initHashtableForSymTable();
+            forScope->corrHashtable = forScopeHashTable;
             SymTablePointer *var = initSymTablePointer();
             var->typeIfNotArray = TYPE_INTEGER;
             var->isArray = false;
@@ -474,8 +478,10 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             SymTablePointer *whileScope = initSymTablePointer();
             module->childScopeTable = append_scope_pointer(module->childScopeTable, whileScope);
             whileScope->parentHashTable = module;
-            hashtable whileScopeHashTable = initHashtable();
-            whileScope->corrHashtable = &whileScopeHashTable;
+            whileScope->typeST = SCOPEST;
+            stmts->symTable = whileScope;
+            hashtable *whileScopeHashTable = initHashtableForSymTable();
+            whileScope->corrHashtable = whileScopeHashTable;
             astNode *whileStmts = stmts->leftChild->nextSibling->leftChild;
             traverse_ast(stmts->leftChild, module);
             int offset1 = 0;
@@ -505,6 +511,8 @@ void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offs
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset)
 {
     hashtable *globalST = global->corrHashtable;
+    astRoot->symTable = global;
+
     astNode *root = astRoot->leftChild;
     while (root != NULL)
     {
@@ -540,7 +548,8 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
             while (mdls != NULL)
             {
                 astNode *corrID = mdls->leftChild;
-                SymTablePointer *pointer = malloc(sizeof(SymTablePointer));
+                SymTablePointer *pointer = initSymTablePointer();
+
                 pointer->str = corrID->tk->str;
                 if (existsInSymTable(globalST, pointer->str) && !getFromSymTable(globalST, pointer->str)->isAwaited)
                 {
@@ -558,8 +567,8 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     astNode *oplNode = iplNode->nextSibling;
                     pointer->input_para_list = getListFromAST(iplNode, &offset);
                     pointer->output_para_list = getListFromAST(oplNode, &offset);
-                    hashtable ht = initHashtable();
-                    pointer->corrHashtable = &ht;
+                    hashtable *ht = initHashtableForSymTable();
+                    pointer->corrHashtable = ht;
                     astNode *temp = iplNode;
                     int offset = 0;
                     while (temp != NULL)
@@ -575,6 +584,12 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     pointer->typeST = MODULEST;
                     pointer->parentHashTable = global;
                     populateModuleSymbolTable(pointer, mdls, &offset);
+                    mdls->symTable = pointer;
+                    // if (existsInSymTable(pointer->corrHashtable, "ty"))
+                    // {
+                    //     printf("yes exists\n\n");
+                    // }
+
                     // temp = pointer->output_para_list;
                     // while (temp != NULL)
                     // {
@@ -586,7 +601,6 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     //     temp = temp->next;
                     // }
                 }
-
                 mdls = mdls->nextSibling;
             }
             root = root->nextSibling;
@@ -595,16 +609,17 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
         }
         case AST_DRIVERMODULE:
         {
-            SymTablePointer *pointer = malloc(sizeof(SymTablePointer));
+            SymTablePointer *pointer = initSymTablePointer();
             pointer->str = "driver";
-            hashtable ht = initHashtable();
-            pointer->corrHashtable = &ht;
+            hashtable *ht = initHashtableForSymTable();
+            root->symTable = pointer;
+            pointer->corrHashtable = ht;
             pointer->typeST = MODULEST;
             pointer->parentHashTable = global;
             astNode *stmts = root->leftChild->leftChild->leftChild;
             populateStmtsSymTable(pointer, stmts, &offset);
             root = root->nextSibling;
-
+            insertSymTable(globalST, pointer);
             break;
         }
         }
@@ -626,22 +641,22 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
     }
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable *ht1 = initHashtableForSymTable();
+//     globalSymbolTable->corrHashtable = ht1;
+//     FILE *fp = fopen("random1.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
 
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-}
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+// }
