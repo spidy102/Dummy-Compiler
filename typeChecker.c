@@ -227,6 +227,102 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
     }
 }
 
+void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePointer *symTable)
+{
+    int i = 0;
+    astNode *temp = actual_params;
+    int line;
+    if (temp->label == AST_ARRAY_ELEMENT)
+    {
+        line = temp->leftChild->tk->line_num;
+    }
+    else
+    {
+        line = temp->tk->line_num;
+    }
+    while (actual_params != NULL && ipl != NULL)
+    {
+        switch (actual_params->label)
+        {
+        case AST_NUM:
+        case AST_RNUM:
+        case AST_BOOL:
+        case AST_ID:
+        case AST_ARRAY_ELEMENT:
+        {
+            getAttributeType(actual_params, symTable);
+            if (ipl->isArray)
+            {
+                if (actual_params->type != TYPE_ARR_BOOL || actual_params->type != TYPE_ARR_REAL || actual_params->type != TYPE_ARR_BOOL)
+                {
+                    printf("Error: type mismatch in parameter %d on line number %d, received %s, required array\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type));
+                }
+            }
+            else if (ipl->typeIfNotArray != actual_params->type)
+            {
+                printf("Error: type mismatch in parameter %d on line number %d, received %s, required %s\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type), EnumToTypeString(ipl->typeIfNotArray));
+            }
+            actual_params = actual_params->nextSibling;
+            ipl = ipl->next;
+            break;
+        }
+        }
+        i++;
+    }
+    if (ipl != NULL)
+    {
+        printf("Error: Received too few input arguments for function call on line number %d\n", line);
+    }
+    if (actual_params != NULL)
+    {
+        printf("Error: received too many input arguments for function call on line number %d\n", line);
+    }
+}
+
+void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, int line)
+{
+    int i = 0;
+    while (retParams != NULL && opl != NULL)
+    {
+        switch (retParams->label)
+        {
+        case AST_NUM:
+        case AST_RNUM:
+        case AST_BOOL:
+        case AST_ID:
+        case AST_ARRAY_ELEMENT:
+        {
+
+            getAttributeType(retParams, symTable);
+            if (opl->isArray)
+            {
+                if (retParams->type != TYPE_ARR_BOOL || retParams->type != TYPE_ARR_REAL || retParams->type != TYPE_ARR_BOOL)
+                {
+                    printf("Error: type mismatch in output parameter %d on line number %d, received %s, required array\n", i + 1, retParams->tk->line_num, EnumToTypeString(retParams->type));
+                }
+            }
+            else if (opl->typeIfNotArray != retParams->type)
+            {
+                printf("Error: type mismatch in output parameter %d on line number %d, received %s, required %s\n", i + 1, retParams->tk->line_num, EnumToTypeString(retParams->type), EnumToTypeString(opl->typeIfNotArray));
+            }
+            retParams = retParams->nextSibling;
+            opl = opl->next;
+            break;
+        }
+        }
+        i++;
+    }
+    if (opl != NULL)
+    {
+
+        printf("Error: too few output parameters for function call at line number %d\n", line);
+    }
+    if (retParams != NULL)
+    {
+        printf("Error: too many output parameters for function call at line number %d\n", line);
+    }
+}
+
 void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
 {
     while (stmts != NULL)
@@ -282,6 +378,42 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
             SymTablePointer *symTableInThisScope = stmts->symTable;
             astNode *stmtsNode = stmts->leftChild->nextSibling;
             checkTypesForModule(symTableInThisScope, stmtsNode);
+            stmts = stmts->nextSibling;
+            break;
+        }
+        case AST_MODULE_REUSE:
+        {
+            astNode *params = stmts->leftChild;
+            SymTablePointer *ptr = getFromSymTable(globalSymbolTable->corrHashtable, params->nextSibling->tk->str);
+            while (params != NULL)
+            {
+
+                switch (params->label)
+                {
+                case AST_ID:
+                {
+                    // ptr = getFromSymTable(globalSymbolTable->corrHashtable, params->tk->str);
+                    params = params->nextSibling;
+                    break;
+                }
+                case AST_ACTUAL_PARA:
+                {
+                    astNode *actualParams = params->leftChild;
+                    list *ipl = ptr->input_para_list;
+                    compareActualAndFormalParams(ipl, actualParams, symTable);
+                    params = params->nextSibling;
+                    break;
+                }
+                case AST_OPTIONAL:
+                {
+                    astNode *retParams = params->leftChild->leftChild;
+                    list *opl = ptr->output_para_list;
+                    compareRetParams(opl, retParams, symTable, params->tk->line_num);
+                    params = params->nextSibling;
+                    break;
+                }
+                }
+            }
             stmts = stmts->nextSibling;
             break;
         }

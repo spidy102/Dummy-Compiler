@@ -6,7 +6,8 @@
     "token_name.h": "c",
     "stdbool.h": "c",
     "stdlib.h": "c",
-    "parser.h": "c"
+    "parser.h": "c",
+    "symboltabledef.h": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

@@ -278,6 +278,7 @@ list *getListFromAST(astNode *pl, int *offset)
     {
         if (pl->leftChild->label != AST_ARRAY_DATATYPE)
         {
+            head->isArray = false;
             head->typeIfNotArray = getType(pl->leftChild);
             if (head->typeIfNotArray == TYPE_INTEGER)
             {
@@ -297,7 +298,7 @@ list *getListFromAST(astNode *pl, int *offset)
         }
         else
         {
-
+            head->isArray = true;
             astNode *arr_type = pl->leftChild;
             // HAVE TO INCORPORATE SIGNED CASES TOO
             head->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
@@ -457,6 +458,11 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 {
                 case AST_OPTIONAL:
                 {
+                    if (children->leftChild == NULL)
+                    {
+                        children = children->nextSibling;
+                        break;
+                    }
                     astNode *idList = children->leftChild->leftChild;
 
                     while (idList != NULL)

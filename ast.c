@@ -636,6 +636,13 @@ astNode *constructAST(treenode *root)
         {
             node->leftChild = append_at_end(node->leftChild, optionalNode->addr);
         }
+        else
+        {
+            printf("is here\n\n");
+            astNode *newNode = initASTNode(AST_OPTIONAL, NULL);
+            newNode->tk = root->child->nextSibling->tk;
+            node->leftChild = append_at_end(node->leftChild, newNode);
+        }
         node->leftChild = append_at_end(node->leftChild, idNode);
         if (actualPara->addr != NULL)
         {
@@ -783,6 +790,7 @@ astNode *constructAST(treenode *root)
     {
         constructAST(root->child->nextSibling);
         root->addr = initASTNode(AST_OPTIONAL, root->child->nextSibling->syn);
+        root->addr->tk = root->child->tk;
         freeRHSList(root);
         return NULL;
     }
