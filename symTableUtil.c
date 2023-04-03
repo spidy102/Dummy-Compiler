@@ -71,3 +71,19 @@ SymTablePointer *getFromSymTable(hashtable *ht, char *str)
     }
     return NULL;
 }
+
+SymTablePointer *getFromAnySymTable(SymTablePointer *st, char *str)
+{
+    while (st->typeST != GLOBALST)
+    {
+
+        if (existsInSymTable(st->corrHashtable, str))
+        {
+
+            return getFromSymTable(st->corrHashtable, str);
+        }
+
+        st = st->parentHashTable;
+    }
+    return NULL;
+}

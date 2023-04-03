@@ -598,6 +598,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_NUM, NULL);
         numNode->tk = root->child->tk;
         freeRHSList(root);
+        root->addr = numNode;
         return numNode;
     }
     case 54:
@@ -605,6 +606,7 @@ astNode *constructAST(treenode *root)
         astNode *numNode = initASTNode(AST_ID, NULL);
         numNode->tk = root->child->tk;
         freeRHSList(root);
+        root->addr = numNode;
         return numNode;
     }
     case 55 ... 56:

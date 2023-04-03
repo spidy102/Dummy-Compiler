@@ -12,4 +12,6 @@ bool existsInAnySymTable(SymTablePointer *st, char *str);
 
 SymTablePointer *getFromSymTable(hashtable *ht, char *str);
 
+SymTablePointer *getFromAnySymTable(SymTablePointer *st, char *str);
+
 #endif

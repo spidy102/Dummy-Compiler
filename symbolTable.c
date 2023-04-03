@@ -9,10 +9,13 @@
 #include "symTableUtil.h"
 #include "symbolTable.h"
 #include "symbolTableDef.h"
+#include <stdbool.h>
+
+bool semanticallyCorrect = true;
 
 SymTablePointer *globalSymbolTable;
 
-void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
+void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePointer *parent)
 {
     if (temp->label == AST_ARRAY_DATATYPE)
     {
@@ -39,10 +42,30 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
             {
                 if (range1->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range1->tk->str))
+                    {
+                        printf("Error: variable %s at line number %d is not declared\n", range1->tk->str, range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
+                    else if (getFromAnySymTable(parent, range1->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                     pointer->typeIfArray.low_ = true;
                 }
                 if (range2->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range2->tk->str))
+                    {
+                        printf("Error: variable %s at line number %d is not declared\n", range2->tk->str, range2->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
+                    else if (getFromAnySymTable(parent, range2->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range2->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                     pointer->typeIfArray.high_ = true;
                 }
             }
@@ -70,10 +93,28 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
             {
                 if (range1->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range1->tk->str))
+                    {
+                        printf("Error: variable %s at line number %d is not declared\n", range1->tk->str, range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
+                    else if (getFromAnySymTable(parent, range1->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                     pointer->typeIfArray.low_ = true;
                 }
                 if (range2->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range2->tk->str))
+                    {
+                        printf("Error: variable %s at line number %d is not declared\n", range2->tk->str, range2->tk->line_num);
+                    }
+                    else if (getFromAnySymTable(parent, range2->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range2->tk->line_num);
+                    }
                     pointer->typeIfArray.high_ = true;
                 }
             }
@@ -101,10 +142,30 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
             {
                 if (range1->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range1->tk->str))
+                    {
+                        printf("Error: variable %s in array bound for %s at line number %d is not declared\n", range1->tk->str, pointer->str, range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
+                    else if (getFromAnySymTable(parent, range1->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range1->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                     pointer->typeIfArray.low_ = true;
                 }
                 if (range2->label == AST_ID)
                 {
+                    if (!existsInAnySymTable(parent, range2->tk->str))
+                    {
+                        printf("Error: variable %s at line number %d is not declared", range2->tk->str, range2->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
+                    else if (getFromAnySymTable(parent, range2->tk->str)->typeIfNotArray != TYPE_INTEGER)
+                    {
+                        printf("Error: received non integral array bounds at line number %d\n", range2->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                     pointer->typeIfArray.high_ = true;
                 }
             }
@@ -120,7 +181,7 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp)
 
             pointer->typeIfNotArray = TYPE_INTEGER;
         }
-        else if (temp->tk->token == BOOL_WIDTH)
+        else if (temp->tk->token == BOOLEAN)
         {
             pointer->typeIfNotArray = TYPE_BOOLEAN;
         }
@@ -281,6 +342,7 @@ void traverse_ast(astNode *root, SymTablePointer *st)
         if (!existsInAnySymTable(st, root->tk->str))
         {
             printf("Error: variable %s at line number %d has not been declared in this scope\n", root->tk->str, root->tk->line_num);
+            semanticallyCorrect = false;
         }
     }
     if (root->leftChild != NULL)
@@ -312,13 +374,15 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 {
 
                     printf("Error: Redeclaration of variable %s at line number %d\n", idList->tk->str, idList->tk->line_num);
+                    semanticallyCorrect = false;
                 }
                 else
                 {
 
                     SymTablePointer *pointer = initSymTablePointer();
                     // pointer->typeExpression = stmts->leftChild->nextSibling;
-                    populateTypeInformation(pointer, stmts->leftChild->nextSibling);
+                    pointer->str = idList->tk->str;
+                    populateTypeInformation(pointer, stmts->leftChild->nextSibling, module);
                     pointer->offset = getOffset(pointer, offset);
                     pointer->str = idList->tk->str;
                     pointer->tk = idList->tk;
@@ -336,6 +400,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 if (!existsInAnySymTable(module, stmts->leftChild->tk->str))
                 {
                     printf("Error: variable %s at line number %d is not defined in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
+                    semanticallyCorrect = false;
                 }
             }
             stmts = stmts->nextSibling;
@@ -348,6 +413,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             if (!existsInAnySymTable(module, idNode->tk->str))
             {
                 printf("Error: variable %s at line number %d is not defined in this scope\n", idNode->tk->str, idNode->tk->line_num);
+                semanticallyCorrect = false;
             }
 
             hashtable *newScopeHashTable = initHashtableForSymTable();
@@ -398,6 +464,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                         if (!existsInAnySymTable(module, idList->tk->str))
                         {
                             printf("Error: Variable %s at line number %d is not declared in this scope\n", idList->tk->str, idList->tk->line_num);
+                            semanticallyCorrect = false;
                         }
                         idList = idList->nextSibling;
                     }
@@ -409,6 +476,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                     if (!existsInSymTable(globalSymbolTable->corrHashtable, children->tk->str))
                     {
                         printf("Error: module %s at line number %d has not been defined\n", children->tk->str, children->tk->line_num);
+                        semanticallyCorrect = false;
                     }
                     children = children->nextSibling;
                     break;
@@ -424,6 +492,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                             if (!existsInAnySymTable(module, idNode->tk->str))
                             {
                                 printf("Error: variable %s at line number %d has not been declared\n", idNode->tk->str, idNode->tk->line_num);
+                                semanticallyCorrect = false;
                             }
                         }
                         else
@@ -432,6 +501,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                             if (!existsInAnySymTable(module, idNode->tk->str))
                             {
                                 printf("Error: variable %s at line number %d has not been declared\n", idNode->tk->str, idNode->tk->line_num);
+                                semanticallyCorrect = false;
                             }
                         }
                         idList = idList->nextSibling;
@@ -554,6 +624,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                 if (existsInSymTable(globalST, pointer->str) && !getFromSymTable(globalST, pointer->str)->isAwaited)
                 {
                     printf("Error: Module with name %s at line number %d was defined previously!\n", corrID->tk->str, corrID->tk->line_num);
+                    semanticallyCorrect = false;
                 }
                 else
                 {
@@ -575,7 +646,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     {
                         SymTablePointer *pointer1 = initSymTablePointer();
 
-                        populateTypeInformation(pointer1, temp->leftChild);
+                        populateTypeInformation(pointer1, temp->leftChild, pointer);
                         pointer1->offset = getOffset(pointer1, &offset);
                         pointer1->str = temp->leftChild->nextSibling->tk->str;
                         insertSymTable(pointer->corrHashtable, pointer1);
@@ -634,6 +705,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                 if (node->isAwaited)
                 {
                     printf("Error: module %s declared at line number %d is never defined\n", node->str, node->tk->line_num);
+                    semanticallyCorrect = false;
                 }
                 node = node->next;
             }

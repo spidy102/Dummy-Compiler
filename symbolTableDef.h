@@ -5,6 +5,7 @@
 #include "symbolTable.h"
 
 extern SymTablePointer *globalSymbolTable;
+extern bool semanticallyCorrect;
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset);
 void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offset);
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset);
@@ -14,6 +15,5 @@ list *getListFromAST(astNode *pl, int *offset);
 types getType(astNode *type);
 SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *append);
 int getOffset(SymTablePointer *pointer, int *offset);
-void populateTypeInformation(SymTablePointer *pointer, astNode *temp);
-
+void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePointer *parent);
 #endif
