@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "lexerDef.h"
 #include "lexer.h"
 #include "tree.h"
@@ -426,6 +427,90 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
     }
 }
 
+void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module)
+{
+
+    list *opl = module->output_para_list;
+
+    astNode *temp = stmts;
+
+    while (opl != NULL)
+    {
+        bool isPresent = false;
+
+        while (temp != NULL)
+        {
+
+            if (temp->label == AST_ASSIGNOP)
+            {
+
+                astNode *lvalue = temp->leftChild;
+
+                if (lvalue->label != AST_ID)
+                {
+                    temp = temp->nextSibling;
+                }
+                else
+                {
+                    if (strcmp(lvalue->tk->str, opl->tk->str) == 0)
+                    {
+                        isPresent = true;
+                        break;
+                    }
+                    else
+                    {
+                        temp = temp->nextSibling;
+                    }
+                }
+            }
+            else if (temp->label == AST_MODULE_REUSE)
+            {
+
+                astNode *optionalNode = temp->leftChild;
+                if (optionalNode->leftChild == NULL)
+                {
+                    temp = temp->nextSibling;
+                }
+                else
+                {
+                    astNode *idList = optionalNode->leftChild->leftChild;
+                    while (idList != NULL)
+                    {
+                        if (strcmp(idList->tk->str, opl->tk->str) == 0)
+                        {
+                            isPresent = true;
+                            break;
+                        }
+                        else
+                        {
+                            idList = idList->nextSibling;
+                        }
+                    }
+                    if (isPresent)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        temp = temp->nextSibling;
+                    }
+                }
+            }
+            else
+            {
+                temp = temp->nextSibling;
+            }
+        }
+        if (!isPresent)
+        {
+            printf("Error: In module %s output parameter %s is never assigned a value\n", module->str, opl->tk->str);
+        }
+        isPresent = false;
+        temp = stmts;
+        opl = opl->next;
+    }
+}
+
 void typeCheck(astNode *root)
 {
     astNode *modules = root->leftChild;
@@ -440,10 +525,15 @@ void typeCheck(astNode *root)
             while (separateModules != NULL)
             {
                 SymTablePointer *symTableForCurrentModule = separateModules->symTable;
-                astNode *stmtsForCurrentModule = separateModules->leftChild->nextSibling->nextSibling->nextSibling->leftChild->leftChild;
-                checkTypesForModule(symTableForCurrentModule, stmtsForCurrentModule);
+                astNode *stmtsForCurrentModule = separateModules->leftChild->nextSibling->nextSibling->nextSibling->leftChild;
+                if (stmtsForCurrentModule != NULL)
+                {
+                    checkTypesForModule(symTableForCurrentModule, stmtsForCurrentModule->leftChild);
+                    checkIfOutputParametersAreAssigned(stmtsForCurrentModule->leftChild, separateModules->symTable);
+                }
                 separateModules = separateModules->nextSibling;
             }
+
             modules = modules->nextSibling;
             break;
         }

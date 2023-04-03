@@ -276,6 +276,7 @@ list *getListFromAST(astNode *pl, int *offset)
     list *ret = head;
     while (pl != NULL)
     {
+
         if (pl->leftChild->label != AST_ARRAY_DATATYPE)
         {
             head->isArray = false;
@@ -298,11 +299,20 @@ list *getListFromAST(astNode *pl, int *offset)
         }
         else
         {
+            // printf("%s\n\n\n\n", pl->leftChild->leftChild->nextSibling->nextSibling->tk->str);
             head->isArray = true;
             astNode *arr_type = pl->leftChild;
             // HAVE TO INCORPORATE SIGNED CASES TOO
             head->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
+            if (arr_type->leftChild->nextSibling->leftChild->isNegative)
+            {
+                head->typeIfArray.low = -head->typeIfArray.low;
+            }
             head->typeIfArray.high = arr_type->leftChild->nextSibling->leftChild->nextSibling->tk->integer;
+            if (arr_type->leftChild->nextSibling->leftChild->nextSibling->isNegative)
+            {
+                head->typeIfArray.high = -head->typeIfArray.high;
+            }
             head->typeIfArray.type = getType(arr_type->leftChild);
             // range checks?
             head->tk = pl->leftChild->nextSibling->tk;
@@ -373,7 +383,9 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 
                 if (existsInSymTable(module->corrHashtable, idList->tk->str))
                 {
+                    // if (module->typeST==MODULEST) {
 
+                    // }
                     printf("Error: Redeclaration of variable %s at line number %d\n", idList->tk->str, idList->tk->line_num);
                     semanticallyCorrect = false;
                 }
@@ -641,13 +653,25 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     insertSymTable(globalST, pointer);
                     // populate type expression
                     astNode *iplNode = mdls->leftChild->nextSibling->leftChild;
-                    astNode *oplNode = iplNode->nextSibling;
+                    astNode *oplNode = mdls->leftChild->nextSibling->nextSibling->leftChild;
+
                     pointer->input_para_list = getListFromAST(iplNode, &offset);
                     pointer->output_para_list = getListFromAST(oplNode, &offset);
                     hashtable *ht = initHashtableForSymTable();
                     pointer->corrHashtable = ht;
                     astNode *temp = iplNode;
                     int offset = 0;
+                    while (temp != NULL)
+                    {
+                        SymTablePointer *pointer1 = initSymTablePointer();
+
+                        populateTypeInformation(pointer1, temp->leftChild, pointer);
+                        pointer1->offset = getOffset(pointer1, &offset);
+                        pointer1->str = temp->leftChild->nextSibling->tk->str;
+                        insertSymTable(pointer->corrHashtable, pointer1);
+                        temp = temp->nextSibling;
+                    }
+                    temp = oplNode;
                     while (temp != NULL)
                     {
                         SymTablePointer *pointer1 = initSymTablePointer();
