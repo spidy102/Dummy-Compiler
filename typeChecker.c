@@ -436,6 +436,8 @@ void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module)
 
     while (opl != NULL)
     {
+        printf("hemlo??\n");
+
         bool isPresent = false;
 
         while (temp != NULL)
@@ -533,12 +535,12 @@ void typeCheck(astNode *root)
                 }
                 separateModules = separateModules->nextSibling;
             }
-
             modules = modules->nextSibling;
             break;
         }
         default:
         {
+
             modules = modules->nextSibling;
             break;
         }

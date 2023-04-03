@@ -1,18 +1,20 @@
+declare module one;
+
 <<module two>>
 takes input [x: integer, q:array [-2..10] of real];
 returns [u:real];
 start
+declare z:integer;
+declare y:real;
+[z]:=use module one with parameters z,y; 
 end
 
 <<module one>>
 takes input [x: integer, y:real];
-returns [z:real, p:integer];
 start
 
 declare ty:integer;
 declare zy: real;
-p:=1.1;
-z:=0.9;
 [ty]:=use module two with parameters ty,zy;
 declare z1:integer;
 declare arr,arr1: array [-3..10] of real;

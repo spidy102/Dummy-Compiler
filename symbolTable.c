@@ -654,9 +654,12 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     // populate type expression
                     astNode *iplNode = mdls->leftChild->nextSibling->leftChild;
                     astNode *oplNode = mdls->leftChild->nextSibling->nextSibling->leftChild;
-
-                    pointer->input_para_list = getListFromAST(iplNode, &offset);
-                    pointer->output_para_list = getListFromAST(oplNode, &offset);
+                    pointer->input_para_list = NULL;
+                    pointer->output_para_list = NULL;
+                    if (iplNode != NULL)
+                        pointer->input_para_list = getListFromAST(iplNode, &offset);
+                    if (oplNode != NULL)
+                        pointer->output_para_list = getListFromAST(oplNode, &offset);
                     hashtable *ht = initHashtableForSymTable();
                     pointer->corrHashtable = ht;
                     astNode *temp = iplNode;
