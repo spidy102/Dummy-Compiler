@@ -37,6 +37,7 @@ astNode *initASTNode(astNodeLabel label, astNode *leftChild)
 {
     astNode *node = malloc(sizeof(astNode));
     node->label = label;
+    node->isNegative = false;
     node->leftChild = leftChild;
     node->nextSibling = NULL; // need to check;
     node->symTable = NULL;
