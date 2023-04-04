@@ -155,6 +155,12 @@ char *EnumToTypeString(types type)
         return "integer";
     else if (type == TYPE_REAL)
         return "real";
+    else if (type == TYPE_ARR_BOOL)
+        return "array of boolean";
+    else if (type == TYPE_ARR_INT)
+        return "array of integer";
+    else if (type == TYPE_ARR_REAL)
+        return "array of real";
     return "boolean";
 }
 

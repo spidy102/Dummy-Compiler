@@ -374,7 +374,7 @@ bool inInputParameters(SymTablePointer *module, char *str)
     {
         module = module->parentHashTable;
     }
-    if (module->str != "driver")
+    if (strcmp(module->str, "driver") != 0)
     {
         list *ipl = module->input_para_list;
         while (ipl != NULL)
@@ -405,7 +405,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 
                 if (existsInSymTable(module->corrHashtable, idList->tk->str))
                 {
-                    if (inInputParameters(module, idList->tk->str))
+                    if (module->typeST != SCOPEST && inInputParameters(module, idList->tk->str))
                     {
                         SymTablePointer *pointer11 = initSymTablePointer();
                         pointer11->str = idList->tk->str;
