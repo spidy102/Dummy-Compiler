@@ -408,6 +408,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         {
             astNode *params = stmts->leftChild;
             SymTablePointer *ptr = getFromSymTable(globalSymbolTable->corrHashtable, params->nextSibling->tk->str);
+
             while (params != NULL)
             {
 
@@ -415,7 +416,17 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
                 {
                 case AST_ID:
                 {
+
                     // ptr = getFromSymTable(globalSymbolTable->corrHashtable, params->tk->str);
+                    SymTablePointer *currentScope = symTable;
+                    while (currentScope->typeST != MODULEST)
+                    {
+                        currentScope = currentScope->parentHashTable;
+                    }
+                    if (strcmp(params->tk->str, currentScope->str) == 0)
+                    {
+                        printf("Error: A function cannot be called recursively, call received at line number %d\n", params->tk->line_num);
+                    }
                     params = params->nextSibling;
                     break;
                 }

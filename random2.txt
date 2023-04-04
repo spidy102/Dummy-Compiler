@@ -3,6 +3,10 @@ takes input [index: integer, val_: integer];
 ** this function does not return any value**
 start
 declare i_1: integer;
+for (k in 1..10)
+start
+use module mod1 with parameters i_1, i_1;
+end
 i_1:= val_+ index - 4;
 print(i_1);
 end
@@ -21,11 +25,11 @@ break;
 case 2 :use module mod1 with parameters a, b;
 break;
 default: declare a,b:integer;
+break;
 end
 for( k in 2..8)
 start
-declare k, num:real;
-a:=(num - k)*(num-k);
+declare num:real;
 print(a);
 end
 end

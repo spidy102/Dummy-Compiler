@@ -639,6 +639,7 @@ astNode *constructAST(treenode *root)
         else
         {
             astNode *newNode = initASTNode(AST_OPTIONAL, NULL);
+            newNode->leftChild = initASTNode(AST_IDLIST, NULL);
             newNode->tk = root->child->nextSibling->tk;
             node->leftChild = append_at_end(node->leftChild, newNode);
         }
