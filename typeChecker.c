@@ -324,6 +324,26 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
     }
 }
 
+void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, SymTablePointer *symTable, astNode *loopVar)
+{
+    while (stmts != NULL)
+    {
+        if (stmts->label == AST_DECLARE)
+        {
+            astNode *idList = stmts->leftChild->leftChild;
+            while (idList != NULL)
+            {
+                if (strcmp(idList->tk->str, loopVar->tk->str) == 0)
+                {
+                    printf("Error: Loop variable redeclaration is not allowed, redeclaration received at line number %d\n", idList->tk->line_num);
+                }
+                idList = idList->nextSibling;
+            }
+        }
+        stmts = stmts->nextSibling;
+    }
+}
+
 void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
 {
     while (stmts != NULL)
@@ -370,6 +390,8 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         {
             SymTablePointer *symTableInThisScope = stmts->symTable;
             astNode *stmtsNode = stmts->leftChild->nextSibling->nextSibling->leftChild;
+            // check if the statements inside for loop do not redefine the loop variable
+            checkIfLoopStmtsDoNotRedefineLoopVariable(stmtsNode, symTableInThisScope, stmts->leftChild);
             checkTypesForModule(symTableInThisScope, stmtsNode);
             stmts = stmts->nextSibling;
             break;
@@ -418,6 +440,59 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
             stmts = stmts->nextSibling;
             break;
         }
+        case AST_SWITCH_CASE:
+        {
+            astNode *idNode = stmts->leftChild;
+            SymTablePointer *ptr = getFromAnySymTable(symTable, idNode->tk->str);
+            if (!ptr->isArray && ptr->typeIfNotArray == TYPE_INTEGER)
+            {
+                // need to check case conditions are integral or not
+                // and default must be present
+                astNode *cases = stmts->leftChild->nextSibling->leftChild;
+                astNode *def = stmts->leftChild->nextSibling->nextSibling;
+                if (def->leftChild == NULL)
+                {
+                    printf("Error: Switch case statement must have a default statement associated when the identifier is integer, is absent for switch statement at line number %d\n", idNode->tk->line_num);
+                }
+                while (cases != NULL)
+                {
+                    astNode *caseLabel = cases->leftChild;
+                    if (caseLabel->label == AST_BOOL)
+                    {
+                        printf("Error: should have integer case labels for switch statement with integer identifier, received boolean at line number %d\n", caseLabel->tk->line_num);
+                    }
+                    cases = cases->nextSibling;
+                }
+            }
+            else if (!ptr->isArray && ptr->typeIfNotArray == TYPE_BOOLEAN)
+            {
+                // need to check if case conditions are boolean
+                // default should not be present
+                astNode *cases = stmts->leftChild->nextSibling->leftChild;
+                astNode *temp = cases;
+                astNode *def = stmts->leftChild->nextSibling->nextSibling;
+                if (def->leftChild != NULL)
+                {
+                    printf("Error: Switch case statement must not have a default statement associated when the identifier is boolean, received one at line number %d\n", def->tk->line_num);
+                }
+                while (temp != NULL)
+                {
+                    astNode *caseLabel = temp->leftChild;
+                    if (caseLabel->label != AST_BOOL)
+                    {
+                        printf("Error: case statement at line number %d should have a boolean identifier\n", caseLabel->tk->line_num);
+                    }
+                    temp = temp->nextSibling;
+                }
+            }
+            else
+            {
+                printf("Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s at line number %d\n", (ptr->isArray ? "array" : "real"), idNode->tk->line_num);
+            }
+            // check types???
+            stmts = stmts->nextSibling;
+            break;
+        }
         default:
         {
             stmts = stmts->nextSibling;
@@ -436,7 +511,6 @@ void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module)
 
     while (opl != NULL)
     {
-        printf("hemlo??\n");
 
         bool isPresent = false;
 
@@ -538,6 +612,12 @@ void typeCheck(astNode *root)
             modules = modules->nextSibling;
             break;
         }
+        case AST_DRIVERMODULE:
+        {
+            checkTypesForModule(getFromSymTable(globalSymbolTable->corrHashtable, "driver"), modules->leftChild->leftChild->leftChild);
+            modules = modules->nextSibling;
+            break;
+        }
         default:
         {
 
@@ -555,7 +635,7 @@ int main()
     globalSymbolTable->parentHashTable = NULL;
     hashtable ht1 = initHashtable();
     globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random1.txt", "r");
+    FILE *fp = fopen("random2.txt", "r");
     twinbuffer *tb = twinbuffer_init(fp, 256);
     fill_grammar(fopen("Grammar.txt", "r"));
     hashtable ht = initHashtable();

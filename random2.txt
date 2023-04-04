@@ -1,0 +1,31 @@
+<<module mod1>>
+takes input [index: integer, val_: integer];
+** this function does not return any value**
+start
+declare i_1: integer;
+i_1:= val_+ index - 4;
+print(i_1);
+end
+<<<driver program>>>
+start
+declare a,b, dummy:integer;
+a:=48;
+b:=10;
+dummy:=100;
+declare flag: boolean;
+flag:=(a>=30)AND(b<30);
+switch(dummy)
+start
+case 1 :print(100);
+break;
+case 2 :use module mod1 with parameters a, b;
+break;
+default: declare a,b:integer;
+end
+for( k in 2..8)
+start
+declare k, num:real;
+a:=(num - k)*(num-k);
+print(a);
+end
+end

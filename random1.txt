@@ -38,4 +38,3 @@ start
 declare a,b,c:integer;
 a:=b+c;
 end
-

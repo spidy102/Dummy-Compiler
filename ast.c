@@ -1440,6 +1440,10 @@ astNode *constructAST(treenode *root)
         {
             node->leftChild = append_at_end(node->leftChild, defNode->addr);
         }
+        else
+        {
+            node->leftChild = append_at_end(node->leftChild, initASTNode(AST_DEFAULT, NULL));
+        }
         root->addr = node;
         freeRHSList(root);
         return NULL;
@@ -1510,7 +1514,9 @@ astNode *constructAST(treenode *root)
         treenode *stmtsNode = root->child->nextSibling->nextSibling;
         astNode *stmtsAST = constructAST(stmtsNode);
         astNode *newNode = initASTNode(AST_DEFAULT, NULL);
+        newNode->tk = root->child->tk;
         newNode->leftChild = stmtsAST;
+        root->addr = newNode;
         freeRHSList(root);
         return NULL;
     }
