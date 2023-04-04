@@ -21,7 +21,6 @@ void getAttributeType(astNode *node, SymTablePointer *symTable)
     case AST_MINUS:
     case AST_MUL:
     {
-
         getAttributeType(node->leftChild, symTable);
         getAttributeType(node->leftChild->nextSibling, symTable);
         if (node->leftChild->type == TYPE_INTEGER && node->leftChild->nextSibling->type == TYPE_INTEGER)
@@ -134,6 +133,7 @@ void getAttributeType(astNode *node, SymTablePointer *symTable)
         }
         else
         {
+
             node->type = pointer->typeIfNotArray;
         }
         break;
@@ -160,6 +160,7 @@ char *EnumToTypeString(types type)
 
 void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent)
 {
+    // printf("str:%s\n\n", ptr->str);
 
     astNode *bound = arr_ele->leftChild->nextSibling;
     if (bound->label == AST_NUM)
@@ -169,7 +170,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
         {
             if (!(bound->tk->integer >= ptr->typeIfArray.low && bound->tk->integer <= ptr->typeIfArray.high))
             {
-                printf("Error: array index out of bounds at line number %d\n", bound->tk->line_num);
+                printf("Error: array index out of bounds at line number %d for array variable %s\n", bound->tk->line_num, arr_ele->leftChild->tk->str);
                 // type_error?
             }
         }
@@ -254,7 +255,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
             getAttributeType(actual_params, symTable);
             if (ipl->isArray)
             {
-                if (actual_params->type != TYPE_ARR_BOOL || actual_params->type != TYPE_ARR_REAL || actual_params->type != TYPE_ARR_BOOL)
+                if (actual_params->type != TYPE_ARR_BOOL && actual_params->type != TYPE_ARR_REAL && actual_params->type != TYPE_ARR_INT)
                 {
                     printf("Error: type mismatch in parameter %d on line number %d, received %s, required array\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type));
                 }
@@ -297,7 +298,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
             getAttributeType(retParams, symTable);
             if (opl->isArray)
             {
-                if (retParams->type != TYPE_ARR_BOOL || retParams->type != TYPE_ARR_REAL || retParams->type != TYPE_ARR_BOOL)
+                if (retParams->type != TYPE_ARR_BOOL && retParams->type != TYPE_ARR_REAL && retParams->type != TYPE_ARR_INT)
                 {
                     printf("Error: type mismatch in output parameter %d on line number %d, received %s, required array\n", i + 1, retParams->tk->line_num, EnumToTypeString(retParams->type));
                 }
@@ -398,8 +399,9 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         }
         case AST_WHILE:
         {
+            // while's condition??????
             SymTablePointer *symTableInThisScope = stmts->symTable;
-            astNode *stmtsNode = stmts->leftChild->nextSibling;
+            astNode *stmtsNode = stmts->leftChild->nextSibling->leftChild;
             checkTypesForModule(symTableInThisScope, stmtsNode);
             stmts = stmts->nextSibling;
             break;
@@ -501,6 +503,14 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
                 printf("Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s at line number %d\n", (ptr->isArray ? "array" : "real"), idNode->tk->line_num);
             }
             // check types???
+            astNode *cases = stmts->leftChild->nextSibling->leftChild;
+            while (cases != NULL)
+            {
+                checkTypesForModule(stmts->symTable, cases->leftChild->nextSibling->leftChild);
+                cases = cases->nextSibling;
+            }
+            astNode *def = stmts->leftChild->nextSibling->nextSibling;
+            checkTypesForModule(stmts->symTable, def->leftChild->leftChild);
             stmts = stmts->nextSibling;
             break;
         }
@@ -607,17 +617,18 @@ void typeCheck(astNode *root)
         {
         case AST_OTHERMODULES:
         {
-
             astNode *separateModules = modules->leftChild;
             while (separateModules != NULL)
             {
                 SymTablePointer *symTableForCurrentModule = separateModules->symTable;
+
                 astNode *stmtsForCurrentModule = separateModules->leftChild->nextSibling->nextSibling->nextSibling->leftChild;
                 if (stmtsForCurrentModule != NULL)
                 {
                     checkTypesForModule(symTableForCurrentModule, stmtsForCurrentModule->leftChild);
                     checkIfOutputParametersAreAssigned(stmtsForCurrentModule->leftChild, separateModules->symTable);
                 }
+
                 separateModules = separateModules->nextSibling;
             }
             modules = modules->nextSibling;

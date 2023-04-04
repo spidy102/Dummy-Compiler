@@ -10,6 +10,7 @@
 #include "symbolTable.h"
 #include "symbolTableDef.h"
 #include <stdbool.h>
+#include <string.h>
 
 bool semanticallyCorrect = true;
 
@@ -367,6 +368,27 @@ void traverse_ast(astNode *root, SymTablePointer *st)
     }
 }
 
+bool inInputParameters(SymTablePointer *module, char *str)
+{
+    while (module->typeST != MODULEST)
+    {
+        module = module->parentHashTable;
+    }
+    if (module->str != "driver")
+    {
+        list *ipl = module->input_para_list;
+        while (ipl != NULL)
+        {
+            if (strcmp(ipl->tk->str, str) == 0)
+            {
+                return true;
+            }
+            ipl = ipl->next;
+        }
+    }
+    return false;
+}
+
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 {
     hashtable *ht = module->corrHashtable;
@@ -383,11 +405,21 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 
                 if (existsInSymTable(module->corrHashtable, idList->tk->str))
                 {
-                    // if (module->typeST==MODULEST) {
-
-                    // }
-                    printf("Error: Redeclaration of variable %s at line number %d\n", idList->tk->str, idList->tk->line_num);
-                    semanticallyCorrect = false;
+                    if (inInputParameters(module, idList->tk->str))
+                    {
+                        SymTablePointer *pointer11 = initSymTablePointer();
+                        pointer11->str = idList->tk->str;
+                        populateTypeInformation(pointer11, stmts->leftChild->nextSibling, module);
+                        pointer11->offset = getOffset(pointer11, offset);
+                        pointer11->str = idList->tk->str;
+                        pointer11->tk = idList->tk;
+                        insertSymTable(ht, pointer11);
+                    }
+                    else
+                    {
+                        printf("Error: Redeclaration of variable %s at line number %d\n", idList->tk->str, idList->tk->line_num);
+                        semanticallyCorrect = false;
+                    }
                 }
                 else
                 {
@@ -664,16 +696,16 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     pointer->corrHashtable = ht;
                     astNode *temp = iplNode;
                     int offset = 0;
-                    while (temp != NULL)
-                    {
-                        SymTablePointer *pointer1 = initSymTablePointer();
+                    // while (temp != NULL)
+                    // {
+                    //     SymTablePointer *pointer1 = initSymTablePointer();
 
-                        populateTypeInformation(pointer1, temp->leftChild, pointer);
-                        pointer1->offset = getOffset(pointer1, &offset);
-                        pointer1->str = temp->leftChild->nextSibling->tk->str;
-                        insertSymTable(pointer->corrHashtable, pointer1);
-                        temp = temp->nextSibling;
-                    }
+                    //     populateTypeInformation(pointer1, temp->leftChild, pointer);
+                    //     pointer1->offset = getOffset(pointer1, &offset);
+                    //     pointer1->str = temp->leftChild->nextSibling->tk->str;
+                    //     insertSymTable(pointer->corrHashtable, pointer1);
+                    //     temp = temp->nextSibling;
+                    // }
                     temp = oplNode;
                     while (temp != NULL)
                     {
