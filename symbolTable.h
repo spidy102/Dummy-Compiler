@@ -78,6 +78,8 @@ typedef struct SymTablePointer
     bool isAwaited;
     struct SymTablePointer *childScopeTable;
     SymTableType typeST;
+    bool isDefined;
+    bool isDeclared;
 } SymTablePointer;
 
 #endif

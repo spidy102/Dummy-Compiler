@@ -338,6 +338,14 @@ SymTablePointer *initSymTablePointer()
     SymTablePointer *pointer = malloc(sizeof(SymTablePointer));
     pointer->corrHashtable = NULL;
     pointer->isAwaited = false;
+    pointer->isDeclared = false;
+    pointer->isDefined = false;
+    pointer->childScopeTable = NULL;
+    pointer->input_para_list = NULL;
+    pointer->next = NULL;
+    pointer->output_para_list = NULL;
+    pointer->parentHashTable = NULL;
+    pointer->tk = NULL;
     // pointer->typeExpression = NULL;
     pointer->str = NULL;
 }
@@ -399,10 +407,10 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
         {
         case AST_DECLARE:
         {
+
             astNode *idList = stmts->leftChild->leftChild;
             while (idList != NULL)
             {
-
                 if (existsInSymTable(module->corrHashtable, idList->tk->str))
                 {
                     if (module->typeST != SCOPEST && inInputParameters(module, idList->tk->str))
@@ -423,7 +431,6 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 }
                 else
                 {
-
                     SymTablePointer *pointer = initSymTablePointer();
                     // pointer->typeExpression = stmts->leftChild->nextSibling;
                     pointer->str = idList->tk->str;
@@ -435,6 +442,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 }
                 idList = idList->nextSibling;
             }
+
             stmts = stmts->nextSibling;
             break;
         }
@@ -528,11 +536,20 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                         printf("Error: module %s at line number %d has not been defined\n", children->tk->str, children->tk->line_num);
                         semanticallyCorrect = false;
                     }
+                    else
+                    {
+                        SymTablePointer *ptr = getFromSymTable(globalSymbolTable->corrHashtable, children->tk->str);
+                        if (ptr->isDeclared && ptr->isDefined)
+                        {
+                            printf("Error: module %s's call at line number %d has both a declaration and definition before this\n", children->tk->str, children->tk->line_num);
+                        }
+                    }
                     children = children->nextSibling;
                     break;
                 }
                 case AST_ACTUAL_PARA:
                 {
+
                     astNode *idList = children->leftChild;
                     while (idList != NULL)
                     {
@@ -554,13 +571,16 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                                 semanticallyCorrect = false;
                             }
                         }
+
                         idList = idList->nextSibling;
                     }
+
                     children = children->nextSibling;
                     break;
                 }
                 }
             }
+
             stmts = stmts->nextSibling;
             break;
         }
@@ -606,6 +626,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             traverse_ast(stmts->leftChild, module);
             int offset1 = 0;
             populateStmtsSymTable(whileScope, whileStmts, &offset1);
+            printf("actual para\n");
 
             stmts = stmts->nextSibling;
             break;
@@ -624,7 +645,6 @@ void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offs
         return;
     }
     astNode *stmts = mdlDef->leftChild->leftChild;
-
     populateStmtsSymTable(module, stmts, offset);
 }
 
@@ -652,6 +672,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                 {
                     SymTablePointer *pointer = initSymTablePointer();
                     pointer->isAwaited = true;
+                    pointer->isDeclared = true;
                     pointer->str = corrID->tk->str;
                     pointer->tk = corrID->tk;
                     pointer->parentHashTable = global;
@@ -680,21 +701,37 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                 {
                     if (existsInSymTable(globalST, pointer->str))
                     {
-                        getFromSymTable(globalST, pointer->str)->isAwaited = false;
+                        SymTablePointer *temp = getFromSymTable(globalST, pointer->str);
+                        temp->isAwaited = false;
+                        temp->isDefined = true;
+                        pointer = temp;
                     }
-                    insertSymTable(globalST, pointer);
+                    else
+                    {
+                        insertSymTable(globalST, pointer);
+                    }
                     // populate type expression
                     astNode *iplNode = mdls->leftChild->nextSibling->leftChild;
                     astNode *oplNode = mdls->leftChild->nextSibling->nextSibling->leftChild;
                     pointer->input_para_list = NULL;
                     pointer->output_para_list = NULL;
+
                     if (iplNode != NULL)
                         pointer->input_para_list = getListFromAST(iplNode, &offset);
                     if (oplNode != NULL)
                         pointer->output_para_list = getListFromAST(oplNode, &offset);
+
+                    list *ptr = pointer->input_para_list;
+                    if (strcmp(pointer->str, "function2") == 0)
+                    {
+                        while (ptr != NULL)
+                        {
+                            ptr = ptr->next;
+                        }
+                    }
                     hashtable *ht = initHashtableForSymTable();
                     pointer->corrHashtable = ht;
-                    astNode *temp = iplNode;
+                    astNode *temp;
                     int offset = 0;
                     // while (temp != NULL)
                     // {
@@ -707,19 +744,23 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     //     temp = temp->nextSibling;
                     // }
                     temp = oplNode;
+
                     while (temp != NULL)
                     {
                         SymTablePointer *pointer1 = initSymTablePointer();
 
                         populateTypeInformation(pointer1, temp->leftChild, pointer);
+                        // offset here:
                         pointer1->offset = getOffset(pointer1, &offset);
                         pointer1->str = temp->leftChild->nextSibling->tk->str;
                         insertSymTable(pointer->corrHashtable, pointer1);
                         temp = temp->nextSibling;
                     }
+
                     pointer->typeST = MODULEST;
                     pointer->parentHashTable = global;
                     populateModuleSymbolTable(pointer, mdls, &offset);
+
                     mdls->symTable = pointer;
                     // if (existsInSymTable(pointer->corrHashtable, "ty"))
                     // {
@@ -737,6 +778,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     //     temp = temp->next;
                     // }
                 }
+
                 mdls = mdls->nextSibling;
             }
             root = root->nextSibling;

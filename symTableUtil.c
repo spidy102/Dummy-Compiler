@@ -10,7 +10,7 @@ bool existsInAnySymTable(SymTablePointer *st, char *str)
     SymTablePointer *temp = st;
     while (st->typeST != GLOBALST)
     {
-
+        // printf("inside%s\n\n", st->str);
         if (existsInSymTable(st->corrHashtable, str))
         {
             return true;
@@ -18,13 +18,16 @@ bool existsInAnySymTable(SymTablePointer *st, char *str)
 
         st = st->parentHashTable;
     }
+
     SymTablePointer *moduleST = temp;
     while (moduleST->typeST != MODULEST)
     {
         moduleST = moduleST->parentHashTable;
     }
+
     if (strcmp(moduleST->str, "driver") != 0)
     {
+
         list *ipl = moduleST->input_para_list;
 
         while (ipl != NULL)
@@ -49,6 +52,7 @@ bool insertSymTable(hashtable *ht, SymTablePointer *str)
     if (ptr == NULL)
     {
         ht->table[getHash]->bucket_ptr = typecasted;
+        typecasted->next = NULL;
         return true;
     }
     while (ptr->next != NULL)
@@ -66,6 +70,7 @@ bool existsInSymTable(hashtable *ht, char *str)
     SymTablePointer *ptr = ht->table[getHash]->bucket_ptr;
     while (ptr != NULL)
     {
+
         if (strcmp(ptr->str, str) == 0)
         {
             return true;

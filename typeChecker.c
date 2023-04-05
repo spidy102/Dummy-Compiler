@@ -638,6 +638,7 @@ void typeCheck(astNode *root)
                 separateModules = separateModules->nextSibling;
             }
             modules = modules->nextSibling;
+
             break;
         }
         case AST_DRIVERMODULE:
@@ -671,8 +672,8 @@ int main()
     populateParseTable();
     treenode *root = parseInputSourceCode(fp, tb, ht);
     astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
+    // inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    if (semanticallyCorrect)
-        typeCheck(astRoot);
+    // if (semanticallyCorrect)
+    typeCheck(astRoot);
 }

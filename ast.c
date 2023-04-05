@@ -41,6 +41,7 @@ astNode *initASTNode(astNodeLabel label, astNode *leftChild)
     node->leftChild = leftChild;
     node->nextSibling = NULL; // need to check;
     node->symTable = NULL;
+    node->tk = NULL;
     return node;
 }
 
