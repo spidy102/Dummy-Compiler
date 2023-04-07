@@ -26,7 +26,8 @@ typedef enum
     TYPE_ERROR,
     TYPE_ARR_INT,
     TYPE_ARR_REAL,
-    TYPE_ARR_BOOL
+    TYPE_ARR_BOOL,
+    TYPE_MISSING,
 } types;
 
 typedef struct array_type

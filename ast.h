@@ -2,6 +2,7 @@
 #define AST_H
 
 #include "symbolTable.h"
+#include "intermedCodeGen.h"
 
 typedef enum
 {
@@ -17,6 +18,11 @@ typedef struct astNode
     bool isNegative;
     SymTablePointer *symTable;
     types type;
+    quadruple *code;
+    // need temporaries
+    char name[25];
+    int trueCase;
+    int falseCase;
 } astNode;
 
 #endif

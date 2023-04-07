@@ -9,6 +9,7 @@
 #include "symTableUtil.h"
 #include "symbolTable.h"
 #include "symbolTableDef.h"
+#include "typeCheckerDef.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -395,6 +396,47 @@ bool inInputParameters(SymTablePointer *module, char *str)
         }
     }
     return false;
+}
+
+void checkTypes(astNode *stmts, SymTablePointer *symTable)
+{
+    getAttributeType(stmts->leftChild, symTable);
+    getAttributeType(stmts->leftChild->nextSibling, symTable);
+    if (stmts->leftChild->type == TYPE_MISSING || stmts->leftChild->nextSibling->type == TYPE_MISSING)
+    {
+        // SKIP THIS
+        stmts = stmts->nextSibling;
+        return;
+    }
+    if (stmts->leftChild->nextSibling->type == TYPE_ERROR || stmts->leftChild->type == TYPE_ERROR)
+    {
+        int line;
+        if (stmts->leftChild->tk != NULL)
+        {
+            line = stmts->leftChild->tk->line_num;
+        }
+        else
+        {
+            line = stmts->leftChild->leftChild->tk->line_num;
+        }
+        printf("Error: Invalid operands for operation on line number %d\n", line);
+        semanticRulesPassed = false;
+    }
+    else if (stmts->leftChild->type != stmts->leftChild->nextSibling->type)
+    {
+
+        int line;
+        if (stmts->leftChild->tk != NULL)
+        {
+            line = stmts->leftChild->tk->line_num;
+        }
+        else
+        {
+            line = stmts->leftChild->leftChild->tk->line_num;
+        }
+        printf("Error: type mismatch at line number %d, cannot assign %s type value to %s\n", line, EnumToTypeString(stmts->leftChild->nextSibling->type), EnumToTypeString(stmts->leftChild->type));
+        semanticRulesPassed = false;
+    }
 }
 
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)

@@ -6,6 +6,7 @@
 
 extern SymTablePointer *globalSymbolTable;
 extern bool semanticallyCorrect;
+extern bool semanticRulesPassed;
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset);
 void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offset);
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset);

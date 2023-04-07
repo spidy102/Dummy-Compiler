@@ -1,0 +1,12 @@
+<<<driver program>>>
+start
+for (k in -20..-10)
+start
+declare x:integer;
+end
+declare x,y:integer;
+while (x>1 AND y<1) 
+start
+declare z:integer;
+end
+end
