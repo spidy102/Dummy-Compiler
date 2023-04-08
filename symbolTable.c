@@ -603,7 +603,14 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             while (cases != NULL)
             {
                 int offset1 = 0;
-                populateStmtsSymTable(newPointer, cases->leftChild->nextSibling->leftChild, &offset1);
+                SymTablePointer *casePtr = initSymTablePointer();
+                casePtr->typeST = SCOPEST;
+                hashtable *caseHashtable = initHashtableForSymTable();
+                casePtr->corrHashtable = caseHashtable;
+                casePtr->parentHashTable = newPointer;
+                cases->symTable = casePtr;
+                newPointer->childScopeTable = append_scope_pointer(newPointer, casePtr);
+                populateStmtsSymTable(casePtr, cases->leftChild->nextSibling->leftChild, &offset1);
                 cases = cases->nextSibling;
             }
 
