@@ -549,7 +549,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             {
                 if (!existsInAnySymTable(module, stmts->leftChild->tk->str))
                 {
-                    printf("Error: variable %s at line number %d is not defined in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
+                    printf("Error: variable %s at line number %d is not declared in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
                     semanticallyCorrect = false;
                 }
             }

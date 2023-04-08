@@ -455,6 +455,96 @@ void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, SymTablePointer *
     }
 }
 
+bool checkIfOnLHS(astNode *temp, astNode *expr)
+{
+    while (temp != NULL)
+    {
+        switch (temp->label)
+        {
+        case AST_ASSIGNOP:
+        {
+            if (temp->leftChild->label == AST_ID)
+            {
+                if (strcmp(expr->tk->str, temp->leftChild->tk->str) == 0)
+                {
+                    return true;
+                }
+            }
+            temp = temp->nextSibling;
+            break;
+        }
+        case AST_MODULE_REUSE:
+        {
+            astNode *optionalNode = temp->leftChild;
+            if (optionalNode->leftChild == NULL)
+            {
+                temp = temp->nextSibling;
+            }
+            else
+            {
+                astNode *idList = optionalNode->leftChild->leftChild;
+                while (idList != NULL)
+                {
+                    if (strcmp(idList->tk->str, expr->tk->str) == 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        idList = idList->nextSibling;
+                    }
+                }
+                temp = temp->nextSibling;
+            }
+            break;
+        }
+        case AST_WHILE:
+        {
+            if (checkIfOnLHS(temp->leftChild->nextSibling->leftChild, expr))
+                return true;
+            temp = temp->nextSibling;
+            break;
+        }
+        case AST_FOR:
+        {
+            if (checkIfOnLHS(temp->leftChild->nextSibling->nextSibling->leftChild, expr))
+                return true;
+            temp = temp->nextSibling;
+            break;
+        }
+        default:
+        {
+            temp = temp->nextSibling;
+            break;
+        }
+        }
+    }
+}
+
+bool checkWhileLoopExpressionAssigned(astNode *stmts, astNode *expr)
+{
+    if (expr == NULL)
+        return false;
+    if (checkWhileLoopExpressionAssigned(stmts, expr->leftChild))
+        return true;
+    if (expr->label == AST_ID)
+    {
+        astNode *temp = stmts;
+        if (checkIfOnLHS(temp, expr))
+            return true;
+    }
+    if (expr->leftChild != NULL)
+    {
+        astNode *leftOut = expr->leftChild->nextSibling;
+        while (leftOut != NULL)
+        {
+            if (checkWhileLoopExpressionAssigned(stmts, leftOut))
+                return true;
+            leftOut = leftOut->nextSibling;
+        }
+    }
+}
+
 void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
 {
     while (stmts != NULL)
@@ -520,6 +610,10 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
             SymTablePointer *symTableInThisScope = stmts->symTable;
             astNode *stmtsNode = stmts->leftChild->nextSibling->leftChild;
             checkTypesForModule(symTableInThisScope, stmtsNode);
+            if (!checkWhileLoopExpressionAssigned(stmtsNode, stmts->leftChild))
+            {
+                printf("Error: while loop at line number %d expression variables are not assigned any value\n", stmts->tk->line_num);
+            }
             stmts = stmts->nextSibling;
             break;
         }
@@ -782,6 +876,7 @@ void typeCheck(astNode *root)
     }
 }
 
+<<<<<<< HEAD
 /* int main()
 {
     globalSymbolTable = initSymTablePointer();
@@ -802,3 +897,25 @@ void typeCheck(astNode *root)
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     typeCheck(astRoot);
 } */
+=======
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable *ht1 = initHashtableForSymTable();
+//     globalSymbolTable->corrHashtable = ht1;
+//     FILE *fp = fopen("random2.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     typeCheck(astRoot);
+// }
+>>>>>>> b22248046d1d7574be09046c7b1972ca5a4ce148
