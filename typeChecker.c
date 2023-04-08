@@ -782,14 +782,14 @@ void typeCheck(astNode *root)
     }
 }
 
-int main()
+/* int main()
 {
     globalSymbolTable = initSymTablePointer();
     globalSymbolTable->typeST = GLOBALST;
     globalSymbolTable->parentHashTable = NULL;
     hashtable *ht1 = initHashtableForSymTable();
     globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("random2.txt", "r");
+    FILE *fp = fopen("semanicAnalysis_testcases/t7.txt", "r");
     twinbuffer *tb = twinbuffer_init(fp, 256);
     fill_grammar(fopen("Grammar.txt", "r"));
     hashtable ht = initHashtable();
@@ -801,4 +801,4 @@ int main()
     inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     typeCheck(astRoot);
-}
+} */
