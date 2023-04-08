@@ -421,13 +421,13 @@ astNode *constructAST(treenode *root)
         astNode *idNode = initASTNode(AST_ID, NULL);
         idNode->tk = root->child->nextSibling->nextSibling->tk;
         freeRHSList(root);
-        return initASTNode(AST_IOSTMT, idNode);
+        return initASTNode(AST_GETVALUE, idNode);
     }
     case 33: // ioStmt PRINT BO var_print BC SEMICOL
     {
         astNode *varPrintNode = constructAST(getNodeWithSymbol(var_print, root));
         freeRHSList(root);
-        return initASTNode(AST_IOSTMT, varPrintNode);
+        return initASTNode(AST_PRINT, varPrintNode);
     }
     case 34 ... 35:
     {

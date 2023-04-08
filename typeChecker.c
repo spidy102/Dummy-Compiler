@@ -421,48 +421,48 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
 
         switch (stmts->label)
         {
-        case AST_ASSIGNOP:
-        {
-            getAttributeType(stmts->leftChild, symTable);
-            getAttributeType(stmts->leftChild->nextSibling, symTable);
-            if (stmts->leftChild->type == TYPE_MISSING || stmts->leftChild->nextSibling->type == TYPE_MISSING)
-            {
-                // SKIP THIS
-                stmts = stmts->nextSibling;
-                break;
-            }
-            if (stmts->leftChild->nextSibling->type == TYPE_ERROR || stmts->leftChild->type == TYPE_ERROR)
-            {
-                int line;
-                if (stmts->leftChild->tk != NULL)
-                {
-                    line = stmts->leftChild->tk->line_num;
-                }
-                else
-                {
-                    line = stmts->leftChild->leftChild->tk->line_num;
-                }
-                printf("Error: Invalid operands for operation on line number %d\n", line);
-                semanticRulesPassed = false;
-            }
-            else if (stmts->leftChild->type != stmts->leftChild->nextSibling->type)
-            {
+        // case AST_ASSIGNOP:
+        // {
+        //     getAttributeType(stmts->leftChild, symTable);
+        //     getAttributeType(stmts->leftChild->nextSibling, symTable);
+        //     if (stmts->leftChild->type == TYPE_MISSING || stmts->leftChild->nextSibling->type == TYPE_MISSING)
+        //     {
+        //         // SKIP THIS
+        //         stmts = stmts->nextSibling;
+        //         break;
+        //     }
+        //     if (stmts->leftChild->nextSibling->type == TYPE_ERROR || stmts->leftChild->type == TYPE_ERROR)
+        //     {
+        //         int line;
+        //         if (stmts->leftChild->tk != NULL)
+        //         {
+        //             line = stmts->leftChild->tk->line_num;
+        //         }
+        //         else
+        //         {
+        //             line = stmts->leftChild->leftChild->tk->line_num;
+        //         }
+        //         printf("Error: Invalid operands for operation on line number %d\n", line);
+        //         semanticRulesPassed = false;
+        //     }
+        //     else if (stmts->leftChild->type != stmts->leftChild->nextSibling->type)
+        //     {
 
-                int line;
-                if (stmts->leftChild->tk != NULL)
-                {
-                    line = stmts->leftChild->tk->line_num;
-                }
-                else
-                {
-                    line = stmts->leftChild->leftChild->tk->line_num;
-                }
-                printf("Error: type mismatch at line number %d, cannot assign %s type value to %s\n", line, EnumToTypeString(stmts->leftChild->nextSibling->type), EnumToTypeString(stmts->leftChild->type));
-                semanticRulesPassed = false;
-            }
-            stmts = stmts->nextSibling;
-            break;
-        }
+        //         int line;
+        //         if (stmts->leftChild->tk != NULL)
+        //         {
+        //             line = stmts->leftChild->tk->line_num;
+        //         }
+        //         else
+        //         {
+        //             line = stmts->leftChild->leftChild->tk->line_num;
+        //         }
+        //         printf("Error: type mismatch at line number %d, cannot assign %s type value to %s\n", line, EnumToTypeString(stmts->leftChild->nextSibling->type), EnumToTypeString(stmts->leftChild->type));
+        //         semanticRulesPassed = false;
+        //     }
+        //     stmts = stmts->nextSibling;
+        //     break;
+        // }
         case AST_FOR:
         {
             SymTablePointer *symTableInThisScope = stmts->symTable;
@@ -741,7 +741,23 @@ void typeCheck(astNode *root)
     }
 }
 
-// int main()
-// {
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable *ht1 = initHashtableForSymTable();
+    globalSymbolTable->corrHashtable = ht1;
+    FILE *fp = fopen("random2.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
 
-// }
+    astNode *astRoot = constructAST(root);
+    inorder_ast(astRoot);
+    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+    typeCheck(astRoot);
+}

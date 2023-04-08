@@ -9,6 +9,7 @@
 #include "symbolTableDef.h"
 #include "astDef.h"
 #include "typeCheckerDef.h"
+#include "symTableUtil.h"
 #include "intermedCodeGen.h"
 #include <string.h>
 
@@ -155,7 +156,7 @@ void getExpressionsCode(astNode *expr)
         quadruple *qp = initQuadruple();
         qp->op = LABEL;
         sprintf(qp->operand1, "label%d", b1->falseCase);
-        b1->code->next = qp;
+        expr->code = appendAtEnd(expr->code, qp);
         qp->next = b2->code;
         return;
     }
@@ -217,7 +218,7 @@ void getExpressionsCode(astNode *expr)
         }
         else if (expr->label == AST_LT)
         {
-            qp->op = OP_EQ;
+            qp->op = OP_LT;
         }
         expr->code = appendAtEnd(expr->code, qp);
         // e2->code->next = qp;
@@ -258,6 +259,34 @@ void getExpressionsCode(astNode *expr)
     case AST_NUM:
     {
         sprintf(expr->name, "%d", expr->tk->integer);
+        return;
+    }
+    case AST_PLUS:
+    case AST_MINUS:
+    case AST_MUL:
+    case AST_DIV:
+    {
+        int newT = newTemp();
+        sprintf(expr->name, "temp%d", newT);
+        astNode *e1 = expr->leftChild;
+        astNode *e2 = e1->nextSibling;
+        getExpressionsCode(e1);
+        getExpressionsCode(e2);
+        expr->code = appendAtEnd(expr->code, e1->code);
+        expr->code = appendAtEnd(expr->code, e2->code);
+        quadruple *qp = initQuadruple();
+        if (expr->label == AST_PLUS)
+            qp->op = OP_PLUS;
+        else if (expr->label == AST_MINUS)
+            qp->op = OP_MINUS;
+        else if (expr->label == AST_MUL)
+            qp->op = OP_MUL;
+        else
+            qp->op = OP_DIV;
+        strcpy(qp->resultant, expr->name);
+        strcpy(qp->operand1, e1->name);
+        strcpy(qp->operand2, e2->name);
+        expr->code = appendAtEnd(expr->code, qp);
         return;
     }
     }
@@ -369,6 +398,110 @@ quadruple *generateForLoopCode(astNode *stmts)
     return head;
 }
 
+void getArrayCode(astNode *node, SymTablePointer *symTable)
+{
+    SymTablePointer *ptr = getFromAnySymTable(symTable, node->leftChild->tk->str);
+    types type = ptr->typeIfArray.type;
+    int width = -1;
+    if (type == TYPE_INTEGER)
+    {
+        width = INT_WIDTH;
+    }
+    else if (type == TYPE_REAL)
+    {
+        width = REAL_WIDTH;
+    }
+    else
+    {
+        width = BOOL_WIDTH;
+    }
+    int temp = newTemp();
+    sprintf(node->name, "temp%d", temp);
+    // get expression code
+    astNode *expr = node->leftChild->nextSibling;
+    getExpressionsCode(expr);
+    quadruple *qp = initQuadruple();
+    qp->op = OP_MUL;
+    strcpy(qp->resultant, node->name);
+    strcpy(qp->operand1, expr->name);
+    sprintf(qp->operand2, "%d", width);
+    expr->code = appendAtEnd(expr->code, qp);
+    node->code = expr->code;
+    return;
+}
+
+void getGen(astNode *node, SymTablePointer *symTable)
+{
+    if (node->label == AST_ID)
+    {
+        strcpy(node->name, node->tk->str);
+        return;
+    }
+    else if (node->label == AST_NUM)
+    {
+        sprintf(node->name, "%d", node->tk->integer);
+        return;
+    }
+    else if (node->label == AST_RNUM)
+    {
+        sprintf(node->name, "%d", node->tk->rnum);
+        return;
+    }
+    else if (node->label == AST_BOOL)
+    {
+        strcpy(node->name, node->tk->str);
+        return;
+    }
+    else
+    {
+        getArrayCode(node, symTable);
+        globalHead = appendAtEnd(globalHead, node->code);
+        quadruple *qp = initQuadruple();
+        qp->op = LW;
+        int temp = newTemp();
+        sprintf(qp->resultant, "temp%d", temp);
+        strcpy(qp->operand1, node->leftChild->tk->str);
+        strcpy(qp->operand2, node->name); // offset
+        sprintf(node->name, "temp%d", temp);
+        globalHead = appendAtEnd(globalHead, qp);
+        return;
+    }
+}
+
+void stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
+{
+    while (stmts != NULL)
+    {
+        if (stmts->label == AST_FOR)
+        {
+            quadruple *head1 = generateForLoopCode(stmts);
+            globalHead = appendAtEnd(globalHead, head1);
+        }
+        else if (stmts->label == AST_WHILE)
+        {
+            quadruple *head1 = generateWhileLoopCode(stmts);
+            globalHead = appendAtEnd(globalHead, head1);
+        }
+        else if (stmts->label == AST_PRINT)
+        {
+            quadruple *head = initQuadruple();
+            head->op = OP_PRINT;
+            getGen(stmts->leftChild, symTable);
+            strcpy(head->operand1, stmts->leftChild->name);
+            globalHead = appendAtEnd(globalHead, head);
+        }
+        else if (stmts->label == AST_GETVALUE)
+        {
+            quadruple *head = initQuadruple();
+            head->op = OP_GETVALUE;
+            getGen(stmts->leftChild, symTable);
+            strcpy(head->operand1, stmts->leftChild->name);
+            globalHead = appendAtEnd(globalHead, head);
+        }
+        stmts = stmts->nextSibling;
+    }
+}
+
 void startIntermCodeGen(astNode *root)
 {
     astNode *mdls = root->leftChild;
@@ -382,20 +515,7 @@ void startIntermCodeGen(astNode *root)
         {
             SymTablePointer *symTable = mdls->symTable;
             astNode *stmts = mdls->leftChild->leftChild->leftChild;
-            while (stmts != NULL)
-            {
-                if (stmts->label == AST_FOR)
-                {
-                    quadruple *head1 = generateForLoopCode(stmts);
-                    globalHead = appendAtEnd(globalHead, head1);
-                }
-                else if (stmts->label == AST_WHILE)
-                {
-                    quadruple *head1 = generateWhileLoopCode(stmts);
-                    globalHead = appendAtEnd(globalHead, head1);
-                }
-                stmts = stmts->nextSibling;
-            }
+            stmtsCodeGen(stmts, symTable);
             mdls = mdls->nextSibling;
             break;
         }
@@ -457,7 +577,7 @@ int main()
     astNode *astRoot = constructAST(root);
     inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // // if (semanticallyCorrect)
+    // if (semanticallyCorrect)
     typeCheck(astRoot);
     if (semanticallyCorrect && semanticRulesPassed)
     {

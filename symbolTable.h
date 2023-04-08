@@ -34,7 +34,11 @@ typedef struct array_type
 {
     int low;
     int high;
+    char *highLexeme;
+    bool isNegHigh;
     bool low_;
+    char *lowLexeme;
+    bool isNegLow;
     bool high_;
     types type;
 } array_type;
@@ -81,6 +85,7 @@ typedef struct SymTablePointer
     SymTableType typeST;
     bool isDefined;
     bool isDeclared;
+    bool called;
 } SymTablePointer;
 
 #endif

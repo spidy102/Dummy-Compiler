@@ -9,4 +9,6 @@ while (x>1 AND y<1)
 start
 declare z:integer;
 end
+declare A:array[2..10] of integer;
+print(A[2+2]);
 end

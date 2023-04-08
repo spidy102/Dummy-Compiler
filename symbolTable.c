@@ -55,6 +55,8 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePo
                         semanticallyCorrect = false;
                     }
                     pointer->typeIfArray.low_ = true;
+                    pointer->typeIfArray.lowLexeme = range1->tk->str;
+                    pointer->typeIfArray.isNegLow = range1->isNegative;
                 }
                 if (range2->label == AST_ID)
                 {
@@ -69,6 +71,8 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePo
                         semanticallyCorrect = false;
                     }
                     pointer->typeIfArray.high_ = true;
+                    pointer->typeIfArray.highLexeme = range2->tk->str;
+                    pointer->typeIfArray.isNegHigh = range2->isNegative;
                 }
             }
             pointer->typeIfArray.type = TYPE_INTEGER;
@@ -106,18 +110,24 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePo
                         semanticallyCorrect = false;
                     }
                     pointer->typeIfArray.low_ = true;
+                    pointer->typeIfArray.lowLexeme = range1->tk->str;
+                    pointer->typeIfArray.isNegLow = range1->isNegative;
                 }
                 if (range2->label == AST_ID)
                 {
                     if (!existsInAnySymTable(parent, range2->tk->str))
                     {
+                        semanticallyCorrect = false;
                         printf("Error: variable %s at line number %d is not declared\n", range2->tk->str, range2->tk->line_num);
                     }
                     else if (getFromAnySymTable(parent, range2->tk->str)->typeIfNotArray != TYPE_INTEGER)
                     {
+                        semanticallyCorrect = false;
                         printf("Error: received non integral array bounds at line number %d\n", range2->tk->line_num);
                     }
                     pointer->typeIfArray.high_ = true;
+                    pointer->typeIfArray.highLexeme = range2->tk->str;
+                    pointer->typeIfArray.isNegHigh = range2->isNegative;
                 }
             }
             pointer->typeIfArray.type = TYPE_BOOLEAN;
@@ -155,6 +165,8 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePo
                         semanticallyCorrect = false;
                     }
                     pointer->typeIfArray.low_ = true;
+                    pointer->typeIfArray.lowLexeme = range1->tk->str;
+                    pointer->typeIfArray.isNegLow = range1->isNegative;
                 }
                 if (range2->label == AST_ID)
                 {
@@ -169,6 +181,8 @@ void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePo
                         semanticallyCorrect = false;
                     }
                     pointer->typeIfArray.high_ = true;
+                    pointer->typeIfArray.highLexeme = range2->tk->str;
+                    pointer->typeIfArray.isNegHigh = range2->isNegative;
                 }
             }
             pointer->typeIfArray.type = TYPE_REAL;
@@ -341,6 +355,7 @@ SymTablePointer *initSymTablePointer()
     pointer->isAwaited = false;
     pointer->isDeclared = false;
     pointer->isDefined = false;
+    pointer->called = false;
     pointer->childScopeTable = NULL;
     pointer->input_para_list = NULL;
     pointer->next = NULL;
@@ -398,6 +413,39 @@ bool inInputParameters(SymTablePointer *module, char *str)
     return false;
 }
 
+void compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line)
+{
+
+    if (!ptr1->typeIfArray.high_ && !ptr2->typeIfArray.low_)
+    {
+        if (!(ptr1->typeIfArray.low == ptr2->typeIfArray.low && ptr1->typeIfArray.high == ptr2->typeIfArray.high && ptr1->typeIfArray.type == ptr2->typeIfArray.type))
+        {
+            printf("Error: array type mismatch at line number %d\n", line);
+            return;
+        }
+    }
+    else
+    {
+        // how to check here
+        if (ptr1->typeIfArray.high_ && ptr2->typeIfArray.high_ && ptr1->typeIfArray.isNegHigh && ptr2->typeIfArray.isNegHigh && strcmp(ptr1->typeIfArray.highLexeme, ptr2->typeIfArray.highLexeme) == 0)
+        {
+        }
+        else
+        {
+            printf("Error: array type mismatch at line number %d\n", line);
+            return;
+        }
+        if (ptr1->typeIfArray.low_ && ptr2->typeIfArray.low_ && ptr1->typeIfArray.isNegLow && ptr2->typeIfArray.isNegLow && strcmp(ptr1->typeIfArray.lowLexeme, ptr2->typeIfArray.lowLexeme) == 0)
+        {
+        }
+        else
+        {
+            printf("Error: array type mismatch at line number %d\n", line);
+            return;
+        }
+    }
+}
+
 void checkTypes(astNode *stmts, SymTablePointer *symTable)
 {
     getAttributeType(stmts->leftChild, symTable);
@@ -436,6 +484,12 @@ void checkTypes(astNode *stmts, SymTablePointer *symTable)
         }
         printf("Error: type mismatch at line number %d, cannot assign %s type value to %s\n", line, EnumToTypeString(stmts->leftChild->nextSibling->type), EnumToTypeString(stmts->leftChild->type));
         semanticRulesPassed = false;
+    }
+    else if ((stmts->leftChild->type == TYPE_ARR_BOOL || stmts->leftChild->type == TYPE_ARR_INT || stmts->leftChild->type == TYPE_ARR_REAL) && (stmts->leftChild->nextSibling->type == TYPE_ARR_BOOL || stmts->leftChild->nextSibling->type == TYPE_ARR_INT || stmts->leftChild->nextSibling->type == TYPE_ARR_REAL))
+    {
+        SymTablePointer *ptr1 = getFromAnySymTable(symTable, stmts->leftChild->tk->str);
+        SymTablePointer *ptr2 = getFromAnySymTable(symTable, stmts->leftChild->nextSibling->tk->str);
+        compareForArrayMatch(ptr1, ptr2, stmts->leftChild->tk->line_num);
     }
 }
 
@@ -488,7 +542,20 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             stmts = stmts->nextSibling;
             break;
         }
-        case AST_IOSTMT:
+        case AST_PRINT:
+        {
+            if (stmts->leftChild->label == AST_ID)
+            {
+                if (!existsInAnySymTable(module, stmts->leftChild->tk->str))
+                {
+                    printf("Error: variable %s at line number %d is not defined in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
+                    semanticallyCorrect = false;
+                }
+            }
+            stmts = stmts->nextSibling;
+            break;
+        }
+        case AST_GETVALUE:
         {
             if (stmts->leftChild->label == AST_ID)
             {
@@ -581,7 +648,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                     else
                     {
                         SymTablePointer *ptr = getFromSymTable(globalSymbolTable->corrHashtable, children->tk->str);
-                        if (ptr->isDeclared && ptr->isDefined)
+                        ptr->called = true;
+                        if (ptr->isDeclared && ptr->isDefined && !ptr->called)
                         {
                             printf("Error: module %s's call at line number %d has both a declaration and definition before this\n", children->tk->str, children->tk->line_num);
                         }
@@ -629,6 +697,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
         case AST_ASSIGNOP:
         {
             traverse_ast(stmts, module);
+            checkTypes(stmts, module);
             stmts = stmts->nextSibling;
             break;
         }
@@ -668,8 +737,6 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             traverse_ast(stmts->leftChild, module);
             int offset1 = 0;
             populateStmtsSymTable(whileScope, whileStmts, &offset1);
-            printf("actual para\n");
-
             stmts = stmts->nextSibling;
             break;
         }
@@ -744,8 +811,13 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     if (existsInSymTable(globalST, pointer->str))
                     {
                         SymTablePointer *temp = getFromSymTable(globalST, pointer->str);
-                        temp->isAwaited = false;
                         temp->isDefined = true;
+                        if (temp->isDeclared && temp->isDefined && !temp->called)
+                        {
+                            printf("Error: at line number %d module %s has both definition and declaration before its call\n", corrID->tk->line_num, pointer->str);
+                        }
+                        temp->isAwaited = false;
+
                         pointer = temp;
                     }
                     else
@@ -869,7 +941,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
 //     globalSymbolTable->parentHashTable = NULL;
 //     hashtable *ht1 = initHashtableForSymTable();
 //     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("random1.txt", "r");
+//     FILE *fp = fopen("random2.txt", "r");
 //     twinbuffer *tb = twinbuffer_init(fp, 256);
 //     fill_grammar(fopen("Grammar.txt", "r"));
 //     hashtable ht = initHashtable();
