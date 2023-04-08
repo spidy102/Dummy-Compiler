@@ -413,7 +413,7 @@ bool inInputParameters(SymTablePointer *module, char *str)
     return false;
 }
 
-void compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line)
+bool compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line)
 {
 
     if (!ptr1->typeIfArray.high_ && !ptr2->typeIfArray.low_)
@@ -421,7 +421,7 @@ void compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line
         if (!(ptr1->typeIfArray.low == ptr2->typeIfArray.low && ptr1->typeIfArray.high == ptr2->typeIfArray.high && ptr1->typeIfArray.type == ptr2->typeIfArray.type))
         {
             printf("Error: array type mismatch at line number %d\n", line);
-            return;
+            return true;
         }
     }
     else
@@ -433,7 +433,7 @@ void compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line
         else
         {
             printf("Error: array type mismatch at line number %d\n", line);
-            return;
+            return true;
         }
         if (ptr1->typeIfArray.low_ && ptr2->typeIfArray.low_ && ptr1->typeIfArray.isNegLow && ptr2->typeIfArray.isNegLow && strcmp(ptr1->typeIfArray.lowLexeme, ptr2->typeIfArray.lowLexeme) == 0)
         {
@@ -441,9 +441,10 @@ void compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line
         else
         {
             printf("Error: array type mismatch at line number %d\n", line);
-            return;
+            return true;
         }
     }
+    return false;
 }
 
 void checkTypes(astNode *stmts, SymTablePointer *symTable)

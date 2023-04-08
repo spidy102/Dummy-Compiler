@@ -17,4 +17,6 @@ types getType(astNode *type);
 SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *append);
 int getOffset(SymTablePointer *pointer, int *offset);
 void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePointer *parent);
+bool compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line);
+
 #endif

@@ -14,4 +14,6 @@ SymTablePointer *getFromSymTable(hashtable *ht, char *str);
 
 SymTablePointer *getFromAnySymTable(SymTablePointer *st, char *str);
 
+SymTablePointer *getPointerFromList(list *ipl);
+
 #endif

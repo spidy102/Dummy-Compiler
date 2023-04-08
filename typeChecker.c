@@ -270,6 +270,37 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
     }
 }
 
+bool compareForArrayMatch1(SymTablePointer *ptr1, SymTablePointer *ptr2, int line)
+{
+
+    if (!ptr1->typeIfArray.high_ && !ptr2->typeIfArray.low_)
+    {
+        if (!(ptr1->typeIfArray.low == ptr2->typeIfArray.low && ptr1->typeIfArray.high == ptr2->typeIfArray.high && ptr1->typeIfArray.type == ptr2->typeIfArray.type))
+        {
+            return true;
+        }
+    }
+    else
+    {
+        // how to check here
+        if (ptr1->typeIfArray.high_ && ptr2->typeIfArray.high_ && ptr1->typeIfArray.isNegHigh && ptr2->typeIfArray.isNegHigh && strcmp(ptr1->typeIfArray.highLexeme, ptr2->typeIfArray.highLexeme) == 0)
+        {
+        }
+        else
+        {
+            return true;
+        }
+        if (ptr1->typeIfArray.low_ && ptr2->typeIfArray.low_ && ptr1->typeIfArray.isNegLow && ptr2->typeIfArray.isNegLow && strcmp(ptr1->typeIfArray.lowLexeme, ptr2->typeIfArray.lowLexeme) == 0)
+        {
+        }
+        else
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePointer *symTable)
 {
     int i = 0;
@@ -302,6 +333,16 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
                     {
                         printf("Error: type mismatch in parameter %d on line number %d, received %s, required array\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type));
                         semanticRulesPassed = false;
+                    }
+                }
+                else
+                {
+                    if (actual_params->type != TYPE_MISSING)
+                    {
+                        if (compareForArrayMatch1(getPointerFromList(ipl), getFromAnySymTable(symTable, actual_params->tk->str), actual_params->tk->line_num))
+                        {
+                            printf("Error: type mismatch in parameter %d on line number %d, received %s, required %s\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type), ipl->typeIfArray.type == TYPE_ARR_INT ? "array of integer" : (ipl->typeIfArray.type == TYPE_ARR_BOOL ? "array of boolean" : "array of real"));
+                        }
                     }
                 }
             }
