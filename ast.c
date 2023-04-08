@@ -1552,6 +1552,7 @@ astNode *constructAST(treenode *root)
         constructAST(arOrB);
         constructAST(stmts);
         root->addr = initASTNode(AST_WHILE, NULL);
+        root->addr->tk = root->child->tk;
         root->addr->leftChild = append_at_end(root->addr->leftChild, arOrB->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
         freeRHSList(root);
