@@ -444,7 +444,7 @@ void getGen(astNode *node, SymTablePointer *symTable)
     }
     else if (node->label == AST_RNUM)
     {
-        sprintf(node->name, "%d", node->tk->rnum);
+        sprintf(node->name, "%lf", node->tk->rnum);
         return;
     }
     else if (node->label == AST_BOOL)
@@ -496,6 +496,15 @@ void stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             head->op = OP_GETVALUE;
             getGen(stmts->leftChild, symTable);
             strcpy(head->operand1, stmts->leftChild->name);
+            globalHead = appendAtEnd(globalHead, head);
+        }
+        else if (stmts->label == AST_ASSIGNOP)
+        {
+            quadruple *head = initQuadruple();
+            head->op = OP_ASSIGN;
+            getExpressionsCode(stmts->leftChild->nextSibling);
+            globalHead = appendAtEnd(globalHead, stmts->leftChild->nextSibling->code);
+            strcpy(head->operand1, stmts->leftChild->nextSibling->name);
             globalHead = appendAtEnd(globalHead, head);
         }
         stmts = stmts->nextSibling;

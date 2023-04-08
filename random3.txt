@@ -10,5 +10,7 @@ start
 declare z:integer;
 end
 declare A:array[2..10] of integer;
-print(A[2+2]);
+print(A[2]);
+declare a,b,c,d:integer;
+a:=b+c*d+a-d;
 end
