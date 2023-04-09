@@ -483,87 +483,136 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
     // get code for case statements
     astNode* case1 = caseStmts->leftChild;
     astNode* def = caseStmts->nextSibling;
-
-    //create a dynamic array to store the labels and the case values
-    // can realloc later if more than 25 cases.
-    int *casevalues = malloc(sizeof(int) * 25);
-    int *caselabels = malloc(sizeof(int) * 25);
-    int i = 0; //tracks number of cases
-    int labelexit = newLabel();
-    while (case1 != NULL) {
-
+    //check if boolean or integer switch
+    if(def->leftChild == NULL) {
+        bool *casevalues = malloc(sizeof(bool) * 2);
+        int *caselabels = malloc(sizeof(int) * 2);
+        int labelexit = newLabel();
         quadruple *tempQ1 = initQuadruple();
-        //create a label for each case
         int label1 = newLabel();
         tempQ1->op = LABEL;
         snprintf(tempQ1->operand1, 25, "label%d", label1);
-        caselabels[i] = label1;
-        casevalues[i] = case1->leftChild->tk->integer; //this could be a booleean!
+        caselabels[0] = label1;
+        casevalues[0] = true;
         head = appendAtEnd(head, tempQ1);
 
-        //generate code for the statements
         quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
         head = appendAtEnd(head, stmtsHead);
         quadruple *tempQ2 = initQuadruple();
         tempQ2->op = JUMP;
         snprintf(tempQ2->operand1, 25, "label%d", labelexit);
         head = appendAtEnd(head, tempQ2);
-        case1 = case1->nextSibling;
-        i++;
-    }
-    int labeldef = newLabel(); 
-    if(def->leftChild != NULL){
-        
-        quadruple *tempQ3 = initQuadruple();
 
+        quadruple *tempQ3 = initQuadruple();
+        int label2 = newLabel();
         tempQ3->op = LABEL;
-        snprintf(tempQ3->operand1, 25, "label%d", labeldef);
+        snprintf(tempQ3->operand1, 25, "label%d", label2);
+        caselabels[1] = label2;
+        casevalues[1] = false;
         head = appendAtEnd(head, tempQ3);
-        quadruple *stmtsHead = stmtsCodeGen(def->leftChild, symTable);
+
+        stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->nextSibling, symTable);
         head = appendAtEnd(head, stmtsHead);
         quadruple *tempQ4 = initQuadruple();
         tempQ4->op = JUMP;
         snprintf(tempQ4->operand1, 25, "label%d", labelexit);
         head = appendAtEnd(head, tempQ4);
-    }
 
-    quadruple *tempQ5 = initQuadruple();
-    tempQ5->op = LABEL;
-    snprintf(tempQ5->operand1, 25, "label%d", label0);
-    head = appendAtEnd(head, tempQ5);
+        quadruple *tempQ5 = initQuadruple();
+        tempQ5->op = LABEL;
+        snprintf(tempQ5->operand1, 25, "label%d", label0);
+        head = appendAtEnd(head, tempQ5);
 
-
-    for(int j = 0; j < i; j++) {
         quadruple *tempQ6 = initQuadruple();
-        int tempcmp = newTemp();
-        tempQ6->op = OP_EQ;
+        tempQ6->op = JUMPIFTRUE;
         strcpy(tempQ6->operand1, switchExpr->tk->str);
-        snprintf(tempQ6->operand2, 25, "%d", casevalues[j]);
-        snprintf(tempQ6->resultant, 25, "temp%d", tempcmp);
+        snprintf(tempQ6->operand2, 25, "label%d", label1);
         head = appendAtEnd(head, tempQ6);
 
         quadruple *tempQ7 = initQuadruple();
-        tempQ7->op = JUMPIFTRUE;
-        snprintf(tempQ7->operand1, 25, "temp%d", tempcmp);
-        snprintf(tempQ7->operand2, 25, "label%d", caselabels[j]);
-        head = appendAtEnd(head, tempQ7);
-    }
-
-    if (labeldef != -1) {
-        quadruple *tempQ7 = initQuadruple();
         tempQ7->op = JUMP;
-        snprintf(tempQ7->operand1, 25, "label%d", labeldef);
+        snprintf(tempQ7->operand1, 25, "label%d", label2);
         head = appendAtEnd(head, tempQ7);
+
+        quadruple *tempQ8 = initQuadruple();
+        tempQ8->op = LABEL;
+        snprintf(tempQ8->operand1, 25, "label%d", labelexit);
+        head = appendAtEnd(head, tempQ8);
+
+        free(casevalues);
+        free(caselabels);
+
     }
+    else{
+        int *casevalues = malloc(sizeof(int) * 25);
+        int *caselabels = malloc(sizeof(int) * 25);
+        int i = 0; //tracks number of cases
+        int labelexit = newLabel();
+        while (case1 != NULL) {
+            quadruple *tempQ1 = initQuadruple();
+            //create a label for each case
+            int label1 = newLabel();
+            tempQ1->op = LABEL;
+            snprintf(tempQ1->operand1, 25, "label%d", label1);
+            caselabels[i] = label1;
+            casevalues[i] = case1->leftChild->tk->integer; 
+            head = appendAtEnd(head, tempQ1);
+            quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
+            head = appendAtEnd(head, stmtsHead);
+            quadruple *tempQ2 = initQuadruple();
+            tempQ2->op = JUMP;
+            snprintf(tempQ2->operand1, 25, "label%d", labelexit);
+            head = appendAtEnd(head, tempQ2);
+            case1 = case1->nextSibling;
+            i++;
+        }
+        //note the default checks are redundant, but I'm keeping them for now
+        int labeldef = newLabel(); 
+        if(def->leftChild != NULL){
+            quadruple *tempQ3 = initQuadruple();
+            tempQ3->op = LABEL;
+            snprintf(tempQ3->operand1, 25, "label%d", labeldef);
+            head = appendAtEnd(head, tempQ3);
+            quadruple *stmtsHead = stmtsCodeGen(def->leftChild, symTable);
+            head = appendAtEnd(head, stmtsHead);
+            quadruple *tempQ4 = initQuadruple();
+            tempQ4->op = JUMP;
+            snprintf(tempQ4->operand1, 25, "label%d", labelexit);
+            head = appendAtEnd(head, tempQ4);
+        }
+        quadruple *tempQ5 = initQuadruple();
+        tempQ5->op = LABEL;
+        snprintf(tempQ5->operand1, 25, "label%d", label0);
+        head = appendAtEnd(head, tempQ5);
+        for(int j = 0; j < i; j++) {
+            quadruple *tempQ6 = initQuadruple();
+            int tempcmp = newTemp();
+            tempQ6->op = OP_EQ;
+            strcpy(tempQ6->operand1, switchExpr->tk->str);
+            snprintf(tempQ6->operand2, 25, "%d", casevalues[j]);
+            snprintf(tempQ6->resultant, 25, "temp%d", tempcmp);
+            head = appendAtEnd(head, tempQ6);
 
-    quadruple *tempQ8 = initQuadruple();
-    tempQ8->op = LABEL;
-    snprintf(tempQ8->operand1, 25, "label%d", labelexit);
-    head = appendAtEnd(head, tempQ8);
-
-    free(casevalues);
-    free(caselabels);
-    return head;
+            quadruple *tempQ7 = initQuadruple();
+            tempQ7->op = JUMPIFTRUE;
+            snprintf(tempQ7->operand1, 25, "temp%d", tempcmp);
+            snprintf(tempQ7->operand2, 25, "label%d", caselabels[j]);
+            head = appendAtEnd(head, tempQ7);
+        }
+        if (labeldef != -1) {
+            quadruple *tempQ7 = initQuadruple();
+            tempQ7->op = JUMP;
+            snprintf(tempQ7->operand1, 25, "label%d", labeldef);
+            head = appendAtEnd(head, tempQ7);
+        }
+        quadruple *tempQ8 = initQuadruple();
+        tempQ8->op = LABEL;
+        snprintf(tempQ8->operand1, 25, "label%d", labelexit);
+        head = appendAtEnd(head, tempQ8);
+        free(casevalues);
+        free(caselabels);
+    }
+ return head;
 }
 
 
