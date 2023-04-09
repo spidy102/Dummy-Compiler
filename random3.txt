@@ -1,23 +1,10 @@
 <<<driver program>>>
 start
-for (k in -20..-10)
-start
-print(k);
-  for (i in 1..10)
+declare z: boolean;
+switch (z)
   start
-  print(i);
-  end
+  case true: declare a: integer;
+  case false: declare b: real;
 end
-declare x,y:integer;
-while (x>1 AND y<1) 
-start
-declare z:integer;
-end
-declare A:array[2..10] of integer;
-print(A[2]);
-<<<<<<< HEAD
-=======
-declare a,b,c,d:integer;
-a:=b+c*d+a-d;
->>>>>>> b22248046d1d7574be09046c7b1972ca5a4ce148
+
 end
