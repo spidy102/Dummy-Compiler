@@ -38,6 +38,17 @@ bool existsInAnySymTable(SymTablePointer *st, char *str)
             }
             ipl = ipl->next;
         }
+
+        list *opl = moduleST->output_para_list;
+
+        while (opl != NULL)
+        {
+            if (strcmp(opl->tk->str, str) == 0)
+            {
+                return true;
+            }
+            opl = opl->next;
+        }
     }
 
     return false;
@@ -103,6 +114,8 @@ SymTablePointer *getPointerFromList(list *ipl)
     ptr->isArray = ipl->isArray;
     ptr->str = ipl->tk->str;
     ptr->tk = ipl->tk;
+    ptr->offset = ipl->offset;
+    ptr->width = ipl->width;
     if (ptr->isArray)
     {
         ptr->typeIfArray.high = ipl->typeIfArray.high;
@@ -115,7 +128,6 @@ SymTablePointer *getPointerFromList(list *ipl)
     {
         ptr->typeIfNotArray = ipl->typeIfNotArray;
     }
-    ptr->offset = ipl->width;
     return ptr;
 }
 
@@ -138,6 +150,15 @@ SymTablePointer *getFromAnySymTable(SymTablePointer *st, char *str)
                     return getPointerFromList(ipl);
                 }
                 ipl = ipl->next;
+            }
+            list *opl = st->output_para_list;
+            while (opl != NULL)
+            {
+                if (strcmp(str, opl->tk->str) == 0)
+                {
+                    return getPointerFromList(opl);
+                }
+                opl = opl->next;
             }
         }
         st = st->parentHashTable;

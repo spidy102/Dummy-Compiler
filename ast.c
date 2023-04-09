@@ -219,10 +219,19 @@ astNode *constructAST(treenode *root)
         {
             moduleNode->leftChild = append_at_end(moduleNode->leftChild, inputParaListNode);
         } // need to add this node here..(if null)
+        else
+        {
+            moduleNode->leftChild = append_at_end(moduleNode->leftChild, initASTNode(AST_INPUT_PARA_LIST, NULL));
+        }
         if (retNode != NULL)
         {
             moduleNode->leftChild = append_at_end(moduleNode->leftChild, retNode);
         }
+        else
+        {
+            moduleNode->leftChild = append_at_end(moduleNode->leftChild, initASTNode(AST_OUTPUT_PARA_LIST, NULL));
+        }
+
         if (modDefNode != NULL)
         {
             moduleNode->leftChild = append_at_end(moduleNode->leftChild, modDefNode);
@@ -378,8 +387,12 @@ astNode *constructAST(treenode *root)
         constructAST(stmts);
 
         root->syn = stmts->addr;
+
+        astNode *node = initASTNode(AST_MODULEDEF, root->syn);
+        node->line_start = root->child->tk->line_num;
+        node->line_end = root->child->nextSibling->nextSibling->tk->line_num;
         freeRHSList(root);
-        return initASTNode(AST_MODULEDEF, root->syn);
+        return node;
     }
     case 25: // statements(2) statement statements(1)
     {
@@ -1459,6 +1472,11 @@ astNode *constructAST(treenode *root)
         constructAST(valueNode);
         astNode *stmtsNode = constructAST(stmts);
         astNode *caseNode = initASTNode(AST_CASE, NULL);
+        printf("hemlo??\n\n");
+
+        caseNode->line_start = root->child->tk->line_num;
+        caseNode->line_end = stmts->nextSibling->nextSibling->tk->line_num;
+
         caseNode->leftChild = append_at_end(caseNode->leftChild, valueNode->addr);
         if (stmts->addr != NULL)
         {
@@ -1479,6 +1497,8 @@ astNode *constructAST(treenode *root)
         constructAST(valueNode);
         astNode *stmtsNode = constructAST(stmts);
         astNode *caseNode = initASTNode(AST_CASE, NULL);
+        caseNode->line_start = root->child->tk->line_num;
+        caseNode->line_end = stmts->nextSibling->nextSibling->tk->line_num;
         caseNode->leftChild = valueNode->addr;
         if (stmtsNode != NULL)
         {
@@ -1542,6 +1562,9 @@ astNode *constructAST(treenode *root)
         root->addr->leftChild = append_at_end(root->addr->leftChild, idAST);
         root->addr->leftChild = append_at_end(root->addr->leftChild, rangeFor->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
+        treenode *st = rangeFor->nextSibling->nextSibling;
+        root->addr->line_start = st->tk->line_num;
+        root->addr->line_end = st->nextSibling->nextSibling->tk->line_num;
         freeRHSList(root);
         return NULL;
     }
@@ -1555,6 +1578,8 @@ astNode *constructAST(treenode *root)
         root->addr->tk = root->child->tk;
         root->addr->leftChild = append_at_end(root->addr->leftChild, arOrB->addr);
         root->addr->leftChild = append_at_end(root->addr->leftChild, stmts->addr);
+        root->addr->line_start = arOrB->nextSibling->nextSibling->tk->line_num;
+        root->addr->line_end = stmts->nextSibling->tk->line_num;
         freeRHSList(root);
         return NULL;
     }

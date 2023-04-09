@@ -28,7 +28,7 @@ int newLabel()
     return ++labelCount;
 }
 
-quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable);
+quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable);
 
 quadruple *initQuadruple()
 {
@@ -457,7 +457,7 @@ void getGen(astNode *node, SymTablePointer *symTable)
     else
     {
         getArrayCode(node, symTable);
-        globalHead = appendAtEnd(globalHead, node->code);
+        // globalHead = appendAtEnd(globalHead, node->code);
         quadruple *qp = initQuadruple();
         qp->op = LW;
         int temp = newTemp();
@@ -465,12 +465,12 @@ void getGen(astNode *node, SymTablePointer *symTable)
         strcpy(qp->operand1, node->leftChild->tk->str);
         strcpy(qp->operand2, node->name); // offset
         sprintf(node->name, "temp%d", temp);
-        globalHead = appendAtEnd(globalHead, qp);
+        node->code = appendAtEnd(node->code, qp);
         return;
     }
 }
 
-quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
+quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
 {
     quadruple *tempHead = NULL;
     while (stmts != NULL)
@@ -491,6 +491,7 @@ quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             quadruple *head = initQuadruple();
             head->op = OP_PRINT;
             getGen(stmts->leftChild, symTable);
+            tempHead = appendAtEnd(tempHead, stmts->leftChild->code);
             strcpy(head->operand1, stmts->leftChild->name);
             tempHead = appendAtEnd(tempHead, head);
         }
@@ -507,9 +508,9 @@ quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             quadruple *head = initQuadruple();
             head->op = OP_ASSIGN;
             getExpressionsCode(stmts->leftChild->nextSibling);
-            globalHead = appendAtEnd(globalHead, stmts->leftChild->nextSibling->code);
+            tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
             strcpy(head->operand1, stmts->leftChild->nextSibling->name);
-            globalHead = appendAtEnd(globalHead, head);
+            tempHead = appendAtEnd(tempHead, head);
         }
         stmts = stmts->nextSibling;
     }
@@ -529,7 +530,7 @@ void startIntermCodeGen(astNode *root)
         {
             SymTablePointer *symTable = mdls->symTable;
             astNode *stmts = mdls->leftChild->leftChild->leftChild;
-            quadruple* qp = stmtsCodeGen(stmts, symTable);
+            quadruple *qp = stmtsCodeGen(stmts, symTable);
             globalHead = appendAtEnd(globalHead, qp);
             mdls = mdls->nextSibling;
             break;

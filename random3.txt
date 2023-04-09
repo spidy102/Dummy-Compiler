@@ -15,9 +15,6 @@ declare z:integer;
 end
 declare A:array[2..10] of integer;
 print(A[2]);
-<<<<<<< HEAD
-=======
 declare a,b,c,d:integer;
 a:=b+c*d+a-d;
->>>>>>> b22248046d1d7574be09046c7b1972ca5a4ce148
 end

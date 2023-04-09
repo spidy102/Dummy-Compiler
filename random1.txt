@@ -7,6 +7,24 @@ start
 declare z:integer;
 declare y:real;
 [z]:=use module one with parameters z,y; 
+switch(z)
+start
+case 1:
+switch(x)
+start
+case 2:
+declare x:integer;
+qw:=op+1;
+break;
+default:
+declare x:real;
+break;
+end
+break;
+default:
+declare x:real;
+break;
+end
 end
 
 <<module one>>

@@ -214,18 +214,21 @@ int getOffset(SymTablePointer *pointer, int *offset)
     {
         if (pointer->typeIfNotArray == TYPE_INTEGER)
         {
+            pointer->width = INT_WIDTH;
             int ret = *offset;
             *offset += INT_WIDTH;
             return ret;
         }
         else if (pointer->typeIfNotArray == TYPE_BOOLEAN)
         {
+            pointer->width = BOOL_WIDTH;
             int ret = *offset;
             *offset += BOOL_WIDTH;
             return ret;
         }
         else
         {
+            pointer->width = REAL_WIDTH;
             int ret = *offset;
             *offset += REAL_WIDTH;
             return ret;
@@ -234,24 +237,30 @@ int getOffset(SymTablePointer *pointer, int *offset)
     else
     {
         array_type type = pointer->typeIfArray;
-        if (type.type == TYPE_INTEGER)
+        if (!type.low_ && !type.high_)
         {
-            int ret = *offset;
-            *offset += (type.high - type.low + 1) * INT_WIDTH;
-            return ret;
-        }
-        else if (type.type == TYPE_BOOLEAN)
-        {
-            int ret = *offset;
-            *offset += (type.high - type.low + 1) * BOOL_WIDTH;
-            return ret;
-        }
-        else
-        {
-            int ret = *offset;
-            *offset += (type.high - type.low + 1) * TYPE_REAL;
-            return ret;
-        }
+            if (type.type == TYPE_INTEGER)
+            {
+                pointer->width = (type.high - type.low + 1) * INT_WIDTH + 1;
+                int ret = *offset;
+                *offset += pointer->width;
+                return ret;
+            }
+            else if (type.type == TYPE_BOOLEAN)
+            {
+                pointer->width = (type.high - type.low) * BOOL_WIDTH + 1;
+                int ret = *offset;
+                *offset += pointer->width;
+                return ret;
+            }
+            else
+            {
+                pointer->width = (type.high - type.low) * REAL_WIDTH + 1;
+                int ret = *offset;
+                *offset += pointer->width;
+                return ret;
+            }
+        } // dynamic arrays treatment??
     }
 }
 
@@ -299,17 +308,21 @@ list *getListFromAST(astNode *pl, int *offset)
             head->typeIfNotArray = getType(pl->leftChild);
             if (head->typeIfNotArray == TYPE_INTEGER)
             {
-                head->width = *offset + INT_WIDTH;
-                *offset += 4;
+                head->width = INT_WIDTH;
+                head->offset = *offset;
+                *offset += head->width;
             }
             else if (head->typeIfNotArray == TYPE_BOOLEAN)
             {
-                head->width = *offset + BOOL_WIDTH;
-                *offset += 1;
+                head->width = BOOL_WIDTH;
+                head->offset = *offset;
+                *offset += head->width;
             }
             else
             {
-                head->width = *offset + REAL_WIDTH;
+                head->width = REAL_WIDTH;
+                head->offset = *offset;
+                *offset += head->width;
             }
             head->tk = pl->leftChild->nextSibling->tk;
         }
@@ -319,21 +332,46 @@ list *getListFromAST(astNode *pl, int *offset)
             head->isArray = true;
             astNode *arr_type = pl->leftChild;
             // HAVE TO INCORPORATE SIGNED CASES TOO
-            head->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
-            if (arr_type->leftChild->nextSibling->leftChild->isNegative)
-            {
-                head->typeIfArray.low = -head->typeIfArray.low;
-            }
-            head->typeIfArray.high = arr_type->leftChild->nextSibling->leftChild->nextSibling->tk->integer;
-            if (arr_type->leftChild->nextSibling->leftChild->nextSibling->isNegative)
-            {
-                head->typeIfArray.high = -head->typeIfArray.high;
-            }
+            astNode *range1 = pl->leftChild->leftChild->nextSibling->leftChild;
+            astNode *range2 = pl->leftChild->leftChild->nextSibling->leftChild->nextSibling;
             head->typeIfArray.type = getType(arr_type->leftChild);
-            // range checks?
-            head->tk = pl->leftChild->nextSibling->tk;
-            head->width = (head->typeIfArray.high - head->typeIfArray.low + 1) * (head->typeIfArray.type == TYPE_INTEGER ? INT_WIDTH : (head->typeIfArray.type == TYPE_BOOLEAN ? (BOOL_WIDTH) : (REAL_WIDTH)));
+            if (range1->label == AST_NUM && range2->label == AST_NUM)
+            {
+                head->typeIfArray.low = arr_type->leftChild->nextSibling->leftChild->tk->integer;
+                if (arr_type->leftChild->nextSibling->leftChild->isNegative)
+                {
+                    head->typeIfArray.low = -head->typeIfArray.low;
+                }
+                head->typeIfArray.high = arr_type->leftChild->nextSibling->leftChild->nextSibling->tk->integer;
+                if (arr_type->leftChild->nextSibling->leftChild->nextSibling->isNegative)
+                {
+                    head->typeIfArray.high = -head->typeIfArray.high;
+                }
+                // range checks?
+                head->typeIfArray.high_ = false;
+                head->typeIfArray.low_ = false;
+                head->tk = pl->leftChild->nextSibling->tk;
+                head->width = (head->typeIfArray.high - head->typeIfArray.low + 1) * (head->typeIfArray.type == TYPE_INTEGER ? INT_WIDTH : (head->typeIfArray.type == TYPE_BOOLEAN ? (BOOL_WIDTH) : (REAL_WIDTH))) + 1;
+                head->offset = *offset;
+                *offset += head->width;
+            }
+            else
+            {
+                if (range1->label == AST_ID)
+                {
+                    head->typeIfArray.low_ = true;
+                    head->typeIfArray.lowLexeme = range1->tk->str;
+                    head->typeIfArray.isNegLow = range1->isNegative;
+                }
+                if (range2->label == AST_ID)
+                {
+                    head->typeIfArray.high_ = true;
+                    head->typeIfArray.highLexeme = range2->tk->str;
+                    head->typeIfArray.isNegLow = range2->isNegative;
+                }
+            }
         }
+
         pl = pl->nextSibling;
         if (pl != NULL)
         {
@@ -356,12 +394,18 @@ SymTablePointer *initSymTablePointer()
     pointer->isDeclared = false;
     pointer->isDefined = false;
     pointer->called = false;
+    pointer->width = -1;
+    pointer->offset = -1;
+    pointer->line_start = -1;
+    pointer->line_end = -1;
     pointer->childScopeTable = NULL;
     pointer->input_para_list = NULL;
     pointer->next = NULL;
     pointer->output_para_list = NULL;
     pointer->parentHashTable = NULL;
     pointer->tk = NULL;
+    pointer->typeIfArray.low_ = false;
+    pointer->typeIfArray.high_ = false;
     // pointer->typeExpression = NULL;
     pointer->str = NULL;
 }
@@ -603,15 +647,17 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             astNode *cases = stmts->leftChild->nextSibling->leftChild;
             while (cases != NULL)
             {
-                int offset1 = 0;
+                // int offset1 = 0;
                 SymTablePointer *casePtr = initSymTablePointer();
                 casePtr->typeST = SCOPEST;
                 hashtable *caseHashtable = initHashtableForSymTable();
                 casePtr->corrHashtable = caseHashtable;
                 casePtr->parentHashTable = newPointer;
                 cases->symTable = casePtr;
-                newPointer->childScopeTable = append_scope_pointer(newPointer, casePtr);
-                populateStmtsSymTable(casePtr, cases->leftChild->nextSibling->leftChild, &offset1);
+                casePtr->line_start = cases->line_start;
+                casePtr->line_end = cases->line_end;
+                newPointer->childScopeTable = append_scope_pointer(newPointer->childScopeTable, casePtr);
+                populateStmtsSymTable(casePtr, cases->leftChild->nextSibling->leftChild, offset);
                 cases = cases->nextSibling;
             }
 
@@ -715,6 +761,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             module->childScopeTable = append_scope_pointer(module->childScopeTable, forScope);
             forScope->parentHashTable = module;
             forScope->typeST = SCOPEST;
+            forScope->line_start = stmts->line_start;
+            forScope->line_end = stmts->line_end;
             stmts->symTable = forScope; // attach sym table with for's new scope;
             hashtable *forScopeHashTable = initHashtableForSymTable();
             forScope->corrHashtable = forScopeHashTable;
@@ -726,8 +774,8 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             var->str = stmts->leftChild->tk->str;
             insertSymTable(forScope->corrHashtable, var);
             astNode *forStmts = stmts->leftChild->nextSibling->nextSibling->leftChild;
-            int offset1 = 0;
-            populateStmtsSymTable(forScope, forStmts, &offset1);
+            // int offset1 = 0;
+            populateStmtsSymTable(forScope, forStmts, offset);
 
             stmts = stmts->nextSibling;
             break;
@@ -738,13 +786,15 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             module->childScopeTable = append_scope_pointer(module->childScopeTable, whileScope);
             whileScope->parentHashTable = module;
             whileScope->typeST = SCOPEST;
+            whileScope->line_start = stmts->line_start;
+            whileScope->line_end = stmts->line_end;
             stmts->symTable = whileScope;
             hashtable *whileScopeHashTable = initHashtableForSymTable();
             whileScope->corrHashtable = whileScopeHashTable;
             astNode *whileStmts = stmts->leftChild->nextSibling->leftChild;
             traverse_ast(stmts->leftChild, module);
-            int offset1 = 0;
-            populateStmtsSymTable(whileScope, whileStmts, &offset1);
+            // int offset1 = 0;
+            populateStmtsSymTable(whileScope, whileStmts, offset);
             stmts = stmts->nextSibling;
             break;
         }
@@ -763,6 +813,100 @@ void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offs
     }
     astNode *stmts = mdlDef->leftChild->leftChild;
     populateStmtsSymTable(module, stmts, offset);
+}
+
+int staticOrDyn(SymTablePointer *ptr)
+{
+    if (ptr->typeIfArray.high_ || ptr->typeIfArray.low_)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+void printSymbolTable(SymTablePointer *symTable)
+{
+    if (symTable == NULL)
+        return;
+    for (int i = 0; i < HASHTABLE_SIZE; i++)
+    {
+        if (symTable->corrHashtable->table[i]->bucket_ptr != NULL)
+        {
+            SymTablePointer *ptr = symTable->corrHashtable->table[i]->bucket_ptr;
+            int line_start = symTable->line_start;
+            int line_end = symTable->line_end;
+            while (ptr != NULL)
+            {
+                // char *moduleName = ptr->str;
+                hashtable *ht = ptr->corrHashtable;
+                if (ptr->typeST == MODULEST)
+                {
+                    line_start = ptr->line_start;
+                    line_end = ptr->line_end;
+                    list *inp = ptr->input_para_list;
+                    while (inp != NULL)
+                    {
+                        if (inp->isArray)
+                        {
+                            if (staticOrDyn(getPointerFromList(inp)) == 1)
+                            {
+                                printf("%10s %20s [%d-%d] %10s %10s %10s %10s %10s %10d\n", inp->tk->str, ptr->str, line_start, line_end, EnumToTypeString(inp->typeIfArray.type), "yes", "dynamic", "**", "**", inp->offset);
+                            }
+                            else
+                            {
+                                printf("%10s %20s [%d-%d] %10s %10s %10s [%3d,%3d] %10d %10d\n", inp->tk->str, ptr->str, line_start, line_end, EnumToTypeString(inp->typeIfArray.type), "yes", "static", inp->typeIfArray.low, inp->typeIfArray.high, inp->width, inp->offset);
+                            }
+                        }
+                        else
+                        {
+                            printf("%10s %20s [%d-%d] %10s %10s %10s %10s %10d %10d\n", inp->tk->str, ptr->str, line_start, line_end, EnumToTypeString(inp->typeIfNotArray), "no", "**", "**", inp->width, inp->offset);
+                        }
+                        inp = inp->next;
+                    }
+                    list *opl = ptr->output_para_list;
+                    while (opl != NULL)
+                    {
+
+                        printf("%10s %20s [%d-%d] %10s %10s %10s %10s %10d %10d\n", opl->tk->str, ptr->str, line_start, line_end, EnumToTypeString(opl->typeIfNotArray), "no", "**", "**", opl->width, opl->offset);
+                        opl = opl->next;
+                    }
+                    printSymbolTable(ptr);
+                }
+                else
+                {
+                    SymTablePointer *ptr1 = symTable;
+                    while (ptr1 != NULL && ptr1->typeST != MODULEST)
+                    {
+                        ptr1 = ptr1->parentHashTable;
+                    }
+                    if (ptr->isArray)
+                    {
+                        if (staticOrDyn(ptr) == 1)
+                        {
+                            printf("%10s %20s [%d-%d] %10s %10s %10s %10s %10s %10d\n", ptr->str, ptr1->str, line_start, line_end, EnumToTypeString(ptr->typeIfArray.type), "yes", "dynamic", "**", "**", ptr->offset);
+                        }
+                        else
+                        {
+                            printf("%10s %20s [%d-%d] %10s %10s %10s [%3d,%3d] %10d %10d\n", ptr->str, ptr1->str, line_start, line_end, EnumToTypeString(ptr->typeIfArray.type), "yes", "static", ptr->typeIfArray.low, ptr->typeIfArray.high, ptr->width, ptr->offset);
+                        }
+                    }
+                    else
+                    {
+                        printf("%10s %20s [%d-%d] %10s %10s %10s %10s %10d %10d\n", ptr->str, ptr1->str, line_start, line_end, EnumToTypeString(ptr->typeIfNotArray), "no", "**", "**", ptr->width, ptr->offset);
+                    }
+                }
+                ptr = ptr->next;
+            }
+        }
+    }
+    if (symTable->childScopeTable != NULL)
+    {
+        printSymbolTable(symTable->childScopeTable);
+    }
+    if (symTable->siblingHashTable != NULL)
+    {
+        printSymbolTable(symTable->siblingHashTable);
+    }
 }
 
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset)
@@ -807,7 +951,9 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
             {
                 astNode *corrID = mdls->leftChild;
                 SymTablePointer *pointer = initSymTablePointer();
-
+                astNode *modDef = corrID->nextSibling->nextSibling->nextSibling;
+                pointer->line_start = modDef->line_start;
+                pointer->line_end = modDef->line_end;
                 pointer->str = corrID->tk->str;
                 if (existsInSymTable(globalST, pointer->str) && !getFromSymTable(globalST, pointer->str)->isAwaited)
                 {
@@ -825,8 +971,9 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                             printf("Error: at line number %d module %s has both definition and declaration before its call\n", corrID->tk->line_num, pointer->str);
                         }
                         temp->isAwaited = false;
-
                         pointer = temp;
+                        pointer->line_start = modDef->line_start;
+                        pointer->line_end = modDef->line_end;
                     }
                     else
                     {
@@ -837,11 +984,11 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     astNode *oplNode = mdls->leftChild->nextSibling->nextSibling->leftChild;
                     pointer->input_para_list = NULL;
                     pointer->output_para_list = NULL;
-
+                    int offset1 = 0;
                     if (iplNode != NULL)
-                        pointer->input_para_list = getListFromAST(iplNode, &offset);
+                        pointer->input_para_list = getListFromAST(iplNode, &offset1);
                     if (oplNode != NULL)
-                        pointer->output_para_list = getListFromAST(oplNode, &offset);
+                        pointer->output_para_list = getListFromAST(oplNode, &offset1);
 
                     list *ptr = pointer->input_para_list;
                     if (strcmp(pointer->str, "function2") == 0)
@@ -854,7 +1001,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     hashtable *ht = initHashtableForSymTable();
                     pointer->corrHashtable = ht;
                     astNode *temp;
-                    int offset = 0;
+                    // int offset = 0;
                     // while (temp != NULL)
                     // {
                     //     SymTablePointer *pointer1 = initSymTablePointer();
@@ -867,21 +1014,21 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
                     // }
                     temp = oplNode;
 
-                    while (temp != NULL)
-                    {
-                        SymTablePointer *pointer1 = initSymTablePointer();
+                    // while (temp != NULL)
+                    // {
+                    //     SymTablePointer *pointer1 = initSymTablePointer();
 
-                        populateTypeInformation(pointer1, temp->leftChild, pointer);
-                        // offset here:
-                        pointer1->offset = getOffset(pointer1, &offset);
-                        pointer1->str = temp->leftChild->nextSibling->tk->str;
-                        insertSymTable(pointer->corrHashtable, pointer1);
-                        temp = temp->nextSibling;
-                    }
+                    //     populateTypeInformation(pointer1, temp->leftChild, pointer);
+                    //     // offset here:
+                    //     pointer1->offset = getOffset(pointer1, &offset1);
+                    //     pointer1->str = temp->leftChild->nextSibling->tk->str;
+                    //     insertSymTable(pointer->corrHashtable, pointer1);
+                    //     temp = temp->nextSibling;
+                    // }
 
                     pointer->typeST = MODULEST;
                     pointer->parentHashTable = global;
-                    populateModuleSymbolTable(pointer, mdls, &offset);
+                    populateModuleSymbolTable(pointer, mdls, &offset1);
 
                     mdls->symTable = pointer;
                     // if (existsInSymTable(pointer->corrHashtable, "ty"))
@@ -911,13 +1058,16 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
         {
             SymTablePointer *pointer = initSymTablePointer();
             pointer->str = "driver";
+            pointer->line_start = root->leftChild->line_start;
+            pointer->line_end = root->leftChild->line_end;
             hashtable *ht = initHashtableForSymTable();
             root->symTable = pointer;
             pointer->corrHashtable = ht;
             pointer->typeST = MODULEST;
             pointer->parentHashTable = global;
             astNode *stmts = root->leftChild->leftChild->leftChild;
-            populateStmtsSymTable(pointer, stmts, &offset);
+            int offset1 = 0;
+            populateStmtsSymTable(pointer, stmts, &offset1);
             root = root->nextSibling;
             insertSymTable(globalST, pointer);
             break;
@@ -942,22 +1092,23 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
     }
 }
 
-// int main()
-// {
-//     globalSymbolTable = initSymTablePointer();
-//     globalSymbolTable->typeST = GLOBALST;
-//     globalSymbolTable->parentHashTable = NULL;
-//     hashtable *ht1 = initHashtableForSymTable();
-//     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("random2.txt", "r");
-//     twinbuffer *tb = twinbuffer_init(fp, 256);
-//     fill_grammar(fopen("Grammar.txt", "r"));
-//     hashtable ht = initHashtable();
-//     populate_hashtable(&ht);
-//     populateParseTable();
-//     treenode *root = parseInputSourceCode(fp, tb, ht);
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable *ht1 = initHashtableForSymTable();
+    globalSymbolTable->corrHashtable = ht1;
+    FILE *fp = fopen("random1.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
 
-//     astNode *astRoot = constructAST(root);
-//     inorder_ast(astRoot);
-//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-// }
+    astNode *astRoot = constructAST(root);
+    inorder_ast(astRoot);
+    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+    printSymbolTable(globalSymbolTable);
+}
