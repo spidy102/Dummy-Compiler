@@ -23,6 +23,8 @@ typedef struct astNode
     char name[25];
     int trueCase;
     int falseCase;
+    int line_start;
+    int line_end;
 } astNode;
 
 #endif

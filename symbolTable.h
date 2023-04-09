@@ -14,9 +14,9 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "lexerDef.h"
 #include "hashmap.h"
 
-#define INT_WIDTH 4
+#define INT_WIDTH 2
 #define BOOL_WIDTH 1
-#define REAL_WIDTH 8
+#define REAL_WIDTH 4
 
 typedef enum
 {
@@ -52,6 +52,7 @@ typedef struct list
     };
     token *tk;
     int width;
+    int offset;
     bool isArray;
     struct list *next;
 } list;
@@ -79,6 +80,9 @@ typedef struct SymTablePointer
     char *str;
     token *tk;
     int offset;
+    int width;
+    int line_start;
+    int line_end;
     struct SymTablePointer *next;
     bool isAwaited;
     struct SymTablePointer *childScopeTable;
