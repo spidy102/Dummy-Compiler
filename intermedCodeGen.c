@@ -472,7 +472,6 @@ void getGen(astNode *node, SymTablePointer *symTable)
 
 quadruple *generateSwitchCaseCode(astNode *stmts) {
 
-    printf("In switch case code generation");
     quadruple *head = initQuadruple();
     SymTablePointer *symTable = stmts->symTable;
     head->op = JUMP;
@@ -480,18 +479,16 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
     snprintf(head->operand1, 25, "label%d", label0);
     
     astNode *switchExpr = stmts->leftChild;
-    //print switch statement
-    printf("%s\n", EnumToASTString(switchExpr->label));
     astNode *caseStmts = switchExpr->nextSibling;
-    printf("%s\n", EnumToASTString(caseStmts->label));
-    printf("Done with switch statement\n");
-
     // get code for case statements
     astNode* case1 = caseStmts->leftChild;
     astNode* def = caseStmts->nextSibling;
 
-    //create an array to store the labels and the case values
-
+    //create a dynamic array to store the labels and the case values
+    // can realloc later if more than 25 cases.
+    int *casevalues = malloc(sizeof(int) * 25);
+    int *caselabels = malloc(sizeof(int) * 25);
+    int i = 0; //tracks number of cases
     int labelexit = newLabel();
     while (case1 != NULL) {
 
@@ -500,6 +497,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         int label1 = newLabel();
         tempQ1->op = LABEL;
         snprintf(tempQ1->operand1, 25, "label%d", label1);
+        caselabels[i] = label1;
+        casevalues[i] = case1->leftChild->tk->integer; //this could be a booleean!
         head = appendAtEnd(head, tempQ1);
 
         //generate code for the statements
@@ -509,29 +508,23 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         tempQ2->op = JUMP;
         snprintf(tempQ2->operand1, 25, "label%d", labelexit);
         head = appendAtEnd(head, tempQ2);
-
-        printf("%s\n", EnumToASTString(case1->label));
-        printf("%s\n", EnumToASTString(case1->leftChild->label)); //this would be the case value
-        printf("%s\n", EnumToASTString(case1->leftChild->nextSibling->label)); //this would be the case statements
         case1 = case1->nextSibling;
+        i++;
     }
+    int labeldef = newLabel(); 
     if(def->leftChild != NULL){
         
         quadruple *tempQ3 = initQuadruple();
-        int labeldef = newLabel(); 
+
         tempQ3->op = LABEL;
         snprintf(tempQ3->operand1, 25, "label%d", labeldef);
         head = appendAtEnd(head, tempQ3);
-
         quadruple *stmtsHead = stmtsCodeGen(def->leftChild, symTable);
         head = appendAtEnd(head, stmtsHead);
         quadruple *tempQ4 = initQuadruple();
         tempQ4->op = JUMP;
         snprintf(tempQ4->operand1, 25, "label%d", labelexit);
         head = appendAtEnd(head, tempQ4);
-
-        printf("%s\n", EnumToASTString(def->label));
-        printf("%s\n", EnumToASTString(def->leftChild->label)); //this would be the default statements
     }
 
     quadruple *tempQ5 = initQuadruple();
@@ -539,9 +532,37 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
     snprintf(tempQ5->operand1, 25, "label%d", label0);
     head = appendAtEnd(head, tempQ5);
 
-    //generate code for the switch expression
 
+    for(int j = 0; j < i; j++) {
+        quadruple *tempQ6 = initQuadruple();
+        int tempcmp = newTemp();
+        tempQ6->op = OP_EQ;
+        strcpy(tempQ6->operand1, switchExpr->tk->str);
+        snprintf(tempQ6->operand2, 25, "%d", casevalues[j]);
+        snprintf(tempQ6->resultant, 25, "temp%d", tempcmp);
+        head = appendAtEnd(head, tempQ6);
 
+        quadruple *tempQ7 = initQuadruple();
+        tempQ7->op = JUMPIFTRUE;
+        snprintf(tempQ7->operand1, 25, "temp%d", tempcmp);
+        snprintf(tempQ7->operand2, 25, "label%d", caselabels[j]);
+        head = appendAtEnd(head, tempQ7);
+    }
+
+    if (labeldef != -1) {
+        quadruple *tempQ7 = initQuadruple();
+        tempQ7->op = JUMP;
+        snprintf(tempQ7->operand1, 25, "label%d", labeldef);
+        head = appendAtEnd(head, tempQ7);
+    }
+
+    quadruple *tempQ8 = initQuadruple();
+    tempQ8->op = LABEL;
+    snprintf(tempQ8->operand1, 25, "label%d", labelexit);
+    head = appendAtEnd(head, tempQ8);
+
+    free(casevalues);
+    free(caselabels);
     return head;
 }
 
