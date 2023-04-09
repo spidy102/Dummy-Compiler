@@ -1,9 +1,20 @@
 <<<driver program>>>
 start
-declare z: boolean;
-switch (z)
-  start
-  case true: declare a: integer; break;
-  case false: declare b: real; break;
-  end
+declare k: integer;
+  switch (k)
+    start
+    case 1: declare a: boolean;
+            switch(a)
+              start
+              case true: declare b: integer;
+                          break;
+              case false: declare b: integer;
+                           break;
+              end
+            break;
+    case 2: declare a: boolean;
+            break;
+    default: declare a: boolean;
+            break;                
+    end
 end

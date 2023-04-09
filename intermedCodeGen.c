@@ -546,6 +546,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
     else{
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
+        int size = 25;
         int i = 0; //tracks number of cases
         int labelexit = newLabel();
         while (case1 != NULL) {
@@ -565,6 +566,13 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
             head = appendAtEnd(head, tempQ2);
             case1 = case1->nextSibling;
             i++;
+
+            //keep reallocating whenever we reach half of the allocated space
+            if(i >= size/2){
+                size = size * 2;
+                casevalues = realloc(casevalues, sizeof(int) * size);
+                caselabels = realloc(caselabels, sizeof(int) * size);
+            }
         }
         //note the default checks are redundant, but I'm keeping them for now
         int labeldef = newLabel(); 
