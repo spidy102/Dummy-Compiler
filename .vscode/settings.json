@@ -7,7 +7,8 @@
     "stdbool.h": "c",
     "stdlib.h": "c",
     "parser.h": "c",
-    "symboltabledef.h": "c"
+    "symboltabledef.h": "c",
+    "random": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

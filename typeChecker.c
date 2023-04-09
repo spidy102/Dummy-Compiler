@@ -883,7 +883,7 @@ void typeCheck(astNode *root)
     globalSymbolTable->parentHashTable = NULL;
     hashtable *ht1 = initHashtableForSymTable();
     globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("semanicAnalysis_testcases/t7.txt", "r");
+    FILE *fp = fopen("test/t10.txt", "r");
     twinbuffer *tb = twinbuffer_init(fp, 256);
     fill_grammar(fopen("Grammar.txt", "r"));
     hashtable ht = initHashtable();
