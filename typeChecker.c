@@ -729,6 +729,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         {
             astNode *idNode = stmts->leftChild;
             SymTablePointer *ptr = getFromAnySymTable(symTable, idNode->tk->str);
+
             if (!ptr->isArray && ptr->typeIfNotArray == TYPE_INTEGER)
             {
                 // need to check case conditions are integral or not
@@ -781,10 +782,11 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
                 printf("Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s at line number %d\n", (ptr->isArray ? "array" : "real"), idNode->tk->line_num);
             }
             // check types???
+
             astNode *cases = stmts->leftChild->nextSibling->leftChild;
             while (cases != NULL)
             {
-                checkTypesForModule(stmts->symTable, cases->leftChild->nextSibling->leftChild);
+                checkTypesForModule(cases->symTable, cases->leftChild->nextSibling->leftChild);
                 cases = cases->nextSibling;
             }
             astNode *def = stmts->leftChild->nextSibling->nextSibling;
@@ -935,23 +937,23 @@ void typeCheck(astNode *root)
     }
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable *ht1 = initHashtableForSymTable();
-    globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("test/t10.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable *ht1 = initHashtableForSymTable();
+//     globalSymbolTable->corrHashtable = ht1;
+//     FILE *fp = fopen("test/t10.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
 
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    typeCheck(astRoot);
-}
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     typeCheck(astRoot);
+// }

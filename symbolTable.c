@@ -585,7 +585,6 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 }
                 idList = idList->nextSibling;
             }
-
             stmts = stmts->nextSibling;
             break;
         }
@@ -662,18 +661,23 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 populateStmtsSymTable(casePtr, cases->leftChild->nextSibling->leftChild, offset);
                 cases = cases->nextSibling;
             }
+
             astNode *def = stmts->leftChild->nextSibling->nextSibling; // default node
-            SymTablePointer *defPtr = initSymTablePointer();
-            defPtr->typeST = SCOPEST;
-            hashtable *caseHashtable = initHashtableForSymTable();
-            defPtr->corrHashtable = caseHashtable;
-            defPtr->parentHashTable = newPointer;
-            def->symTable = defPtr;
-            defPtr->line_start = def->line_start;
-            defPtr->line_end = def->line_end;
-            newPointer->childScopeTable = append_scope_pointer(newPointer->childScopeTable, defPtr);
-            populateStmtsSymTable(defPtr, def->leftChild->leftChild, offset);
+            if (def->leftChild != NULL)
+            {
+                SymTablePointer *defPtr = initSymTablePointer();
+                defPtr->typeST = SCOPEST;
+                hashtable *caseHashtable = initHashtableForSymTable();
+                defPtr->corrHashtable = caseHashtable;
+                defPtr->parentHashTable = newPointer;
+                def->symTable = defPtr;
+                defPtr->line_start = def->line_start;
+                defPtr->line_end = def->line_end;
+                newPointer->childScopeTable = append_scope_pointer(newPointer->childScopeTable, defPtr);
+                populateStmtsSymTable(defPtr, def->leftChild->leftChild, offset);
+            }
             stmts = stmts->nextSibling;
+
             break;
         }
         case AST_MODULE_REUSE:

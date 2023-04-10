@@ -470,21 +470,23 @@ void getGen(astNode *node, SymTablePointer *symTable)
     }
 }
 
-quadruple *generateSwitchCaseCode(astNode *stmts) {
+quadruple *generateSwitchCaseCode(astNode *stmts)
+{
 
     quadruple *head = initQuadruple();
     SymTablePointer *symTable = stmts->symTable;
     head->op = JUMP;
     int label0 = newLabel();
     snprintf(head->operand1, 25, "label%d", label0);
-    
+
     astNode *switchExpr = stmts->leftChild;
     astNode *caseStmts = switchExpr->nextSibling;
     // get code for case statements
-    astNode* case1 = caseStmts->leftChild;
-    astNode* def = caseStmts->nextSibling;
-    //check if boolean or integer switch
-    if(def->leftChild == NULL) {
+    astNode *case1 = caseStmts->leftChild;
+    astNode *def = caseStmts->nextSibling;
+    // check if boolean or integer switch
+    if (def->leftChild == NULL)
+    {
         bool *casevalues = malloc(sizeof(bool) * 2);
         int *caselabels = malloc(sizeof(int) * 2);
         int labelexit = newLabel();
@@ -541,22 +543,23 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
 
         free(casevalues);
         free(caselabels);
-
     }
-    else{
+    else
+    {
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
         int size = 25;
-        int i = 0; //tracks number of cases
+        int i = 0; // tracks number of cases
         int labelexit = newLabel();
-        while (case1 != NULL) {
+        while (case1 != NULL)
+        {
             quadruple *tempQ1 = initQuadruple();
-            //create a label for each case
+            // create a label for each case
             int label1 = newLabel();
             tempQ1->op = LABEL;
             snprintf(tempQ1->operand1, 25, "label%d", label1);
             caselabels[i] = label1;
-            casevalues[i] = case1->leftChild->tk->integer; 
+            casevalues[i] = case1->leftChild->tk->integer;
             head = appendAtEnd(head, tempQ1);
             quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
             head = appendAtEnd(head, stmtsHead);
@@ -567,16 +570,18 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
             case1 = case1->nextSibling;
             i++;
 
-            //keep reallocating whenever we reach half of the allocated space
-            if(i >= size/2){
+            // keep reallocating whenever we reach half of the allocated space
+            if (i >= size / 2)
+            {
                 size = size * 2;
                 casevalues = realloc(casevalues, sizeof(int) * size);
                 caselabels = realloc(caselabels, sizeof(int) * size);
             }
         }
-        //note the default checks are redundant, but I'm keeping them for now
-        int labeldef = newLabel(); 
-        if(def->leftChild != NULL){
+        // note the default checks are redundant, but I'm keeping them for now
+        int labeldef = newLabel();
+        if (def->leftChild != NULL)
+        {
             quadruple *tempQ3 = initQuadruple();
             tempQ3->op = LABEL;
             snprintf(tempQ3->operand1, 25, "label%d", labeldef);
@@ -592,7 +597,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         tempQ5->op = LABEL;
         snprintf(tempQ5->operand1, 25, "label%d", label0);
         head = appendAtEnd(head, tempQ5);
-        for(int j = 0; j < i; j++) {
+        for (int j = 0; j < i; j++)
+        {
             quadruple *tempQ6 = initQuadruple();
             int tempcmp = newTemp();
             tempQ6->op = OP_EQ;
@@ -607,7 +613,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
             snprintf(tempQ7->operand2, 25, "label%d", caselabels[j]);
             head = appendAtEnd(head, tempQ7);
         }
-        if (labeldef != -1) {
+        if (labeldef != -1)
+        {
             quadruple *tempQ7 = initQuadruple();
             tempQ7->op = JUMP;
             snprintf(tempQ7->operand1, 25, "label%d", labeldef);
@@ -620,12 +627,10 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         free(casevalues);
         free(caselabels);
     }
- return head;
+    return head;
 }
 
-
-
-quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
+quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
 {
     quadruple *tempHead = NULL;
     while (stmts != NULL)
@@ -645,7 +650,6 @@ quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
         {
             quadruple *head1 = generateSwitchCaseCode(stmts);
             tempHead = appendAtEnd(tempHead, head1);
-            
         }
         else if (stmts->label == AST_PRINT)
         {
