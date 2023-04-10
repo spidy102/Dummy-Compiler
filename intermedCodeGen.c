@@ -140,7 +140,25 @@ quadruple *appendAtEnd(quadruple *head, quadruple *append)
     return head;
 }
 
-void getExpressionsCode(astNode *expr)
+SymTablePointer *getModulesSymTable(SymTablePointer *symTable)
+{
+    while (symTable->typeST != MODULEST)
+    {
+        symTable = symTable->parentHashTable;
+    }
+    return symTable;
+}
+
+// int updateOffsets(char* str, SymTablePointer* symTable) {
+//     SymTablePointer* ptrnewT = initSymTablePointer();
+//         strcpy(ptrnewT->str, str);
+//         SymTablePointer* modulesSymTable = getModulesSymTable(symTable);
+//         int offset = modulesSymTable->activationRecordSize;
+//         ptrnewT->offset = offset;
+//         ptr
+// }
+
+void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
 {
     switch (expr->label)
     {
@@ -270,10 +288,12 @@ void getExpressionsCode(astNode *expr)
     {
         int newT = newTemp();
         sprintf(expr->name, "temp%d", newT);
+        int offset = updateOffsets(expr->name, symTable);
+        insertSymTable(symTable->corrHashtable, ptrnewT);
         astNode *e1 = expr->leftChild;
         astNode *e2 = e1->nextSibling;
-        getExpressionsCode(e1);
-        getExpressionsCode(e2);
+        getExpressionsCode(e1, symTable);
+        getExpressionsCode(e2, symTable);
         expr->code = appendAtEnd(expr->code, e1->code);
         expr->code = appendAtEnd(expr->code, e2->code);
         quadruple *qp = initQuadruple();
@@ -672,9 +692,13 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
         {
             quadruple *head = initQuadruple();
             head->op = OP_ASSIGN;
-            getExpressionsCode(stmts->leftChild->nextSibling);
+            getExpressionsCode(stmts->leftChild->nextSibling, symTable);
             tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
             strcpy(head->operand1, stmts->leftChild->nextSibling->name);
+            if (stmts->leftChild->label == AST_ID)
+            {
+                strcpy(head->resultant, stmts->leftChild->tk->str);
+            }
             tempHead = appendAtEnd(tempHead, head);
         }
         stmts = stmts->nextSibling;
@@ -696,6 +720,10 @@ void startIntermCodeGen(astNode *root)
             SymTablePointer *symTable = mdls->symTable;
             astNode *stmts = mdls->leftChild->leftChild->leftChild;
             quadruple *qp = stmtsCodeGen(stmts, symTable);
+            quadruple *qp1 = initQuadruple();
+            qp1->op = LABEL;
+            strcpy(qp1->operand1, "driver");
+            globalHead = appendAtEnd(globalHead, qp1);
             globalHead = appendAtEnd(globalHead, qp);
             mdls = mdls->nextSibling;
             break;
@@ -741,32 +769,32 @@ char *EnumToOperatorString(operators nt)
     fclose(fp);
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random3.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // if (semanticallyCorrect)
-    typeCheck(astRoot);
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("random4.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot);
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }

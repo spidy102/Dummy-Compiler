@@ -90,6 +90,7 @@ typedef struct SymTablePointer
     bool isDefined;
     bool isDeclared;
     bool called;
+    int activationRecordSize;
 } SymTablePointer;
 
 #endif
