@@ -149,14 +149,29 @@ SymTablePointer *getModulesSymTable(SymTablePointer *symTable)
     return symTable;
 }
 
-// int updateOffsets(char* str, SymTablePointer* symTable) {
-//     SymTablePointer* ptrnewT = initSymTablePointer();
-//         strcpy(ptrnewT->str, str);
-//         SymTablePointer* modulesSymTable = getModulesSymTable(symTable);
-//         int offset = modulesSymTable->activationRecordSize;
-//         ptrnewT->offset = offset;
-//         ptr
-// }
+int updateOffsets(char *str, SymTablePointer *symTable, types type)
+{
+    SymTablePointer *ptrnewT = initSymTablePointer();
+    strcpy(ptrnewT->str, str);
+    SymTablePointer *modulesSymTable = getModulesSymTable(symTable);
+    int offset = modulesSymTable->activationRecordSize;
+    ptrnewT->offset = offset;
+    insertSymTable(symTable->corrHashtable, ptrnewT);
+    if (type == TYPE_INTEGER)
+    {
+        ptrnewT->width = INT_WIDTH;
+    }
+    else if (type == TYPE_BOOLEAN)
+    {
+        ptrnewT->width = BOOL_WIDTH;
+    }
+    else if (type == TYPE_REAL)
+    {
+        ptrnewT->width = REAL_WIDTH;
+    }
+    modulesSymTable->activationRecordSize += ptrnewT->width;
+    return ptrnewT->offset;
+}
 
 void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
 {
@@ -288,8 +303,7 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
     {
         int newT = newTemp();
         sprintf(expr->name, "temp%d", newT);
-        int offset = updateOffsets(expr->name, symTable);
-        insertSymTable(symTable->corrHashtable, ptrnewT);
+        int offset = updateOffsets(expr->name, symTable, expr->type);
         astNode *e1 = expr->leftChild;
         astNode *e2 = e1->nextSibling;
         getExpressionsCode(e1, symTable);
@@ -306,8 +320,17 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
         else
             qp->op = OP_DIV;
         strcpy(qp->resultant, expr->name);
+        qp->offsetRes = offset;
         strcpy(qp->operand1, e1->name);
+        if (atoi(qp->operand1) == 0)
+        {
+            qp->offsetOperand1 = getFromSymTable(symTable->corrHashtable, qp->operand1);
+        }
         strcpy(qp->operand2, e2->name);
+        if (atoi(qp->operand1) == 0)
+        {
+            qp->offsetOperand1 = getFromSymTable(symTable->corrHashtable, qp->operand1);
+        }
         expr->code = appendAtEnd(expr->code, qp);
         return;
     }

@@ -391,25 +391,57 @@ list *getListFromAST(astNode *pl, int *offset)
 SymTablePointer *initSymTablePointer()
 {
     SymTablePointer *pointer = malloc(sizeof(SymTablePointer));
+    // pointer->corrHashtable = NULL;
+    // pointer->isAwaited = false;
+    // pointer->isDeclared = false;
+    // pointer->isDefined = false;
+    // pointer->called = false;
+    // pointer->width = -1;
+    // pointer->offset = -1;
+    // pointer->line_start = -1;
+    // pointer->line_end = -1;
+    // pointer->childScopeTable = NULL;
+    // pointer->input_para_list = NULL;
+    // pointer->next = NULL;
+    // pointer->output_para_list = NULL;
+    // pointer->parentHashTable = NULL;
+    // pointer->tk = NULL;
+    // pointer->typeIfArray.low_ = false;
+    // pointer->typeIfArray.high_ = false;
+    // pointer->activationRecordSize = 0;
+    // pointer->typeST = -1;
+    // // pointer->typeExpression = NULL;
+    // pointer->str = NULL;
+    pointer->activationRecordSize = 0;
+    pointer->called = false;
+    pointer->childScopeTable = NULL;
     pointer->corrHashtable = NULL;
+    pointer->input_para_list = NULL;
+    pointer->isArray = false;
     pointer->isAwaited = false;
     pointer->isDeclared = false;
     pointer->isDefined = false;
-    pointer->called = false;
-    pointer->width = -1;
-    pointer->offset = -1;
-    pointer->line_start = -1;
     pointer->line_end = -1;
-    pointer->childScopeTable = NULL;
-    pointer->input_para_list = NULL;
+    pointer->line_start = -1;
     pointer->next = NULL;
+    pointer->offset = -1;
     pointer->output_para_list = NULL;
     pointer->parentHashTable = NULL;
-    pointer->tk = NULL;
-    pointer->typeIfArray.low_ = false;
-    pointer->typeIfArray.high_ = false;
-    // pointer->typeExpression = NULL;
+    pointer->siblingHashTable = NULL;
     pointer->str = NULL;
+    pointer->tk = NULL;
+    pointer->typeIfArray.high = 0;
+    pointer->typeIfArray.low = 0;
+    pointer->typeIfArray.high_ = false;
+    pointer->typeIfArray.low_ = false;
+    pointer->typeIfArray.highLexeme = NULL;
+    pointer->typeIfArray.lowLexeme = NULL;
+    pointer->typeIfArray.isNegHigh = false;
+    pointer->typeIfArray.isNegLow = false;
+    pointer->typeIfNotArray = -1;
+    pointer->typeST = -1;
+    pointer->width = -1;
+    return pointer;
 }
 
 void traverse_ast(astNode *root, SymTablePointer *st)
@@ -851,6 +883,7 @@ void printSymbolTable(SymTablePointer *symTable)
             SymTablePointer *ptr = symTable->corrHashtable->table[i]->bucket_ptr;
             int line_start = symTable->line_start;
             int line_end = symTable->line_end;
+
             while (ptr != NULL)
             {
                 // char *moduleName = ptr->str;
@@ -1117,6 +1150,8 @@ int getActModule(SymTablePointer *symTable)
     {
         if (symTable->corrHashtable->table[i]->bucket_ptr != NULL)
         {
+            // printf("hello?? %s\n\n", symTable->str);
+
             SymTablePointer *ptr = symTable->corrHashtable->table[i]->bucket_ptr;
             while (ptr != NULL)
             {
@@ -1148,8 +1183,11 @@ void getActivationRecords()
             SymTablePointer *ptr = ht->table[i]->bucket_ptr;
             while (ptr != NULL)
             {
+
                 ptr->activationRecordSize = getActModule(ptr);
+
                 list *inp = ptr->input_para_list;
+
                 while (inp != NULL)
                 {
                     ptr->activationRecordSize += inp->width;
@@ -1167,25 +1205,25 @@ void getActivationRecords()
     }
 }
 
-// int main()
-// {
-//     globalSymbolTable = initSymTablePointer();
-//     globalSymbolTable->typeST = GLOBALST;
-//     globalSymbolTable->parentHashTable = NULL;
-//     hashtable *ht1 = initHashtableForSymTable();
-//     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("random1.txt", "r");
-//     twinbuffer *tb = twinbuffer_init(fp, 256);
-//     fill_grammar(fopen("Grammar.txt", "r"));
-//     hashtable ht = initHashtable();
-//     populate_hashtable(&ht);
-//     populateParseTable();
-//     treenode *root = parseInputSourceCode(fp, tb, ht);
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable *ht1 = initHashtableForSymTable();
+    globalSymbolTable->corrHashtable = ht1;
+    FILE *fp = fopen("test/t1.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
 
-//     astNode *astRoot = constructAST(root);
-//     inorder_ast(astRoot);
-//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-//     getActivationRecords();
-//     printf("%d\n", getFromSymTable(globalSymbolTable->corrHashtable, "one")->activationRecordSize);
-//     printSymbolTable(globalSymbolTable);
-// }
+    astNode *astRoot = constructAST(root);
+    // inorder_ast(astRoot);
+    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+    getActivationRecords();
+    // // printf("%d\n", getFromSymTable(globalSymbolTable->corrHashtable, "one")->activationRecordSize);
+    printSymbolTable(globalSymbolTable);
+}
