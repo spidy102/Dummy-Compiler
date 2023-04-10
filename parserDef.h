@@ -27,6 +27,8 @@ extern ull follows[NON_TERMINALS + 1];
 
 extern ruleNode *parseTable[NON_TERMINALS][TERMINALS];
 
+extern bool isSyntaticallyCorrect;
+
 char *EnumToNTString(nonTerminal nt);
 char *EnumToTString(token_names nt);
 void printParseTree(treenode *root, FILE *fp);

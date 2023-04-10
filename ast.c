@@ -1671,6 +1671,30 @@ void inorder_ast(astNode *root)
     }
 }
 
+void display_inorder_ast(astNode *root)
+{
+    if (root == NULL)
+        return;
+    display_inorder_ast(root->leftChild);
+    if (root->label == AST_ID)
+    {
+        printf("str: %s", root->tk->str);
+        // printf("line number at this token %d\n", root->tk->line_num);
+    }
+    printf("%s\n", EnumToASTString(root->label));
+    if (root->leftChild != NULL)
+    {
+        astNode *leftOut = root->leftChild->nextSibling;
+        while (leftOut != NULL)
+        {
+            display_inorder_ast(leftOut);
+            leftOut = leftOut->nextSibling;
+        }
+    }
+}
+
+
+
 // int main()
 // {
 //     FILE *fp = fopen("random.txt", "r");

@@ -31,6 +31,8 @@ ull follows[NON_TERMINALS + 1];
 
 ruleNode *parseTable[NON_TERMINALS][TERMINALS];
 
+bool isSyntaticallyCorrect = true;
+
 char *EnumToNTString(nonTerminal nt)
 {
     int i = 0;
@@ -486,6 +488,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             // report error E4
 
             printf("Error at line number %d: top of the stack is empty\n", lookAhead->line_num);
+            isSyntaticallyCorrect = false;
             return start;
         }
         else if (top1->node.isTerminal)
@@ -503,6 +506,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 {
                     char *nt = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %d instead\n", tolowercase(nt), lookAhead->line_num, lookAhead->integer);
+                    isSyntaticallyCorrect = false;
                     free(nt);
                 }
 
@@ -510,6 +514,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 {
                     char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %lf instead\n", tolowercase(t), lookAhead->line_num, lookAhead->rnum);
+                    isSyntaticallyCorrect = false;
                     free(t);
                 }
 
@@ -517,6 +522,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 {
                     char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(t), lookAhead->line_num, lookAhead->str);
+                    isSyntaticallyCorrect = false;
                     free(t);
                 }
 
@@ -591,6 +597,7 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 // printf("Stack:\n");
                 // printStack(st);
                 printf("Error at line number %d: Rule entry in the parse table is empty!\n", lookAhead->line_num);
+                isSyntaticallyCorrect = false;
                 // printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
                 ull synchronisation_set = 0;
                 // getFirstSets(top1->node.nt);
@@ -646,7 +653,10 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             }
         }
         if (!isEmpty(st))
+        {
             printf("Error: Input source code has been consumed but stack is non empty\n");
+            isSyntaticallyCorrect = false;
+        }
         // exit(0);
     }
     return start;

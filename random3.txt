@@ -1,20 +1,21 @@
+declare module mod1;
 <<<driver program>>>
 start
-declare k: integer;
-  switch (k)
-    start
-    case 1: declare a: boolean;
-            switch(a)
-              start
-              case true: declare b: integer;
-                          break;
-              case false: declare b: integer;
-                           break;
-              end
-            break;
-    case 2: declare a: boolean;
-            break;
-    default: declare a: boolean;
-            break;                
-    end
+  declare v, w, r :integer;
+  get_value(v);
+  w:=5;
+  declare m:real;
+  [r,m] := use module mod1 with parameters v, w;
+  print(r);
+  print(m);
+end
+
+<<module mod1>>
+takes input [a: integer, b: integer];
+returns [x: integer, abc: real];
+start
+  declare c: real;
+  c:=10.4;
+  x:=a+b-10;
+  abc:=b/5+c;
 end
