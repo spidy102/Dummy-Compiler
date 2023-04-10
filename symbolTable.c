@@ -1212,7 +1212,7 @@ void getActivationRecords()
 //     globalSymbolTable->parentHashTable = NULL;
 //     hashtable *ht1 = initHashtableForSymTable();
 //     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("test/t1.txt", "r");
+//     FILE *fp = fopen("test/t4.txt", "r");
 //     twinbuffer *tb = twinbuffer_init(fp, 256);
 //     fill_grammar(fopen("Grammar.txt", "r"));
 //     hashtable ht = initHashtable();
