@@ -273,15 +273,22 @@ int main(int argc, char *argv[])
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
-      astNode *astRoot = constructAST(root);
-      //inorder_ast(astRoot);
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-      printf("\nDisplaying the global symbol table:\n");
-      printSymbolTable(globalSymbolTable);
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
 
+      }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        printf("\nDisplaying the global symbol table:\n");
+        printSymbolTable(globalSymbolTable);
+
+      }
+      
+      freeGrammar();
       fclose(ft);
       fclose(fg);
-
 
     }
     else if (choice == 6)
@@ -303,13 +310,21 @@ int main(int argc, char *argv[])
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
-      astNode *astRoot = constructAST(root);
-      inorder_ast(astRoot);
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-      getActivationRecords();
-      printf("\nDisplaying the activation records:\n");
-      printf("%d\n", getFromSymTable(globalSymbolTable->corrHashtable, "one")->activationRecordSize);
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
 
+      }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        getActivationRecords();
+        printf("\nDisplaying the activation records:\n");
+        printf("%d\n", getFromSymTable(globalSymbolTable->corrHashtable, "one")->activationRecordSize);
+
+      }
+
+      freeGrammar();
       fclose(ft);
       fclose(fg);
 
