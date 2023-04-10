@@ -152,7 +152,7 @@ SymTablePointer *getModulesSymTable(SymTablePointer *symTable)
 int updateOffsets(char *str, SymTablePointer *symTable, types type)
 {
     SymTablePointer *ptrnewT = initSymTablePointer();
-    strcpy(ptrnewT->str, str);
+    ptrnewT->str = str;
     SymTablePointer *modulesSymTable = getModulesSymTable(symTable);
     int offset = modulesSymTable->activationRecordSize;
     ptrnewT->offset = offset;
@@ -327,7 +327,7 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
             qp->offsetOperand1 = getFromSymTable(symTable->corrHashtable, qp->operand1)->offset;
         }
         strcpy(qp->operand2, e2->name);
-        if (atoi(qp->operand1) == 0)
+        if (atoi(qp->operand2) == 0)
         {
             qp->offsetOperand2 = getFromSymTable(symTable->corrHashtable, qp->operand2)->offset;
         }
