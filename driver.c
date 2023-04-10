@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
       astNode *astRoot = constructAST(root);
-      inorder_ast(astRoot);
+      //inorder_ast(astRoot);
       populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
       printf("\nDisplaying the global symbol table:\n");
       printSymbolTable(globalSymbolTable);
