@@ -44,6 +44,12 @@ void getAttributeType(astNode *node, SymTablePointer *symTable)
         }
         break;
     }
+    case AST_SIGNED:
+    {
+        getAttributeType(node->leftChild->nextSibling, symTable);
+        node->type = node->leftChild->nextSibling->type;
+        break;
+    }
     case AST_DIV:
     {
         getAttributeType(node->leftChild, symTable);
@@ -426,30 +432,57 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
     }
 }
 
-void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, SymTablePointer *symTable, astNode *loopVar)
+void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, astNode *loopVar)
 {
     while (stmts != NULL)
     {
-        if (stmts->label == AST_DECLARE)
-        {
-            astNode *idList = stmts->leftChild->leftChild;
-            while (idList != NULL)
-            {
-                if (strcmp(idList->tk->str, loopVar->tk->str) == 0)
-                {
-                    printf("Error: Loop variable redeclaration is not allowed, redeclaration received at line number %d\n", idList->tk->line_num);
-                    semanticRulesPassed = false;
-                }
-                idList = idList->nextSibling;
-            }
-        }
-        else if (stmts->label == AST_ASSIGNOP)
+        if (stmts->label == AST_ASSIGNOP)
         {
             if (stmts->leftChild->label == AST_ID && strcmp(stmts->leftChild->tk->str, loopVar->tk->str) == 0)
             {
                 printf("Error: for loop variable cannot be assigned a value, found one at line number %d\n", stmts->leftChild->tk->line_num);
                 semanticRulesPassed = false;
             }
+        }
+        else if (stmts->label == AST_MODULE_REUSE)
+        {
+            astNode *optionalNode = stmts->leftChild;
+            if (optionalNode->leftChild == NULL)
+            {
+                stmts = stmts->nextSibling;
+            }
+            else
+            {
+                astNode *idList = optionalNode->leftChild->leftChild;
+                while (idList != NULL)
+                {
+                    if (strcmp(idList->tk->str, loopVar->tk->str) == 0)
+                    {
+                        printf("Error: line number %d: for loop variable assigned a value\n", idList->tk->line_num);
+                    }
+                    idList = idList->nextSibling;
+                }
+            }
+        }
+        else if (stmts->label == AST_WHILE)
+        {
+            checkIfLoopStmtsDoNotRedefineLoopVariable(stmts->leftChild->nextSibling->leftChild, loopVar);
+        }
+        else if (stmts->label == AST_SWITCH_CASE)
+        {
+            astNode *cases = stmts->leftChild->nextSibling->leftChild;
+            while (cases != NULL)
+            {
+                astNode *stmts1 = cases->leftChild->nextSibling->leftChild;
+                checkIfLoopStmtsDoNotRedefineLoopVariable(stmts1, loopVar);
+                cases = cases->nextSibling;
+            }
+            astNode *def = stmts->leftChild->nextSibling->nextSibling->leftChild->leftChild;
+            checkIfLoopStmtsDoNotRedefineLoopVariable(def, loopVar);
+        }
+        else if (stmts->label == AST_FOR)
+        {
+            checkIfLoopStmtsDoNotRedefineLoopVariable(stmts->leftChild->nextSibling->nextSibling->leftChild, loopVar);
         }
         stmts = stmts->nextSibling;
     }
@@ -501,6 +534,24 @@ bool checkIfOnLHS(astNode *temp, astNode *expr)
         case AST_WHILE:
         {
             if (checkIfOnLHS(temp->leftChild->nextSibling->leftChild, expr))
+                return true;
+            temp = temp->nextSibling;
+            break;
+        }
+        case AST_SWITCH_CASE:
+        {
+            astNode *cases = temp->leftChild->nextSibling->leftChild;
+            while (cases != NULL)
+            {
+                astNode *stmts = cases->leftChild->nextSibling->leftChild;
+                if (checkIfOnLHS(stmts, expr))
+                {
+                    return true;
+                }
+                cases = cases->nextSibling;
+            }
+            astNode *def = temp->leftChild->nextSibling->nextSibling->leftChild->leftChild;
+            if (checkIfOnLHS(def, expr))
                 return true;
             temp = temp->nextSibling;
             break;
@@ -599,7 +650,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
             SymTablePointer *symTableInThisScope = stmts->symTable;
             astNode *stmtsNode = stmts->leftChild->nextSibling->nextSibling->leftChild;
             // check if the statements inside for loop do not redefine the loop variable
-            checkIfLoopStmtsDoNotRedefineLoopVariable(stmtsNode, symTableInThisScope, stmts->leftChild);
+            checkIfLoopStmtsDoNotRedefineLoopVariable(stmtsNode, stmts->leftChild);
             checkTypesForModule(symTableInThisScope, stmtsNode);
             stmts = stmts->nextSibling;
             break;
@@ -607,12 +658,20 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         case AST_WHILE:
         {
             // while's condition??????
+            getAttributeType(stmts->leftChild, stmts->symTable);
+            if (stmts->leftChild->type != TYPE_BOOLEAN)
+            {
+                printf("Error: at line number %d: while's condition should only evaluate to boolean\n", stmts->tk->line_num);
+                semanticRulesPassed = false;
+                // check this once
+            }
             SymTablePointer *symTableInThisScope = stmts->symTable;
             astNode *stmtsNode = stmts->leftChild->nextSibling->leftChild;
             checkTypesForModule(symTableInThisScope, stmtsNode);
             if (!checkWhileLoopExpressionAssigned(stmtsNode, stmts->leftChild))
             {
                 printf("Error: while loop at line number %d expression variables are not assigned any value\n", stmts->tk->line_num);
+                semanticRulesPassed = false;
             }
             stmts = stmts->nextSibling;
             break;
@@ -670,6 +729,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         {
             astNode *idNode = stmts->leftChild;
             SymTablePointer *ptr = getFromAnySymTable(symTable, idNode->tk->str);
+
             if (!ptr->isArray && ptr->typeIfNotArray == TYPE_INTEGER)
             {
                 // need to check case conditions are integral or not
@@ -722,10 +782,11 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
                 printf("Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s at line number %d\n", (ptr->isArray ? "array" : "real"), idNode->tk->line_num);
             }
             // check types???
+
             astNode *cases = stmts->leftChild->nextSibling->leftChild;
             while (cases != NULL)
             {
-                checkTypesForModule(stmts->symTable, cases->leftChild->nextSibling->leftChild);
+                checkTypesForModule(cases->symTable, cases->leftChild->nextSibling->leftChild);
                 cases = cases->nextSibling;
             }
             astNode *def = stmts->leftChild->nextSibling->nextSibling;
@@ -876,23 +937,23 @@ void typeCheck(astNode *root)
     }
 }
 
-/* int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable *ht1 = initHashtableForSymTable();
-    globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("test/t10.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable *ht1 = initHashtableForSymTable();
+//     globalSymbolTable->corrHashtable = ht1;
+//     FILE *fp = fopen("test/t10.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
 
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    typeCheck(astRoot);
-} */
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     typeCheck(astRoot);
+// }

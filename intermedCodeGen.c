@@ -140,7 +140,25 @@ quadruple *appendAtEnd(quadruple *head, quadruple *append)
     return head;
 }
 
-void getExpressionsCode(astNode *expr)
+SymTablePointer *getModulesSymTable(SymTablePointer *symTable)
+{
+    while (symTable->typeST != MODULEST)
+    {
+        symTable = symTable->parentHashTable;
+    }
+    return symTable;
+}
+
+// int updateOffsets(char* str, SymTablePointer* symTable) {
+//     SymTablePointer* ptrnewT = initSymTablePointer();
+//         strcpy(ptrnewT->str, str);
+//         SymTablePointer* modulesSymTable = getModulesSymTable(symTable);
+//         int offset = modulesSymTable->activationRecordSize;
+//         ptrnewT->offset = offset;
+//         ptr
+// }
+
+void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
 {
     switch (expr->label)
     {
@@ -270,10 +288,12 @@ void getExpressionsCode(astNode *expr)
     {
         int newT = newTemp();
         sprintf(expr->name, "temp%d", newT);
+        int offset = updateOffsets(expr->name, symTable);
+        insertSymTable(symTable->corrHashtable, ptrnewT);
         astNode *e1 = expr->leftChild;
         astNode *e2 = e1->nextSibling;
-        getExpressionsCode(e1);
-        getExpressionsCode(e2);
+        getExpressionsCode(e1, symTable);
+        getExpressionsCode(e2, symTable);
         expr->code = appendAtEnd(expr->code, e1->code);
         expr->code = appendAtEnd(expr->code, e2->code);
         quadruple *qp = initQuadruple();
@@ -470,21 +490,23 @@ void getGen(astNode *node, SymTablePointer *symTable)
     }
 }
 
-quadruple *generateSwitchCaseCode(astNode *stmts) {
+quadruple *generateSwitchCaseCode(astNode *stmts)
+{
 
     quadruple *head = initQuadruple();
     SymTablePointer *symTable = stmts->symTable;
     head->op = JUMP;
     int label0 = newLabel();
     snprintf(head->operand1, 25, "label%d", label0);
-    
+
     astNode *switchExpr = stmts->leftChild;
     astNode *caseStmts = switchExpr->nextSibling;
     // get code for case statements
-    astNode* case1 = caseStmts->leftChild;
-    astNode* def = caseStmts->nextSibling;
-    //check if boolean or integer switch
-    if(def->leftChild == NULL) {
+    astNode *case1 = caseStmts->leftChild;
+    astNode *def = caseStmts->nextSibling;
+    // check if boolean or integer switch
+    if (def->leftChild == NULL)
+    {
         bool *casevalues = malloc(sizeof(bool) * 2);
         int *caselabels = malloc(sizeof(int) * 2);
         int labelexit = newLabel();
@@ -541,22 +563,23 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
 
         free(casevalues);
         free(caselabels);
-
     }
-    else{
+    else
+    {
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
         int size = 25;
-        int i = 0; //tracks number of cases
+        int i = 0; // tracks number of cases
         int labelexit = newLabel();
-        while (case1 != NULL) {
+        while (case1 != NULL)
+        {
             quadruple *tempQ1 = initQuadruple();
-            //create a label for each case
+            // create a label for each case
             int label1 = newLabel();
             tempQ1->op = LABEL;
             snprintf(tempQ1->operand1, 25, "label%d", label1);
             caselabels[i] = label1;
-            casevalues[i] = case1->leftChild->tk->integer; 
+            casevalues[i] = case1->leftChild->tk->integer;
             head = appendAtEnd(head, tempQ1);
             quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
             head = appendAtEnd(head, stmtsHead);
@@ -567,16 +590,18 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
             case1 = case1->nextSibling;
             i++;
 
-            //keep reallocating whenever we reach half of the allocated space
-            if(i >= size/2){
+            // keep reallocating whenever we reach half of the allocated space
+            if (i >= size / 2)
+            {
                 size = size * 2;
                 casevalues = realloc(casevalues, sizeof(int) * size);
                 caselabels = realloc(caselabels, sizeof(int) * size);
             }
         }
-        //note the default checks are redundant, but I'm keeping them for now
-        int labeldef = newLabel(); 
-        if(def->leftChild != NULL){
+        // note the default checks are redundant, but I'm keeping them for now
+        int labeldef = newLabel();
+        if (def->leftChild != NULL)
+        {
             quadruple *tempQ3 = initQuadruple();
             tempQ3->op = LABEL;
             snprintf(tempQ3->operand1, 25, "label%d", labeldef);
@@ -592,7 +617,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         tempQ5->op = LABEL;
         snprintf(tempQ5->operand1, 25, "label%d", label0);
         head = appendAtEnd(head, tempQ5);
-        for(int j = 0; j < i; j++) {
+        for (int j = 0; j < i; j++)
+        {
             quadruple *tempQ6 = initQuadruple();
             int tempcmp = newTemp();
             tempQ6->op = OP_EQ;
@@ -607,7 +633,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
             snprintf(tempQ7->operand2, 25, "label%d", caselabels[j]);
             head = appendAtEnd(head, tempQ7);
         }
-        if (labeldef != -1) {
+        if (labeldef != -1)
+        {
             quadruple *tempQ7 = initQuadruple();
             tempQ7->op = JUMP;
             snprintf(tempQ7->operand1, 25, "label%d", labeldef);
@@ -620,12 +647,10 @@ quadruple *generateSwitchCaseCode(astNode *stmts) {
         free(casevalues);
         free(caselabels);
     }
- return head;
+    return head;
 }
 
-
-
-quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
+quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
 {
     quadruple *tempHead = NULL;
     while (stmts != NULL)
@@ -645,7 +670,6 @@ quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
         {
             quadruple *head1 = generateSwitchCaseCode(stmts);
             tempHead = appendAtEnd(tempHead, head1);
-            
         }
         else if (stmts->label == AST_PRINT)
         {
@@ -668,9 +692,13 @@ quadruple* stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
         {
             quadruple *head = initQuadruple();
             head->op = OP_ASSIGN;
-            getExpressionsCode(stmts->leftChild->nextSibling);
+            getExpressionsCode(stmts->leftChild->nextSibling, symTable);
             tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
             strcpy(head->operand1, stmts->leftChild->nextSibling->name);
+            if (stmts->leftChild->label == AST_ID)
+            {
+                strcpy(head->resultant, stmts->leftChild->tk->str);
+            }
             tempHead = appendAtEnd(tempHead, head);
         }
         stmts = stmts->nextSibling;
@@ -692,6 +720,10 @@ void startIntermCodeGen(astNode *root)
             SymTablePointer *symTable = mdls->symTable;
             astNode *stmts = mdls->leftChild->leftChild->leftChild;
             quadruple *qp = stmtsCodeGen(stmts, symTable);
+            quadruple *qp1 = initQuadruple();
+            qp1->op = LABEL;
+            strcpy(qp1->operand1, "driver");
+            globalHead = appendAtEnd(globalHead, qp1);
             globalHead = appendAtEnd(globalHead, qp);
             mdls = mdls->nextSibling;
             break;
@@ -737,32 +769,32 @@ char *EnumToOperatorString(operators nt)
     fclose(fp);
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random3.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // if (semanticallyCorrect)
-    typeCheck(astRoot);
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("random4.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot);
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }

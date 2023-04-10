@@ -38,7 +38,7 @@ start
 	declare v1, v2:real;	
 	p[10]:= a*b-20*h;                          **Not an error: array index within bounds**
 	declare b7: array[35..50] of real;			 
-	while(k AND x<=m[11] OR false)
+	while(2)
 	start
 		declare p, u:integer;
 		declare bool1: boolean;
@@ -99,14 +99,16 @@ start
 				 B:=C;           	      **not an error**
 				 E:= Q;                       **ERROR: variables E and Q are of different types	**	 
 				 break;
-			case 20: c:= 12.90 + u*y - c; 
+			case 20: 
+				 c:= 12.90 + u*y - c; 
 				 [u, int1, u, n]:=use module function1 with parameters Var3, c, k, Var1, k; **ERROR: Output parameter type of u does not match with formal parameter type**      
 				 get_value(u);
 				 u:= k+12 - k*10+u;        **ERROR: Type mismatch error**  
 				 int1:= 20+32;
-				 k:= int1-3;               **ERROR: for loop conditional variable k is assigned value***   
+				 k:= int1-3;               **ERROR: for loop conditional variable k is assigned value**
 				 break;
 			default: v2:= D[15]+D[20];	      **not an error**	
+				declare madarchod:integer;
 				 [v2, u]:=use module function1 with parameters Var3, c, k, Var1, k; **ERROR: Number of output parameters does not match with that of formal parameters**       
 				 break;			 	
 		end
