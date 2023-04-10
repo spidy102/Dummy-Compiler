@@ -209,6 +209,10 @@ int main(int argc, char *argv[])
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
       printf("\nDisplaying the parse tree:\n");
       printParseTree(root, fpt);
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
+
+      }
       freeGrammar();
 
       fclose(ft);
@@ -227,10 +231,19 @@ int main(int argc, char *argv[])
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
-      astNode *astRoot = constructAST(root);
-      printf("\nDisplaying inorder traversal of AST:\n");
-      display_inorder_ast(astRoot);
-      printf("\nTraversal completed!\n");
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
+
+      }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        printf("\nDisplaying inorder traversal of AST:\n");
+        display_inorder_ast(astRoot);
+        printf("\nTraversal completed!\n");
+
+      }
+ 
       freeGrammar();
       fclose(ft);
       fclose(fg);
@@ -255,6 +268,7 @@ int main(int argc, char *argv[])
       twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
       hashtable ht = initHashtable();
       populate_hashtable(&ht);
+      fseek(fg, 0, SEEK_SET);
       fill_grammar(fg);
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
@@ -265,9 +279,40 @@ int main(int argc, char *argv[])
       printf("\nDisplaying the global symbol table:\n");
       printSymbolTable(globalSymbolTable);
 
+      fclose(ft);
+      fclose(fg);
+
+
     }
     else if (choice == 6)
     {
+      globalSymbolTable = initSymTablePointer();
+      globalSymbolTable->typeST = GLOBALST;
+      globalSymbolTable->parentHashTable = NULL;
+      hashtable ht1 = initHashtable();
+      globalSymbolTable->corrHashtable = &ht1;
+
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+      
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
+      fseek(fg, 0, SEEK_SET);
+      fill_grammar(fg);
+      populateParseTable();
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      astNode *astRoot = constructAST(root);
+      inorder_ast(astRoot);
+      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+      getActivationRecords();
+      printf("\nDisplaying the activation records:\n");
+      printf("%d\n", getFromSymTable(globalSymbolTable->corrHashtable, "one")->activationRecordSize);
+
+      fclose(ft);
+      fclose(fg);
+
 
     }
     else if (choice == 7)
@@ -276,21 +321,36 @@ int main(int argc, char *argv[])
     }
     else if (choice == 8)
     {
+      globalSymbolTable = initSymTablePointer();
+      globalSymbolTable->typeST = GLOBALST;
+      globalSymbolTable->parentHashTable = NULL;
+      hashtable ht1 = initHashtable();
+      globalSymbolTable->corrHashtable = &ht1;
+
       FILE *ft = openfile(testcase, "r+");
       FILE *fg = openfile("Grammar.txt", "r");
-      //FILE *fpt = openfile(parsetreeOutFile, "w");
-
+      
       twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
       hashtable ht = initHashtable();
-      populate_hashtable(&ht);
 
       start_time = clock();
-      // invoke your lexer and parser here
-      // computeFirstAndFollowSets();
+      populate_hashtable(&ht);
+      fseek(fg, 0, SEEK_SET);
       fill_grammar(fg);
       populateParseTable();
       fseek(ft, 0, SEEK_SET);
       treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
+
+      }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        inorder_ast(astRoot);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        typeCheck(astRoot);
+      }
 
       end_time = clock();
       total_CPU_time = (double)(end_time - start_time);
@@ -299,8 +359,8 @@ int main(int argc, char *argv[])
       fclose(ft);
       fclose(fg);
       //fclose(fpt);
-      printf("The number of CPU ticks taken to parse the source code: %lf\n", total_CPU_time);
-      printf("Time taken to parse the source code: %lf seconds\n", total_CPU_time_in_seconds);
+      printf("The number of CPU ticks taken to compile the source code: %lf\n", total_CPU_time);
+      printf("Time taken to compile the source code: %lf seconds\n", total_CPU_time_in_seconds);
     }
     else if (choice == 9)
     {

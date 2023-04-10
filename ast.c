@@ -1656,10 +1656,10 @@ void inorder_ast(astNode *root)
     inorder_ast(root->leftChild);
     if (root->label == AST_ID)
     {
-        //printf("str: %s", root->tk->str);
+        printf("str: %s", root->tk->str);
         // printf("line number at this token %d\n", root->tk->line_num);
     }
-    //printf("%s\n", EnumToASTString(root->label));
+    printf("%s\n", EnumToASTString(root->label));
     if (root->leftChild != NULL)
     {
         astNode *leftOut = root->leftChild->nextSibling;
