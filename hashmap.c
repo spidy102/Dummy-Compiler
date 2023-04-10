@@ -70,10 +70,10 @@ bool insert(hashtable *ht, void *str, int length, token_names tok)
     {
         ptr = ptr->next;
     }
-    if (strcmp("takes", str) == 0)
+/*     if (strcmp("takes", str) == 0)
     {
         printf("1hello\n");
-    }
+    } */
     ptr->next = malloc(sizeof(bucket_node));
     ptr->next->str = str;
     ptr->next->tok = tok;

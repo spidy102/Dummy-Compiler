@@ -1092,7 +1092,7 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
     }
 }
 
-int main()
+/* int main()
 {
     globalSymbolTable = initSymTablePointer();
     globalSymbolTable->typeST = GLOBALST;
@@ -1111,4 +1111,4 @@ int main()
     inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     printSymbolTable(globalSymbolTable);
-}
+} */

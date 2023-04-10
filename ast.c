@@ -1648,6 +1648,28 @@ void inorder_ast(astNode *root)
     inorder_ast(root->leftChild);
     if (root->label == AST_NUM)
     {
+        //printf("num: %d", root->tk->integer);
+        // printf("line number at this token %d\n", root->tk->line_num);
+    }
+    //printf("%s\n", EnumToASTString(root->label));
+    if (root->leftChild != NULL)
+    {
+        astNode *leftOut = root->leftChild->nextSibling;
+        while (leftOut != NULL)
+        {
+            inorder_ast(leftOut);
+            leftOut = leftOut->nextSibling;
+        }
+    }
+}
+
+void display_inorder_ast(astNode *root)
+{
+    if (root == NULL)
+        return;
+    display_inorder_ast(root->leftChild);
+    if (root->label == AST_NUM)
+    {
         printf("num: %d", root->tk->integer);
         // printf("line number at this token %d\n", root->tk->line_num);
     }
@@ -1657,7 +1679,7 @@ void inorder_ast(astNode *root)
         astNode *leftOut = root->leftChild->nextSibling;
         while (leftOut != NULL)
         {
-            inorder_ast(leftOut);
+            display_inorder_ast(leftOut);
             leftOut = leftOut->nextSibling;
         }
     }
