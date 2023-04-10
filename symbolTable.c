@@ -268,6 +268,7 @@ SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *ap
 {
     if (head == NULL)
     {
+        append->siblingHashTable = NULL;
         return append;
     }
     SymTablePointer *temp = head;
@@ -276,6 +277,7 @@ SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *ap
         temp = temp->siblingHashTable;
     }
     temp->siblingHashTable = append;
+    append->siblingHashTable = NULL;
     return head;
 }
 
@@ -606,7 +608,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             {
                 if (!existsInAnySymTable(module, stmts->leftChild->tk->str))
                 {
-                    printf("Error: variable %s at line number %d is not defined in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
+                    printf("Error: variable %s at line number %d is not declared in this scope\n", stmts->leftChild->tk->str, stmts->leftChild->tk->line_num);
                     semanticallyCorrect = false;
                 }
             }
@@ -619,7 +621,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
             astNode *idNode = stmts->leftChild;
             if (!existsInAnySymTable(module, idNode->tk->str))
             {
-                printf("Error: variable %s at line number %d is not defined in this scope\n", idNode->tk->str, idNode->tk->line_num);
+                printf("Error: variable %s at line number %d is not declared in this scope\n", idNode->tk->str, idNode->tk->line_num);
                 semanticallyCorrect = false;
             }
 
@@ -1092,23 +1094,23 @@ void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int of
     }
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable *ht1 = initHashtableForSymTable();
-    globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("random1.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable *ht1 = initHashtableForSymTable();
+//     globalSymbolTable->corrHashtable = ht1;
+//     FILE *fp = fopen("random1.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
 
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    printSymbolTable(globalSymbolTable);
-}
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     printSymbolTable(globalSymbolTable);
+// }

@@ -44,6 +44,12 @@ void getAttributeType(astNode *node, SymTablePointer *symTable)
         }
         break;
     }
+    case AST_SIGNED:
+    {
+        getAttributeType(node->leftChild->nextSibling, symTable);
+        node->type = node->leftChild->nextSibling->type;
+        break;
+    }
     case AST_DIV:
     {
         getAttributeType(node->leftChild, symTable);
@@ -876,14 +882,14 @@ void typeCheck(astNode *root)
     }
 }
 
-/* int main()
+int main()
 {
     globalSymbolTable = initSymTablePointer();
     globalSymbolTable->typeST = GLOBALST;
     globalSymbolTable->parentHashTable = NULL;
     hashtable *ht1 = initHashtableForSymTable();
     globalSymbolTable->corrHashtable = ht1;
-    FILE *fp = fopen("test/t10.txt", "r");
+    FILE *fp = fopen("test/t6.txt", "r");
     twinbuffer *tb = twinbuffer_init(fp, 256);
     fill_grammar(fopen("Grammar.txt", "r"));
     hashtable ht = initHashtable();
@@ -892,7 +898,7 @@ void typeCheck(astNode *root)
     treenode *root = parseInputSourceCode(fp, tb, ht);
 
     astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
+    // inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     typeCheck(astRoot);
-} */
+}

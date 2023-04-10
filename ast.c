@@ -1646,9 +1646,9 @@ void inorder_ast(astNode *root)
     if (root == NULL)
         return;
     inorder_ast(root->leftChild);
-    if (root->label == AST_NUM)
+    if (root->label == AST_ID)
     {
-        printf("num: %d", root->tk->integer);
+        printf("str: %s", root->tk->str);
         // printf("line number at this token %d\n", root->tk->line_num);
     }
     printf("%s\n", EnumToASTString(root->label));
