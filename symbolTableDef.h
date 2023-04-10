@@ -18,5 +18,6 @@ SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *ap
 int getOffset(SymTablePointer *pointer, int *offset);
 void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePointer *parent);
 bool compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line);
+void printSymbolTable(SymTablePointer *symTable);
 
 #endif

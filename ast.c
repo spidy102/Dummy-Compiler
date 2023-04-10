@@ -1472,8 +1472,6 @@ astNode *constructAST(treenode *root)
         constructAST(valueNode);
         astNode *stmtsNode = constructAST(stmts);
         astNode *caseNode = initASTNode(AST_CASE, NULL);
-        printf("hemlo??\n\n");
-
         caseNode->line_start = root->child->tk->line_num;
         caseNode->line_end = stmts->nextSibling->nextSibling->tk->line_num;
 
@@ -1482,6 +1480,10 @@ astNode *constructAST(treenode *root)
         {
 
             caseNode->leftChild = append_at_end(caseNode->leftChild, stmts->addr);
+        }
+        else
+        {
+            caseNode->leftChild = append_at_end(caseNode->leftChild, initASTNode(AST_STATEMENTS, NULL));
         }
         n9Node->inh = append_at_end(root->inh, caseNode);
         constructAST(n9Node);
@@ -1500,9 +1502,13 @@ astNode *constructAST(treenode *root)
         caseNode->line_start = root->child->tk->line_num;
         caseNode->line_end = stmts->nextSibling->nextSibling->tk->line_num;
         caseNode->leftChild = valueNode->addr;
-        if (stmtsNode != NULL)
+        if (stmts->addr != NULL)
         {
-            caseNode->leftChild = append_at_end(caseNode->leftChild, stmtsNode);
+            caseNode->leftChild = append_at_end(caseNode->leftChild, stmts->addr);
+        }
+        else
+        {
+            caseNode->leftChild = append_at_end(caseNode->leftChild, initASTNode(AST_STATEMENTS, NULL));
         }
         n9Node->inh = append_at_end(root->inh, caseNode);
         constructAST(n9Node);
@@ -1537,6 +1543,8 @@ astNode *constructAST(treenode *root)
         treenode *stmtsNode = root->child->nextSibling->nextSibling;
         astNode *stmtsAST = constructAST(stmtsNode);
         astNode *newNode = initASTNode(AST_DEFAULT, NULL);
+        newNode->line_start = root->child->tk->line_num;
+        newNode->line_end = stmtsNode->nextSibling->nextSibling->tk->line_num;
         newNode->tk = root->child->tk;
         newNode->leftChild = stmtsAST;
         root->addr = newNode;
