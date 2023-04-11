@@ -160,6 +160,7 @@ int updateOffsets(char *str, SymTablePointer *symTable, types type)
     ptrnewT->str = str;
     SymTablePointer *modulesSymTable = getModulesSymTable(symTable);
     int offset = modulesSymTable->activationRecordSize;
+    printf("curoffset:%d\n", offset);
     ptrnewT->offset = offset;
     insertSymTable(symTable->corrHashtable, ptrnewT);
     if (type == TYPE_INTEGER)
@@ -178,7 +179,7 @@ int updateOffsets(char *str, SymTablePointer *symTable, types type)
     return ptrnewT->offset;
 }
 
-void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
+void getShortCircuitCode(astNode *expr, SymTablePointer *symTable)
 {
     switch (expr->label)
     {
@@ -289,6 +290,24 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
         {
             sprintf(expr->code->operand1, "label%d", expr->falseCase);
         }
+        return;
+    }
+    }
+}
+
+void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
+{
+    switch (expr->label)
+    {
+    case AST_AND:
+    case AST_OR:
+    case AST_GE:
+    case AST_LE:
+    case AST_NE:
+    case AST_GT:
+    case AST_LT:
+    {
+
         return;
     }
     case AST_ID:

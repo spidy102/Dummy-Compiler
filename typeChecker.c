@@ -550,9 +550,13 @@ bool checkIfOnLHS(astNode *temp, astNode *expr)
                 }
                 cases = cases->nextSibling;
             }
-            astNode *def = temp->leftChild->nextSibling->nextSibling->leftChild->leftChild;
-            if (checkIfOnLHS(def, expr))
-                return true;
+            astNode *def = temp->leftChild->nextSibling->nextSibling;
+            if (def->leftChild != NULL)
+            {
+                if (checkIfOnLHS(def->leftChild->leftChild, expr))
+                    return true;
+            }
+
             temp = temp->nextSibling;
             break;
         }
