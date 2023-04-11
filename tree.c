@@ -46,3 +46,17 @@ treenode *addChild(treenode *node, Symbol sym)
     node->child = initNode(sym);
     return node->child;
 }
+
+int countNodes(treenode *root)
+{
+    if (root == NULL)
+        return 0;
+    int count = 1;
+    treenode *child = root->child;
+    while (child != NULL)
+    {
+        count += countNodes(child);
+        child = child->nextSibling;
+    }
+    return count;
+}

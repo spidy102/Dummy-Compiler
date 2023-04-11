@@ -1693,6 +1693,19 @@ void display_inorder_ast(astNode *root)
     }
 }
 
+int countASTnodes(astNode *root)
+{
+    if (root == NULL)
+        return 0;
+    int count = 1;
+    astNode *leftOut = root->leftChild;
+    while (leftOut != NULL)
+    {
+        count += countASTnodes(leftOut);
+        leftOut = leftOut->nextSibling;
+    }
+    return count;
+}
 
 
 // int main()
