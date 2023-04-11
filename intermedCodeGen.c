@@ -520,7 +520,7 @@ void getGen(astNode *node, SymTablePointer *symTable)
 
 quadruple *generateSwitchCaseCode(astNode *stmts)
 {
-
+    printf("Generating code for switch case\n");
     quadruple *head = initQuadruple();
     SymTablePointer *symTable = stmts->symTable;
     head->op = JUMP;
@@ -593,7 +593,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
         free(caselabels);
     }
     else
-    {
+    {   
+        printf("detected integer case correctly\n");
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
         int size = 25;
@@ -608,6 +609,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             snprintf(tempQ1->operand1, 25, "label%d", label1);
             caselabels[i] = label1;
             casevalues[i] = case1->leftChild->tk->integer;
+
+            printf("Statements? %s\n", 
             head = appendAtEnd(head, tempQ1);
             quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
             head = appendAtEnd(head, stmtsHead);
@@ -812,32 +815,32 @@ char *EnumToOperatorString(operators nt)
     fclose(fp);
 }
 
-// int main()
-// {
-//     globalSymbolTable = initSymTablePointer();
-//     globalSymbolTable->typeST = GLOBALST;
-//     globalSymbolTable->parentHashTable = NULL;
-//     hashtable ht1 = initHashtable();
-//     globalSymbolTable->corrHashtable = &ht1;
-//     FILE *fp = fopen("random4.txt", "r");
-//     twinbuffer *tb = twinbuffer_init(fp, 256);
-//     fill_grammar(fopen("Grammar.txt", "r"));
-//     hashtable ht = initHashtable();
-//     populate_hashtable(&ht);
-//     populateParseTable();
-//     treenode *root = parseInputSourceCode(fp, tb, ht);
-//     astNode *astRoot = constructAST(root);
-//     inorder_ast(astRoot);
-//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-//     // if (semanticallyCorrect)
-//     typeCheck(astRoot);
-//     if (semanticallyCorrect && semanticRulesPassed)
-//     {
-//         startIntermCodeGen(astRoot);
-//     }
-//     while (globalHead != NULL)
-//     {
-//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-//         globalHead = globalHead->next;
-//     }
-// }
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable ht1 = initHashtable();
+    globalSymbolTable->corrHashtable = &ht1;
+    FILE *fp = fopen("random4.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
+    astNode *astRoot = constructAST(root);
+    inorder_ast(astRoot);
+    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+    // if (semanticallyCorrect)
+    typeCheck(astRoot);
+    if (semanticallyCorrect && semanticRulesPassed)
+    {
+        startIntermCodeGen(astRoot);
+    }
+    while (globalHead != NULL)
+    {
+        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+        globalHead = globalHead->next;
+    }
+}
