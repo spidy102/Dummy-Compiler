@@ -1206,6 +1206,7 @@ void getActivationRecords()
     {
         if (ht->table[i]->bucket_ptr != NULL)
         {
+            printf("helo??\n\n");
             SymTablePointer *ptr = ht->table[i]->bucket_ptr;
             while (ptr != NULL)
             {

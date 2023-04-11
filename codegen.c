@@ -81,7 +81,7 @@ void genCode(FILE *fp)
             }
             else
             {
-                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
+                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 8);
                 fprintf(fp, "movsxd rbx, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
             }
 
@@ -111,7 +111,7 @@ void genCode(FILE *fp)
             }
             else
             {
-                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
+                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 8);
                 fprintf(fp, "movsxd rbx, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
             }
 
@@ -141,7 +141,7 @@ void genCode(FILE *fp)
             }
             else
             {
-                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
+                fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 8);
                 fprintf(fp, "movsxd rbx, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 8);
             }
 
@@ -195,21 +195,23 @@ int main()
     populateParseTable();
     treenode *root = parseInputSourceCode(fp, tb, ht);
     astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
+    // inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     // if (semanticallyCorrect)
     typeCheck(astRoot);
+    getActivationRecords();
+
     if (semanticallyCorrect && semanticRulesPassed)
     {
         startIntermCodeGen(astRoot);
     }
-    FILE *fp1 = fopen("temp.asm", "w");
-    quadruple *qp = globalHead;
-    genCode(fp1);
-    globalHead = qp;
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
+    // FILE *fp1 = fopen("temp.asm", "w");
+    // quadruple *qp = globalHead;
+    // genCode(fp1);
+    // globalHead = qp;
+    // while (globalHead != NULL)
+    // {
+    //     printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+    //     globalHead = globalHead->next;
+    // }
 }
