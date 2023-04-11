@@ -627,7 +627,7 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                 }
                 else if (inOutputParams(module, idList->tk->str))
                 {
-                    printf("Line %d: Error: Redeclaration of variable output variable %s\n", idList->tk->line_num, idList->tk->str);
+                    printf("Line %d: Error: Redeclaration of output variable %s\n", idList->tk->line_num, idList->tk->str);
                     semanticallyCorrect = false;
                 }
                 else

@@ -706,6 +706,11 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             getGen(stmts->leftChild, symTable);
             tempHead = appendAtEnd(tempHead, stmts->leftChild->code);
             strcpy(head->operand1, stmts->leftChild->name);
+            if (stmts->leftChild->label == AST_ID)
+            {
+                printf("%d\n", getFromSymTable(symTable->corrHashtable, stmts->leftChild->tk->str)->offset);
+                head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, stmts->leftChild->tk->str)->offset;
+            }
             tempHead = appendAtEnd(tempHead, head);
         }
         else if (stmts->label == AST_GETVALUE)
@@ -714,6 +719,7 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             head->op = OP_GETVALUE;
             getGen(stmts->leftChild, symTable);
             strcpy(head->operand1, stmts->leftChild->name);
+            head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
             tempHead = appendAtEnd(tempHead, head);
         }
         else if (stmts->label == AST_ASSIGNOP)
@@ -723,9 +729,14 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             getExpressionsCode(stmts->leftChild->nextSibling, symTable);
             tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
             strcpy(head->operand1, stmts->leftChild->nextSibling->name);
+            if (atoi(head->operand1) == 0)
+            {
+                head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
+            }
             if (stmts->leftChild->label == AST_ID)
             {
                 strcpy(head->resultant, stmts->leftChild->tk->str);
+                head->offsetRes = getFromSymTable(symTable->corrHashtable, head->resultant)->offset;
             }
             tempHead = appendAtEnd(tempHead, head);
         }
@@ -753,6 +764,10 @@ void startIntermCodeGen(astNode *root)
             strcpy(qp1->operand1, "driver");
             globalHead = appendAtEnd(globalHead, qp1);
             globalHead = appendAtEnd(globalHead, qp);
+            quadruple *qp2 = initQuadruple();
+            qp2->op = LABEL;
+            strcpy(qp2->operand1, "exit_driver");
+            globalHead - appendAtEnd(globalHead, qp2);
             mdls = mdls->nextSibling;
             break;
         }
