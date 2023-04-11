@@ -572,6 +572,27 @@ void checkTypes(astNode *stmts, SymTablePointer *symTable)
     }
 }
 
+bool inOutputParams(SymTablePointer *module, char *str)
+{
+    while (module->typeST != MODULEST)
+    {
+        module = module->parentHashTable;
+    }
+    if (strcmp(module->str, "driver") != 0)
+    {
+        list *ipl = module->output_para_list;
+        while (ipl != NULL)
+        {
+            if (strcmp(ipl->tk->str, str) == 0)
+            {
+                return true;
+            }
+            ipl = ipl->next;
+        }
+    }
+    return false;
+}
+
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
 {
     hashtable *ht = module->corrHashtable;
@@ -603,6 +624,11 @@ void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset)
                         printf("Line %d: Error: Redeclaration of variable %s\n", idList->tk->line_num, idList->tk->str);
                         semanticallyCorrect = false;
                     }
+                }
+                else if (inOutputParams(module, idList->tk->str))
+                {
+                    printf("Line %d: Error: Redeclaration of variable output variable %s\n", idList->tk->line_num, idList->tk->str);
+                    semanticallyCorrect = false;
                 }
                 else
                 {

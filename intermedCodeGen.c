@@ -11,6 +11,7 @@
 #include "typeCheckerDef.h"
 #include "symTableUtil.h"
 #include "intermedCodeGen.h"
+#include "intermCodeGenDef.h"
 #include <string.h>
 
 int labelCount = 0;
@@ -38,6 +39,10 @@ quadruple *initQuadruple()
     memset(qp->operand2, '\0', sizeof(qp->operand2));
     memset(qp->resultant, '\0', sizeof(qp->resultant));
     qp->op = -1;
+    qp->offsetOperand1 = -1;
+    qp->offsetOperand2 = -1;
+    qp->offsetRes = -1;
+    return qp;
 }
 
 // void getAttributeCodeExpressions(astNode *node, SymTablePointer *symTable)
@@ -792,32 +797,32 @@ char *EnumToOperatorString(operators nt)
     fclose(fp);
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random4.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // if (semanticallyCorrect)
-    typeCheck(astRoot);
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("random4.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot);
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }
