@@ -612,7 +612,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
         free(caselabels);
     }
     else
-    {   
+    {
         printf("detected integer case correctly\n");
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
@@ -629,7 +629,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             caselabels[i] = label1;
             casevalues[i] = case1->leftChild->tk->integer;
 
-            printf("Statements? %s\n", 
+            // printf("Statements? %s\n",
             head = appendAtEnd(head, tempQ1);
             quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
             head = appendAtEnd(head, stmtsHead);
