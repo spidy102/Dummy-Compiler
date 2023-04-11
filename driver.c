@@ -362,7 +362,6 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        inorder_ast(astRoot);
         populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
         typeCheck(astRoot);
       }

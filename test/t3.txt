@@ -51,13 +51,13 @@ start
 	res_2_a:= -(a*b-c/pqr_2);				**ERROR: Type mismatch error**
 	declare s: integer;					**Not an error as a local variable can shadow the input parameter**
 	declare q4, q5: real;
-	res_2__b:= (res_2_b + p)*12+22.34E-2*q5;		**ERROR variable p is not declared**
+	res_2__b:= (res_2__b + p)*12+22.34E-2*q5;		**ERROR variable p is not declared**
 	declare m,n: boolean;
 	s:= 12;
 	res_1 := a <=  b AND c >= a OR  a<0 AND false;
 	
 	m:= n AND (abc_1<=pqr_2);
-	while(m OR a>=b AND res_2_b<=129.54e+3)
+	while(m OR a>=b AND res_2__b<=129.54e+3)
 	start
 		b:=b+1;
 		m:= n OR b>=res_2_a;
@@ -78,8 +78,8 @@ start
 		m:= abc_1<=pqr_2 OR res_1;
 		w1:= w2*a-s*k*c-pqr_2;                  	**ERROR: variable k is not declared**
 	end
-	m:= m OR (a <= b) AND (res_2 >= 30.65);
-	res_1:= (true AND c==b)OR(b>p AND (a<=d));		**ERROR: variable d is not declared**
+	m:= m OR (a <= b) AND (res_2 >= 30.65);			**ERROR: variable res_2 is not declared**
+	res_1:= (true AND c==b)OR(b>p AND (a<=d));		**ERROR: variable d and p are not declared**
 	declare new: integer;					**ERROR: variable new is re-declared**
 	new:= a<b;
 	print(res_1);
@@ -92,7 +92,7 @@ start
 	get_value(v_1_2_43);					**ERROR: variable v_1_2_43 is not declared**		
 	declare result_, v7, v9:integer;
 	declare u1:boolean;
-	[u1, result_, k]:=use module compute with parameters v_1_2_3, v7, v9;	**ERROR: variable k is not declared**
+	[u1, result_, k]:=use module compute with parameters v_1_2_3, v7, v9;	**ERROR: variable k is not declared and input parameters mismatch**
 	print(result_);
 	declare u1: real;					**ERROR: variable u1 is re-declared**
 end
