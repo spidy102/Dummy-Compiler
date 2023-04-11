@@ -629,9 +629,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             caselabels[i] = label1;
             casevalues[i] = case1->leftChild->tk->integer;
 
-            printf("Statements? %s\n", 
             head = appendAtEnd(head, tempQ1);
-            quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
+            quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->leftChild, symTable);
             head = appendAtEnd(head, stmtsHead);
             quadruple *tempQ2 = initQuadruple();
             tempQ2->op = JUMP;
@@ -656,7 +655,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             tempQ3->op = LABEL;
             snprintf(tempQ3->operand1, 25, "label%d", labeldef);
             head = appendAtEnd(head, tempQ3);
-            quadruple *stmtsHead = stmtsCodeGen(def->leftChild, symTable);
+            quadruple *stmtsHead = stmtsCodeGen(def->leftChild->leftChild, symTable);
             head = appendAtEnd(head, stmtsHead);
             quadruple *tempQ4 = initQuadruple();
             tempQ4->op = JUMP;
@@ -852,7 +851,7 @@ int main()
     inorder_ast(astRoot);
     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
     // if (semanticallyCorrect)
-    typeCheck(astRoot);
+    //typeCheck(astRoot);
     if (semanticallyCorrect && semanticRulesPassed)
     {
         startIntermCodeGen(astRoot);

@@ -1,12 +1,14 @@
-<<<<<<< HEAD
 <<<driver program>>>
 start
-declare a : integer;
+declare a : boolean;
 switch (a)
 start
-case 1:
+case true:
 	declare b : integer;
-	switch (b)
+	break;
+case false:
+	declare e : integer;
+	switch (e)
 	start
 		case 1:
 		declare c : integer;
@@ -16,47 +18,7 @@ case 1:
 		break;
 	end
 	break;
-default:
-	declare e : integer;
-	break;
 end
 
 end
 
-=======
-**Code Generation test case 2: Computing expressions using integer and boolean data type**
-
-**Single driver module with single level nesting **
-
-<<<driver program>>>
-start
-	declare x, y, z:integer;
-	declare a, b, c:integer;
-	declare u, v: boolean;
-	u:= true;
-	a:= 5;
-	b:= 9;
-	get_value(x);
-	get_value(y);
-	z:= x + y*b +(a-b)*y+ a*2 - b*x;
-	v:= z > 10 OR a<=b AND x<y AND u;	**follows left to right associativity**
-        print(z);
-	print(v);
-end
-
-** On the console
-Input: Enter an integer value
-2
-Input: Enter an integer value
-3
-Output: 9
-Output: true
-
-For values of x = 2 and y = 3 as run time input, print z as 9.
-Then print v as true (use string true or false to print output of a variable of boolean type).
- 
-
-Similarly run the generated assembly code for other input values and verify.
-
-**
->>>>>>> 039f028cbd383c42fd1b092cff79d6f1f5493d14
