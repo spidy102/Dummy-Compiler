@@ -803,6 +803,96 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         }
     }
 }
+bool outputParamsCheckHelper(astNode *temp, list *opl)
+{
+    bool isPresent = false;
+    while (temp != NULL)
+    {
+
+        if (temp->label == AST_ASSIGNOP)
+        {
+
+            astNode *lvalue = temp->leftChild;
+
+            if (lvalue->label != AST_ID)
+            {
+                temp = temp->nextSibling;
+            }
+            else
+            {
+                if (strcmp(lvalue->tk->str, opl->tk->str) == 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    temp = temp->nextSibling;
+                }
+            }
+        }
+        else if (temp->label == AST_MODULE_REUSE)
+        {
+
+            astNode *optionalNode = temp->leftChild;
+            if (optionalNode->leftChild == NULL)
+            {
+                temp = temp->nextSibling;
+            }
+            else
+            {
+                astNode *idList = optionalNode->leftChild->leftChild;
+                while (idList != NULL)
+                {
+                    if (strcmp(idList->tk->str, opl->tk->str) == 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        idList = idList->nextSibling;
+                    }
+                }
+                temp = temp->nextSibling;
+            }
+        }
+        else if (temp->label == AST_FOR)
+        {
+            astNode *forStmts = temp->leftChild->nextSibling->nextSibling->leftChild;
+            if (outputParamsCheckHelper(forStmts, opl))
+                return true;
+            temp = temp->nextSibling;
+        }
+        else if (temp->label == AST_WHILE)
+        {
+            astNode *whileStmts = temp->leftChild->nextSibling->leftChild;
+            if (outputParamsCheckHelper(whileStmts, opl))
+                return true;
+            temp = temp->nextSibling;
+        }
+        else if (temp->label == AST_SWITCH_CASE)
+        {
+            astNode *cases = temp->leftChild->nextSibling->leftChild;
+            while (cases != NULL)
+            {
+                if (outputParamsCheckHelper(cases->leftChild->nextSibling->leftChild, opl))
+                    return true;
+                cases = cases->nextSibling;
+            }
+            astNode *def = temp->leftChild->nextSibling->nextSibling;
+            if (def->leftChild != NULL)
+            {
+                if (outputParamsCheckHelper(def->leftChild->leftChild, opl))
+                    return true;
+            }
+            temp = temp->nextSibling;
+        }
+        else
+        {
+            temp = temp->nextSibling;
+        }
+    }
+    return false;
+}
 
 void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module)
 {
@@ -814,71 +904,7 @@ void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module)
     while (opl != NULL)
     {
 
-        bool isPresent = false;
-
-        while (temp != NULL)
-        {
-
-            if (temp->label == AST_ASSIGNOP)
-            {
-
-                astNode *lvalue = temp->leftChild;
-
-                if (lvalue->label != AST_ID)
-                {
-                    temp = temp->nextSibling;
-                }
-                else
-                {
-                    if (strcmp(lvalue->tk->str, opl->tk->str) == 0)
-                    {
-                        isPresent = true;
-                        break;
-                    }
-                    else
-                    {
-                        temp = temp->nextSibling;
-                    }
-                }
-            }
-            else if (temp->label == AST_MODULE_REUSE)
-            {
-
-                astNode *optionalNode = temp->leftChild;
-                if (optionalNode->leftChild == NULL)
-                {
-                    temp = temp->nextSibling;
-                }
-                else
-                {
-                    astNode *idList = optionalNode->leftChild->leftChild;
-                    while (idList != NULL)
-                    {
-                        if (strcmp(idList->tk->str, opl->tk->str) == 0)
-                        {
-                            isPresent = true;
-                            break;
-                        }
-                        else
-                        {
-                            idList = idList->nextSibling;
-                        }
-                    }
-                    if (isPresent)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        temp = temp->nextSibling;
-                    }
-                }
-            } // need to incorporate for and while here
-            else
-            {
-                temp = temp->nextSibling;
-            }
-        }
+        bool isPresent = outputParamsCheckHelper(temp, opl);
         if (!isPresent)
         {
             semanticRulesPassed = false;
@@ -937,6 +963,7 @@ void typeCheck(astNode *root)
     }
 }
 
+<<<<<<< HEAD
 // int main()
 // {
 //     globalSymbolTable = initSymTablePointer();
@@ -951,6 +978,22 @@ void typeCheck(astNode *root)
 //     populate_hashtable(&ht);
 //     populateParseTable();
 //     treenode *root = parseInputSourceCode(fp, tb, ht);
+=======
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable *ht1 = initHashtableForSymTable();
+    globalSymbolTable->corrHashtable = ht1;
+    FILE *fp = fopen("test/t10.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
+>>>>>>> 28cfdbe015865b744af0f0c272f1f2cb155e9c04
 
 //     astNode *astRoot = constructAST(root);
 //     // inorder_ast(astRoot);

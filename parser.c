@@ -451,10 +451,6 @@ char *tolowercase(char *str)
 
 int getRuleNumber(ruleNode *rule)
 {
-    if (rule->nt == ioStmt)
-    {
-        printf("helo\n");
-    }
     for (int i = 0; i < NUM_RULES; i++)
     {
 
@@ -644,7 +640,6 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 treenode *parent = pop(st);
 
                 parent->rule_No = getRuleNumber(parseTable[top1->node.nt][EPSILON]);
-                printf("rule num here %d\n", parent->rule_No);
                 top1 = top(st);
             }
             else
