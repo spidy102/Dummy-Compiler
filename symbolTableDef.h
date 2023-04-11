@@ -7,6 +7,7 @@
 extern SymTablePointer *globalSymbolTable;
 extern bool semanticallyCorrect;
 extern bool semanticRulesPassed;
+extern bool arrayChecks;
 void populateGlobalSymbolTable(SymTablePointer *global, astNode *astRoot, int offset);
 void populateModuleSymbolTable(SymTablePointer *module, astNode *root, int *offset);
 void populateStmtsSymTable(SymTablePointer *module, astNode *stmts, int *offset);
@@ -18,7 +19,8 @@ SymTablePointer *append_scope_pointer(SymTablePointer *head, SymTablePointer *ap
 int getOffset(SymTablePointer *pointer, int *offset);
 void populateTypeInformation(SymTablePointer *pointer, astNode *temp, SymTablePointer *parent);
 bool compareForArrayMatch(SymTablePointer *ptr1, SymTablePointer *ptr2, int line);
-void printSymbolTable(SymTablePointer *symTable);
+void printSymbolTable(SymTablePointer *symTable, int nest);
 void getActivationRecords();
+void printArrayElements(SymTablePointer *symTable);
 
 #endif
