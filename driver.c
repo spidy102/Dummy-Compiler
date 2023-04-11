@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
       {
         astNode *astRoot = constructAST(root);
         printf("\nDisplaying inorder traversal of AST:\n");
-        display_inorder_ast(astRoot);
+        inorder_ast(astRoot);
         printf("\nTraversal completed!\n");
 
       }
