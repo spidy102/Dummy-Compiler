@@ -46,4 +46,6 @@ treenode *addSibling(treenode *node, Symbol sym);
 
 treenode *addChild(treenode *node, Symbol sym);
 
+int countNodes(treenode *root);
+
 #endif

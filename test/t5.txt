@@ -18,7 +18,7 @@ start
 	start
 		declare p, u:integer;
 		declare b: array[2..20] of integer;
-		b:= m;
+		b:= m;								**ERROR: array type mismatch**
 		b[2]:= u+m[25];			   **ERROR: element of array m is out of bound** 
 		p:= b[18]*18.56E+2;		   **ERROR: type mismatch **
 	end					   **ERROR: none of the conditional variables k, x and m is assigned any value in scope of while at lines 17-24**
@@ -63,7 +63,7 @@ start
 				 get_value(Q);		      **ERROR: Q not declared**
 				 A[7]:= k+12 - D[12]*10+u;    **ERROR: Type mismatch error**    
 				 break;
-			default: E[9]:= B[15]+Q;	      **not an error**	       
+			default: E[9]:= B[15]+Q;	      **ERROR: variables E and Q not declared and B out of bounds**	       
 				 break;			 	
 		end
 		x:=x + u*v- u<=v;                             **ERROR: Type mismatch error**
@@ -87,8 +87,8 @@ start
 	p:= 23.56;
 	get_value(v_1_2_3);							 		
 	declare B, C: array [2..20] of integer;
-	[ v_1_2_3, u1]:=use module var_demo_array with parameters A,B,p;		
-	[ v_1_2_3, k]:=use module var_demo_array with parameters A,B,p;	
+	[ v_1_2_3, u1]:=use module var_demo_array with parameters A,B,p;		**ERROR: type mismatch error**
+	[ v_1_2_3, k]:=use module var_demo_array with parameters A,B,p;			**ERROR: type mismatch error**
 	declare a,b:integer;
 	a:= 5.89e-2;			        **ERROR: type mismatch error**
 	get_value(b);

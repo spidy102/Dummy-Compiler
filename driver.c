@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
       {
         astNode *astRoot = constructAST(root);
         printf("\nDisplaying inorder traversal of AST:\n");
-        display_inorder_ast(astRoot);
+        inorder_ast(astRoot);
         printf("\nTraversal completed!\n");
 
       }
@@ -251,7 +251,37 @@ int main(int argc, char *argv[])
     }
     else if (choice == 4)
     {
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+      
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
+      fill_grammar(fg);
+      populateParseTable();
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
 
+      //count the number of nodes in the parse tree
+      int num_nodes = countNodes(root);
+      printf("Number of nodes in the parse tree: %d\n", num_nodes);
+      printf("Total size of the parse tree: %d bytes\n", num_nodes * sizeof(treenode));
+
+      if (!isSyntaticallyCorrect) {
+        printf("Found syntax errors!\n");
+      }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        int num_ast_nodes = countASTnodes(astRoot);
+        printf("Number of nodes in the AST: %d\n", num_ast_nodes);
+        printf("Total size of the AST: %d bytes\n", num_ast_nodes * sizeof(astNode));
+        printf("Compression percentage: %f\% \n", (1 - (float)num_ast_nodes / num_nodes) * 100);
+      }
+
+      freeGrammar();
+      fclose(ft);
+      fclose(fg);
     }
     else if (choice == 5)
     {
@@ -362,7 +392,6 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        inorder_ast(astRoot);
         populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
         typeCheck(astRoot);
       }
