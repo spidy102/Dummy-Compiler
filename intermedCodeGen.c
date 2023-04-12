@@ -156,6 +156,10 @@ SymTablePointer *getModulesSymTable(SymTablePointer *symTable)
 
 int updateOffsets(char *str, SymTablePointer *symTable, types type)
 {
+    if (existsInSymTable(symTable->corrHashtable, str))
+    {
+        return getFromSymTable(symTable->corrHashtable, str)->offset;
+    }
     SymTablePointer *ptrnewT = initSymTablePointer();
     ptrnewT->str = str;
     SymTablePointer *modulesSymTable = getModulesSymTable(symTable);
@@ -373,6 +377,69 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
             qp->op2Ptr = getFromSymTable(symTable->corrHashtable, qp->operand2);
         }
         expr->code = appendAtEnd(expr->code, qp);
+        return;
+    }
+    case AST_ARRAY_ELEMENT:
+    {
+        getExpressionsCode(expr->leftChild->nextSibling, symTable);
+        quadruple *head = expr->leftChild->nextSibling->code;
+        // i-low
+        quadruple *first = initQuadruple();
+        first->op = OP_MINUS;
+        int firstTemp = newTemp();
+        sprintf(first->resultant, "temp%d", firstTemp);
+        first->offsetRes = updateOffsets(first->resultant, symTable, TYPE_INTEGER);
+        sprintf(first->operand1, "%s", expr->leftChild->nextSibling->name);
+        sprintf(first->operand2, "%d", getFromSymTable(symTable->corrHashtable, expr->leftChild->tk->str)->typeIfArray.low);
+        head = appendAtEnd(head, first);
+
+        //(width)*firstTemp
+        quadruple *second = initQuadruple();
+        int secondTemp = newTemp();
+        second->op = OP_MUL;
+        sprintf(second->resultant, "temp%d", secondTemp);
+        second->offsetRes = updateOffsets(second->resultant, symTable, TYPE_INTEGER);
+        sprintf(second->operand1, "%d", INT_WIDTH);
+        strcpy(second->operand2, first->resultant);
+        second->offsetOperand2 = updateOffsets(second->resultant, symTable, TYPE_INTEGER);
+        head = appendAtEnd(head, second);
+
+        //+1
+        quadruple *third = initQuadruple();
+        int thirdTemp = newTemp();
+        third->op = OP_PLUS;
+        sprintf(third->resultant, "temp%d", thirdTemp);
+        third->offsetRes = updateOffsets(third->resultant, symTable, TYPE_INTEGER);
+        sprintf(third->operand1, "%s", second->resultant);
+        third->offsetOperand1 = updateOffsets(third->operand1, symTable, TYPE_INTEGER);
+        sprintf(third->operand2, "%d", 1);
+        head = appendAtEnd(head, third);
+
+        // add with base pointer's offset
+        quadruple *fourth = initQuadruple();
+        int fourthTemp = newTemp();
+        fourth->op = OP_PLUS;
+        sprintf(fourth->resultant, "temp%d", fourthTemp);
+        fourth->offsetRes = updateOffsets(fourth->resultant, symTable, TYPE_INTEGER);
+        sprintf(fourth->operand1, "%s", third->resultant);
+        fourth->offsetOperand1 = updateOffsets(fourth->operand1, symTable, TYPE_INTEGER);
+        sprintf(fourth->operand2, "%d", getFromSymTable(symTable->corrHashtable, expr->leftChild->tk->str)->offset);
+        head = appendAtEnd(head, fourth);
+
+        // load from the array
+        quadruple *fifth = initQuadruple();
+        int fifthTemp = newTemp();
+        fifth->op = LW;
+        sprintf(fifth->resultant, "temp%d", fifthTemp);
+        fifth->offsetRes = updateOffsets(fifth->resultant, symTable, getFromSymTable(symTable->corrHashtable, expr->leftChild->tk->str)->typeIfArray.type);
+        sprintf(fifth->operand1, "%s", expr->leftChild->tk->str);
+        fifth->offsetOperand1 = updateOffsets(fifth->operand1, symTable, TYPE_INTEGER);
+        sprintf(fifth->operand2, "%s", fourth->resultant);
+        fifth->offsetOperand1 = updateOffsets(fifth->operand1, symTable, TYPE_INTEGER);
+        head = appendAtEnd(head, fifth);
+
+        sprintf(expr->name, "temp%d", fifthTemp);
+        expr->code = head;
         return;
     }
     }

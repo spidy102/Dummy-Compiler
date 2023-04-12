@@ -22,11 +22,11 @@ void genCode(FILE *fp)
     fprintf(fp, "\n");
     fprintf(fp, "section .data\n");
     fprintf(fp, "inpMessage db 'Enter an Integer value:',0\n");
-    fprintf(fp, "outputMessage db 'Output:%%d',0\n");
+    fprintf(fp, "outputMessage db `Output:%%d\\n`,0\n");
     fprintf(fp, "true equ 1\n");
     fprintf(fp, "false equ 0\n");
     fprintf(fp, "intFormat db \"%%d\",0\n");
-    fprintf(fp, "arrMessage db \"Input: Enter %%d array elements for range %%d to %%d\n\",0\n");
+    fprintf(fp, "arrMessage db `Input: Enter %%d array elements for range %%d to %%d\\n`,0\n");
     fprintf(fp, "section .text\n");
     while (globalHead != NULL)
     {
@@ -54,15 +54,26 @@ void genCode(FILE *fp)
         {
             if (globalHead->op1Ptr->isArray)
             {
-                fprintf(fp, "mov rdi, inpMessage\n");
-                fprintf(fp, "mov rsi, %d", (globalHead->op1Ptr->typeIfArray.high - globalHead->op1Ptr->typeIfArray.low + 1));
-                fprintf(fp, "mov rdx, %d", globalHead->op1Ptr->typeIfArray.low);
-                fprintf(fp, "mov rcx, %d", globalHead->op1Ptr->typeIfArray.high);
+                fprintf(fp, "mov rdi, arrMessage\n");
+                fprintf(fp, "mov rsi, %d\n", (globalHead->op1Ptr->typeIfArray.high - globalHead->op1Ptr->typeIfArray.low + 1));
+                fprintf(fp, "mov rdx, %d\n", globalHead->op1Ptr->typeIfArray.low);
+                fprintf(fp, "mov rcx, %d\n", globalHead->op1Ptr->typeIfArray.high);
                 fprintf(fp, "mov rax, 0\n");
                 fprintf(fp, "call printf WRT ..plt\n");
-                fprintf(fp, "mov rdi, intFormat\n");
 
-                fprintf(fp, "lea rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 16);
+                int startOffset = globalHead->op1Ptr->offset + 1;
+                int numElements = (globalHead->op1Ptr->typeIfArray.high - globalHead->op1Ptr->typeIfArray.low + 1);
+                if (globalHead->op1Ptr->typeIfArray.type == TYPE_INTEGER)
+                {
+                    for (int i = 0; i < numElements; i++)
+                    {
+                        fprintf(fp, "mov rdi, intFormat\n");
+                        fprintf(fp, "lea rax, DWORD[rbp-8-%d]\n", startOffset * 16);
+                        fprintf(fp, "mov rsi, rax\n");
+                        fprintf(fp, "call scanf WRT ..plt\n");
+                        startOffset += 2;
+                    }
+                }
             }
             else
             {
@@ -256,6 +267,12 @@ void genCode(FILE *fp)
             {
                 fprintf(fp, "jne %s\n", globalHead->operand2);
             }
+            break;
+        }
+        case LW:
+        {
+            fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 16);
+            fprintf(fp, "mov QWORD[rbp-8-%d], rax\n", globalHead->offsetRes * 16);
             break;
         }
         default:

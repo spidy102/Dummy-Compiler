@@ -1675,6 +1675,7 @@ int countASTnodes(astNode *root)
 {
     if (root == NULL)
         return 0;
+
     int count = 1;
     astNode *leftOut = root->leftChild;
     while (leftOut != NULL)
@@ -1684,7 +1685,6 @@ int countASTnodes(astNode *root)
     }
     return count;
 }
-
 
 // int main()
 // {
