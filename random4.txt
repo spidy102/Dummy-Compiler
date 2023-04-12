@@ -1,37 +1,49 @@
-**Code Generation test case 2:
-Computing expressions using integer and boolean data type **
+**Code Generation test case 3: Computing expressions using integer, boolean and static array data types**
 
-    **Single driver module with single level nesting **
+**Single driver module with single level nesting **
 
-    <<<driver program>>>
-        start
-            declare x,
-    y, z : integer;
-declare a, b, c : integer;
-declare u, v : boolean;
-u : = true;
-a : = 5;
-b : = 9;
-get_value(x);
-get_value(y);
-z : = x + y * b + (a - b) * y + a * 2 - b * x;
-v : = z > 10 OR a <= b AND x < y AND u;
-**follows left to right associativity **
-     print(z);
-print(v);
+<<<driver program>>>
+start
+	declare x, y, z:integer;
+	declare a, b, c:integer;
+	declare u, v: boolean;
+	declare A: array[-3..2] of integer;
+	u:= true;
+	a:= 5;
+	b:= 9;
+	get_value(x);
+	get_value(y);
+	z:= x + y*b +(a-b)*y+ a*2 - b*x;
+	v:= z > 10 OR a<=b AND x<y AND u;	**follows left to right associativity**
+        print(z);
+	print(v);
+	get_value(A); 
+                          
+**Note: Implement get_value(A) using type information of A. Your code template should first inform user of the size, range indices and type of data and read accordingly to populate the memory locations allocated for elements of A**
+   
+
 end
 
-** On the console
-Input: Enter an integer value
-2
-Input: Enter an integer value
-3
-Output: 9
-Output: true
+** Expected output
 
 For values of x = 2 and y = 3 as run time input, print z as 9.
 Then print v as true (use string true or false to print output of a variable of boolean type).
- 
+Read array element values as 12, 4, -8, 9, 10, -18 as shown below and then print the values of A - all elements of A one after the other  
+
+On the console your output should appear in new line for each print as shown below
+
+Output: 9
+Output: true
+Input: Enter 6 array elements of integer type for range 10 to 15
+12
+4
+-8
+9
+10
+-18
+Output: 67
+Output: 12 4 -8 9 10 -18
+
 
 Similarly run the generated assembly code for other input values and verify.
 
