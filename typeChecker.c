@@ -215,7 +215,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
                 if (printErrors)
                 {
                     printf("Line %d: Error: array index out of bounds for array variable %s\n", bound->tk->line_num, arr_ele->leftChild->tk->str);
-                }         
+                }
                 semanticRulesPassed = false;
                 // type_error?
             }
@@ -227,7 +227,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
     {
         if (printErrors)
         {
-            printf("Line %d: Error: array index is expected to be of integer, received real\n", bound->tk->line_num);
+            printf("Line %d: Error: array index is expected to be integral, received real\n", bound->tk->line_num);
         }
         semanticRulesPassed = false;
         arr_ele->type = TYPE_ERROR;
@@ -244,10 +244,10 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
                 if (!ptr->typeIfArray.high_ && !ptr->typeIfArray.low_)
                 {
                     if (!(signBound >= ptr->typeIfArray.low && signBound <= ptr->typeIfArray.high))
-                    {   
+                    {
                         if (printErrors)
                         {
-                            printf("Line %d: Error: array index out of bounds\n", bound->leftChild->nextSibling->tk->line_num);
+                            printf("Line %d: Error: array index out of bounds for array variable %s\n", bound->leftChild->nextSibling->tk->line_num, arr_ele->leftChild->tk->str);
                         }
                         semanticRulesPassed = false;
                     }
@@ -262,7 +262,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
                     {
                         if (printErrors)
                         {
-                            printf("Line %d: Error: array index out of bounds\n", bound->leftChild->nextSibling->tk->line_num);
+                            printf("Line %d: Error: array index out of bounds for array variable %s\n", bound->leftChild->nextSibling->tk->line_num, arr_ele->leftChild->tk->str);
                         }
                         semanticRulesPassed = false;
                     }
@@ -431,7 +431,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
                 if (retParams->type != TYPE_ARR_BOOL && retParams->type != TYPE_ARR_REAL && retParams->type != TYPE_ARR_INT)
                 {
                     if (retParams->type != TYPE_MISSING)
-                    {   
+                    {
                         if (printErrors)
                         {
                             printf("Line %d: Error: type mismatch in output parameter %d, received %s, required array\n", retParams->tk->line_num, i + 1, EnumToTypeString(retParams->type));
@@ -719,7 +719,6 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 if (printErrors)
                 {
                     printf("Line %d: Error: while's condition should only evaluate to boolean\n", stmts->tk->line_num);
-
                 }
                 semanticRulesPassed = false;
                 // check this once
@@ -760,7 +759,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     }
                     if (strcmp(params->tk->str, currentScope->str) == 0)
                     {
-                        if(printErrors)
+                        if (printErrors)
                         {
                             printf("Line %d: Error: A function cannot be called recursively\n", params->tk->line_num);
                         }
@@ -802,7 +801,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 astNode *def = stmts->leftChild->nextSibling->nextSibling;
                 if (def->leftChild == NULL)
                 {
-                    if(printErrors)
+                    if (printErrors)
                     {
                         printf("Line %d: Error: Switch case statement must have a default statement associated when the identifier is integer, is absent for switch statement\n", idNode->tk->line_num);
                     }
@@ -813,7 +812,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     astNode *caseLabel = cases->leftChild;
                     if (caseLabel->label == AST_BOOL)
                     {
-                        if(printErrors)
+                        if (printErrors)
                         {
                             printf("Line %d: Error: should have integer case labels for switch statement with integer identifier, received boolean\n", caseLabel->tk->line_num);
                         }
@@ -831,7 +830,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 astNode *def = stmts->leftChild->nextSibling->nextSibling;
                 if (def->leftChild != NULL)
                 {
-                    if(printErrors)
+                    if (printErrors)
                     {
                         printf("Line %d: Error: Switch case statement must not have a default statement associated when the identifier is boolean\n", def->tk->line_num);
                     }
@@ -842,9 +841,9 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     astNode *caseLabel = temp->leftChild;
                     if (caseLabel->label != AST_BOOL)
                     {
-                        if(printErrors)
+                        if (printErrors)
                         {
-                            printf("Line %d: Error: case statement should have a boolean identifier\n", caseLabel->tk->line_num);   
+                            printf("Line %d: Error: case statement should have a boolean identifier\n", caseLabel->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -857,7 +856,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 semanticRulesPassed = false;
                 if (printErrors)
                 {
-                    printf("Line %d: Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s \n",  idNode->tk->line_num, (ptr->isArray ? "array" : "real"));
+                    printf("Line %d: Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s \n", idNode->tk->line_num, (ptr->isArray ? "array" : "real"));
                 }
             }
             // check types???
@@ -989,7 +988,7 @@ void checkIfOutputParametersAreAssigned(astNode *stmts, SymTablePointer *module,
             semanticRulesPassed = false;
             if (printErrors)
             {
-                printf("Error: In module %s output parameter %s is never assigned a value\n", module->str, opl->tk->str);
+                printf("Line %d: Error: In module %s output parameter %s is never assigned a value\n", module->line_end, module->str, opl->tk->str);
             }
         }
         isPresent = false;
