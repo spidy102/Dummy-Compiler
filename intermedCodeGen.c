@@ -649,8 +649,10 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
         casevalues[0] = true;
         head = appendAtEnd(head, tempQ1);
 
-        quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
-        head = appendAtEnd(head, stmtsHead);
+        // printf("in true: %s\n", EnumToASTString(case1->leftChild->nextSibling->leftChild->label));
+        quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->leftChild, symTable);
+        // printf("REACHED HERE!!!\n\n");
+       // head = appendAtEnd(head, stmtsHead);
         quadruple *tempQ2 = initQuadruple();
         tempQ2->op = JUMP;
         snprintf(tempQ2->operand1, 25, "label%d", labelexit);
@@ -664,8 +666,10 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
         casevalues[1] = false;
         head = appendAtEnd(head, tempQ3);
 
-        stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->nextSibling, symTable);
-        head = appendAtEnd(head, stmtsHead);
+        // printf("REACHED HERE2!!!\n\n");
+        // printf("in false: %s\n", EnumToASTString(case1->nextSibling->leftChild->nextSibling->leftChild->label));
+        quadruple* stmtsHeadFalse = stmtsCodeGen(case1->nextSibling->leftChild->nextSibling->leftChild, symTable);
+        head = appendAtEnd(head, stmtsHeadFalse);
         quadruple *tempQ4 = initQuadruple();
         tempQ4->op = JUMP;
         snprintf(tempQ4->operand1, 25, "label%d", labelexit);
@@ -713,9 +717,8 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             caselabels[i] = label1;
             casevalues[i] = case1->leftChild->tk->integer;
 
-            // printf("Statements? %s\n",
             head = appendAtEnd(head, tempQ1);
-            quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling, symTable);
+            quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->leftChild, symTable);
             head = appendAtEnd(head, stmtsHead);
             quadruple *tempQ2 = initQuadruple();
             tempQ2->op = JUMP;
@@ -740,7 +743,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             tempQ3->op = LABEL;
             snprintf(tempQ3->operand1, 25, "label%d", labeldef);
             head = appendAtEnd(head, tempQ3);
-            quadruple *stmtsHead = stmtsCodeGen(def->leftChild, symTable);
+            quadruple *stmtsHead = stmtsCodeGen(def->leftChild->leftChild, symTable);
             head = appendAtEnd(head, stmtsHead);
             quadruple *tempQ4 = initQuadruple();
             tempQ4->op = JUMP;
@@ -827,6 +830,7 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
         }
         else if (stmts->label == AST_PRINT)
         {
+            // printf("here\n");
             quadruple *head = initQuadruple();
             head->op = OP_PRINT;
             getGen(stmts->leftChild, symTable);
@@ -840,9 +844,11 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             }
             getPtrs(symTable, head);
             tempHead = appendAtEnd(tempHead, head);
+
         }
         else if (stmts->label == AST_GETVALUE)
         {
+
             quadruple *head = initQuadruple();
             head->op = OP_GETVALUE;
             getGen(stmts->leftChild, symTable);
