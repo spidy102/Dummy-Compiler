@@ -12,6 +12,7 @@
 #include "symTableUtil.h"
 #include "intermedCodeGen.h"
 #include "intermCodeGenDef.h"
+#include "codeGenDef.h"
 #include <string.h>
 
 void genCode(FILE *fp)
@@ -23,9 +24,12 @@ void genCode(FILE *fp)
     fprintf(fp, "section .data\n");
     fprintf(fp, "inpMessage db 'Enter an Integer value:',0\n");
     fprintf(fp, "outputMessage db `Output:%%d\\n`,0\n");
+    fprintf(fp, "outputMessageArray db `Output:`,0\n");
+    fprintf(fp, "newLine db `\\n`,0\n");
     fprintf(fp, "true equ 1\n");
     fprintf(fp, "false equ 0\n");
     fprintf(fp, "intFormat db \"%%d\",0\n");
+    fprintf(fp, "arrayPrintFormat db \"%%d \",0\n");
     fprintf(fp, "arrMessage db `Input: Enter %%d array elements for range %%d to %%d\\n`,0\n");
     fprintf(fp, "section .text\n");
     while (globalHead != NULL)
@@ -145,7 +149,7 @@ void genCode(FILE *fp)
             }
 
             fprintf(fp, "sub rax, rbx\n");
-            fprintf(fp, "mov DWORD[rbp-8-%d], eax\n", globalHead->offsetRes * 16);
+            fprintf(fp, "mov QWORD[rbp-8-%d], rax\n", globalHead->offsetRes * 16);
             break;
         }
         case OP_PLUS:
@@ -180,10 +184,34 @@ void genCode(FILE *fp)
         }
         case OP_PRINT:
         {
-            fprintf(fp, "mov rdi, outputMessage\n");
-            fprintf(fp, "movsxd rsi, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 16);
-            fprintf(fp, "mov rax,0\n");
-            fprintf(fp, "call printf WRT ..plt\n");
+            if (globalHead->op1Ptr->isArray)
+            {
+                fprintf(fp, "mov rdi, outputMessageArray\n");
+                fprintf(fp, "mov rax,0\n");
+                fprintf(fp, "call printf WRT ..plt\n");
+
+                int startOffset = globalHead->op1Ptr->offset + 1;
+                int numElements = (globalHead->op1Ptr->typeIfArray.high - globalHead->op1Ptr->typeIfArray.low + 1);
+                if (globalHead->op1Ptr->typeIfArray.type == TYPE_INTEGER)
+                {
+                    for (int i = 0; i < numElements; i++)
+                    {
+                        fprintf(fp, "mov rdi, arrayPrintFormat\n");
+                        fprintf(fp, "movsxd rsi, DWORD[rbp-8-%d]\n", startOffset * 16);
+                        fprintf(fp, "call printf WRT ..plt\n");
+                        startOffset += 2;
+                    }
+                    fprintf(fp, "mov rdi, newLine\n");
+                    fprintf(fp, "call printf WRT ..plt\n");
+                }
+            }
+            else
+            {
+                fprintf(fp, "mov rdi, outputMessage\n");
+                fprintf(fp, "movsxd rsi, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 16);
+                fprintf(fp, "mov rax,0\n");
+                fprintf(fp, "call printf WRT ..plt\n");
+            }
             break;
         }
         case LABEL:
@@ -272,6 +300,11 @@ void genCode(FILE *fp)
         case LW:
         {
             fprintf(fp, "movsxd rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand2 * 16);
+            fprintf(fp, "mov rbx, rbp\n");
+            fprintf(fp, "imul rax, 16\n");
+            fprintf(fp, "sub rbx, rax\n");
+            fprintf(fp, "sub rbx,8\n");
+            fprintf(fp, "movsxd rax, DWORD[rbx]\n");
             fprintf(fp, "mov QWORD[rbp-8-%d], rax\n", globalHead->offsetRes * 16);
             break;
         }
@@ -282,39 +315,39 @@ void genCode(FILE *fp)
     }
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random4.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    // inorder_ast(astRoot);
-    FILE *fp1 = fopen("temp.asm", "w");
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // if (semanticallyCorrect)
-    typeCheck(astRoot);
-    getActivationRecords();
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("random4.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     // inorder_ast(astRoot);
+//     FILE *fp1 = fopen("temp.asm", "w");
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot, true);
+//     getActivationRecords();
 
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    // FILE *fp1 = fopen("temp.asm", "w");
-    quadruple *qp = globalHead;
-    genCode(fp1);
-    globalHead = qp;
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     // FILE *fp1 = fopen("temp.asm", "w");
+//     quadruple *qp = globalHead;
+//     genCode(fp1);
+//     globalHead = qp;
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }

@@ -24,6 +24,9 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "symbolTableDef.h"
 #include "symTableUtil.h"
 #include "typeCheckerDef.h"
+#include "intermedCodeGen.h"
+#include "intermCodeGenDef.h"
+#include "codeGenDef.h"
 #include <time.h>
 
 void displayImplementationStatus()
@@ -435,6 +438,32 @@ int main(int argc, char *argv[])
     }
     else if (choice == 9)
     {
+      globalSymbolTable = initSymTablePointer();
+      globalSymbolTable->typeST = GLOBALST;
+      globalSymbolTable->parentHashTable = NULL;
+      hashtable *ht1 = initHashtableForSymTable();
+      globalSymbolTable->corrHashtable = ht1;
+      FILE *fp = fopen(testcase, "r");
+      twinbuffer *tb = twinbuffer_init(fp, 256);
+      fill_grammar(fopen("Grammar.txt", "r"));
+      hashtable ht = initHashtable();
+      populate_hashtable(&ht);
+      populateParseTable();
+      treenode *root = parseInputSourceCode(fp, tb, ht);
+      astNode *astRoot = constructAST(root);
+      // inorder_ast(astRoot);
+      FILE *fp1 = fopen(asmfile, "w");
+      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+      // if (semanticallyCorrect)
+      typeCheck(astRoot, true);
+      getActivationRecords();
+
+      if (semanticallyCorrect && semanticRulesPassed)
+      {
+        printf("Code compiles successfully...\n");
+        startIntermCodeGen(astRoot);
+        genCode(fp1);
+      }
     }
     else
     {

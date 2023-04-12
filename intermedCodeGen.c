@@ -334,7 +334,25 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
     case AST_SIGNED:
     {
         getExpressionsCode(expr->leftChild->nextSibling, symTable);
-        sprintf(expr->name, "%s", expr->leftChild->nextSibling->name);
+
+        if (expr->leftChild->tk->token == MINUS)
+        {
+            quadruple *head = initQuadruple();
+            head->op = OP_MINUS;
+            sprintf(head->operand1, "%d", 0);
+            sprintf(head->operand2, "%s", expr->leftChild->nextSibling->name);
+            if (expr->leftChild->nextSibling->label != AST_NUM && expr->leftChild->nextSibling->label != AST_RNUM && expr->leftChild->nextSibling->label != AST_BOOL)
+            {
+                head->offsetOperand2 = updateOffsets(head->operand2, symTable, TYPE_INTEGER);
+            }
+            int newTem = newTemp();
+            sprintf(head->resultant, "temp%d", newTem);
+            head->offsetRes = updateOffsets(head->resultant, symTable, TYPE_INTEGER);
+            sprintf(expr->name, "%s", head->resultant);
+            expr->code = head;
+        }
+        else
+            sprintf(expr->name, "%s", expr->leftChild->nextSibling->name);
         return;
     }
     case AST_PLUS:
@@ -362,6 +380,10 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
             qp->op = OP_DIV;
         strcpy(qp->resultant, expr->name);
         qp->offsetRes = offset;
+        if (strcmp(qp->resultant, "temp17") == 0)
+        {
+            printf("off:%d\n", qp->offsetRes);
+        }
         qp->resPtr = getFromSymTable(symTable->corrHashtable, qp->resultant);
         strcpy(qp->operand1, e1->name);
         if (expr->leftChild->label != AST_NUM && expr->leftChild->label != AST_RNUM && expr->leftChild->label != AST_BOOL)
@@ -374,6 +396,10 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
 
         {
             qp->offsetOperand2 = getFromSymTable(symTable->corrHashtable, qp->operand2)->offset;
+            if (strcmp(qp->operand2, "temp17") == 0)
+            {
+                printf("off:%d\n", qp->offsetOperand2);
+            }
             qp->op2Ptr = getFromSymTable(symTable->corrHashtable, qp->operand2);
         }
         expr->code = appendAtEnd(expr->code, qp);
@@ -390,6 +416,10 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
         sprintf(first->resultant, "temp%d", firstTemp);
         first->offsetRes = updateOffsets(first->resultant, symTable, TYPE_INTEGER);
         sprintf(first->operand1, "%s", expr->leftChild->nextSibling->name);
+        if (expr->leftChild->nextSibling->label != AST_NUM && expr->leftChild->nextSibling->label != AST_RNUM && expr->leftChild->nextSibling->label != AST_BOOL)
+        {
+            first->offsetOperand1 = updateOffsets(first->operand1, symTable, TYPE_INTEGER);
+        }
         sprintf(first->operand2, "%d", getFromSymTable(symTable->corrHashtable, expr->leftChild->tk->str)->typeIfArray.low);
         head = appendAtEnd(head, first);
 
@@ -401,7 +431,7 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
         second->offsetRes = updateOffsets(second->resultant, symTable, TYPE_INTEGER);
         sprintf(second->operand1, "%d", INT_WIDTH);
         strcpy(second->operand2, first->resultant);
-        second->offsetOperand2 = updateOffsets(second->resultant, symTable, TYPE_INTEGER);
+        second->offsetOperand2 = updateOffsets(second->operand2, symTable, TYPE_INTEGER);
         head = appendAtEnd(head, second);
 
         //+1
@@ -435,7 +465,7 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
         sprintf(fifth->operand1, "%s", expr->leftChild->tk->str);
         fifth->offsetOperand1 = updateOffsets(fifth->operand1, symTable, TYPE_INTEGER);
         sprintf(fifth->operand2, "%s", fourth->resultant);
-        fifth->offsetOperand1 = updateOffsets(fifth->operand1, symTable, TYPE_INTEGER);
+        fifth->offsetOperand2 = updateOffsets(fifth->operand2, symTable, TYPE_INTEGER);
         head = appendAtEnd(head, fifth);
 
         sprintf(expr->name, "temp%d", fifthTemp);
@@ -652,7 +682,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
         // printf("in true: %s\n", EnumToASTString(case1->leftChild->nextSibling->leftChild->label));
         quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->leftChild, symTable);
         // printf("REACHED HERE!!!\n\n");
-       // head = appendAtEnd(head, stmtsHead);
+        // head = appendAtEnd(head, stmtsHead);
         quadruple *tempQ2 = initQuadruple();
         tempQ2->op = JUMP;
         snprintf(tempQ2->operand1, 25, "label%d", labelexit);
@@ -668,7 +698,7 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
 
         // printf("REACHED HERE2!!!\n\n");
         // printf("in false: %s\n", EnumToASTString(case1->nextSibling->leftChild->nextSibling->leftChild->label));
-        quadruple* stmtsHeadFalse = stmtsCodeGen(case1->nextSibling->leftChild->nextSibling->leftChild, symTable);
+        quadruple *stmtsHeadFalse = stmtsCodeGen(case1->nextSibling->leftChild->nextSibling->leftChild, symTable);
         head = appendAtEnd(head, stmtsHeadFalse);
         quadruple *tempQ4 = initQuadruple();
         tempQ4->op = JUMP;
@@ -844,7 +874,6 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             }
             getPtrs(symTable, head);
             tempHead = appendAtEnd(tempHead, head);
-
         }
         else if (stmts->label == AST_GETVALUE)
         {
