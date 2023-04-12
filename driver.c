@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
         printf("\nDisplaying the global symbol table:\n");
         printSymbolTable(globalSymbolTable, 0);
       }
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
         getActivationRecords();
         printf("\nDisplaying the activation records:\n");
         for (int i = 0; i < HASHTABLE_SIZE; i++)
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
         getActivationRecords();
         printArrayElements(globalSymbolTable);
       }
@@ -419,8 +419,8 @@ int main(int argc, char *argv[])
       else
       {
         astNode *astRoot = constructAST(root);
-        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-        typeCheck(astRoot);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+        typeCheck(astRoot, true);
       }
 
       end_time = clock();
