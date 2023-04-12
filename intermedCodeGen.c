@@ -183,6 +183,13 @@ void getShortCircuitCode(astNode *expr, SymTablePointer *symTable)
 {
     switch (expr->label)
     {
+    }
+}
+
+void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
+{
+    switch (expr->label)
+    {
     case AST_OR:
     {
         astNode *b1 = expr->leftChild;
@@ -235,8 +242,20 @@ void getShortCircuitCode(astNode *expr, SymTablePointer *symTable)
         int temp = newTemp();
         quadruple *qp = initQuadruple();
         sprintf(qp->resultant, "temp%d", temp);
+        int offset = updateOffsets(qp->resultant, symTable, TYPE_BOOLEAN);
+        qp->offsetRes = offset;
         sprintf(qp->operand1, "%s", e1->name);
+        if (e1->label != AST_NUM && e1->label != AST_RNUM && e1->label != AST_BOOL)
+        {
+            qp->offsetOperand1 = getFromSymTable(symTable->corrHashtable, e1->name)->offset;
+            qp->op1Ptr = getFromSymTable(symTable->corrHashtable, e1->name);
+        }
         sprintf(qp->operand2, "%s", e2->name);
+        if (e2->label != AST_NUM && e2->label != AST_RNUM && e2->label != AST_BOOL)
+        {
+            qp->offsetOperand2 = getFromSymTable(symTable->corrHashtable, e2->name)->offset;
+            qp->op2Ptr = getFromSymTable(symTable->corrHashtable, e2->name);
+        }
         if (expr->label == AST_EQ)
         {
             qp->op = OP_EQ;
@@ -268,8 +287,8 @@ void getShortCircuitCode(astNode *expr, SymTablePointer *symTable)
         sprintf(qp1->operand1, "temp%d", temp);
         sprintf(qp1->operand2, "label%d", expr->trueCase);
         // qp->next = qp1;
-        printf("hemlo??%d\n", qp1->op);
-
+        qp1->offsetOperand1 = getFromSymTable(symTable->corrHashtable, qp1->operand1)->offset;
+        qp1->op1Ptr = getFromSymTable(symTable->corrHashtable, qp1->operand1);
         expr->code = appendAtEnd(expr->code, qp1);
         quadruple *qp2 = initQuadruple();
         qp2->op = JUMP;
@@ -292,32 +311,26 @@ void getShortCircuitCode(astNode *expr, SymTablePointer *symTable)
         }
         return;
     }
-    }
-}
-
-void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
-{
-    switch (expr->label)
-    {
-    case AST_AND:
-    case AST_OR:
-    case AST_GE:
-    case AST_LE:
-    case AST_NE:
-    case AST_GT:
-    case AST_LT:
-    {
-
-        return;
-    }
     case AST_ID:
     {
         strcpy(expr->name, expr->tk->str);
+
         return;
     }
     case AST_NUM:
     {
         sprintf(expr->name, "%d", expr->tk->integer);
+        return;
+    }
+    case AST_RNUM:
+    {
+        sprintf(expr->name, "%f", expr->tk->rnum);
+        return;
+    }
+    case AST_SIGNED:
+    {
+        getExpressionsCode(expr->leftChild->nextSibling, symTable);
+        sprintf(expr->name, "%s", expr->leftChild->nextSibling->name);
         return;
     }
     case AST_PLUS:
@@ -345,15 +358,19 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
             qp->op = OP_DIV;
         strcpy(qp->resultant, expr->name);
         qp->offsetRes = offset;
+        qp->resPtr = getFromSymTable(symTable->corrHashtable, qp->resultant);
         strcpy(qp->operand1, e1->name);
-        if (atoi(qp->operand1) == 0)
+        if (expr->leftChild->label != AST_NUM && expr->leftChild->label != AST_RNUM && expr->leftChild->label != AST_BOOL)
         {
             qp->offsetOperand1 = getFromSymTable(symTable->corrHashtable, qp->operand1)->offset;
+            qp->op1Ptr = getFromSymTable(symTable->corrHashtable, qp->operand1);
         }
         strcpy(qp->operand2, e2->name);
-        if (atoi(qp->operand2) == 0)
+        if (expr->leftChild->nextSibling->label != AST_NUM && expr->leftChild->nextSibling->label != AST_RNUM && expr->leftChild->nextSibling->label != AST_BOOL)
+
         {
             qp->offsetOperand2 = getFromSymTable(symTable->corrHashtable, qp->operand2)->offset;
+            qp->op2Ptr = getFromSymTable(symTable->corrHashtable, qp->operand2);
         }
         expr->code = appendAtEnd(expr->code, qp);
         return;
@@ -703,6 +720,26 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
     return head;
 }
 
+void getPtrs(SymTablePointer *ptr, quadruple *head)
+{
+    while (head != NULL)
+    {
+        if (head->offsetOperand1 != -1)
+        {
+            head->op1Ptr = getFromSymTable(ptr->corrHashtable, head->operand1);
+        }
+        else if (head->offsetOperand2 != -1)
+        {
+            head->op2Ptr = getFromSymTable(ptr->corrHashtable, head->operand2);
+        }
+        else if (head->offsetRes != -1)
+        {
+            head->resPtr = getFromSymTable(ptr->corrHashtable, head->resultant);
+        }
+        head = head->next;
+    }
+}
+
 quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
 {
     quadruple *tempHead = NULL;
@@ -736,7 +773,9 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             {
                 printf("%d\n", getFromSymTable(symTable->corrHashtable, stmts->leftChild->tk->str)->offset);
                 head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, stmts->leftChild->tk->str)->offset;
+                head->op1Ptr = getFromSymTable(symTable->corrHashtable, stmts->leftChild->tk->str);
             }
+            getPtrs(symTable, head);
             tempHead = appendAtEnd(tempHead, head);
 
         }
@@ -748,25 +787,94 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             getGen(stmts->leftChild, symTable);
             strcpy(head->operand1, stmts->leftChild->name);
             head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
+            getPtrs(symTable, head);
             tempHead = appendAtEnd(tempHead, head);
         }
         else if (stmts->label == AST_ASSIGNOP)
         {
-            quadruple *head = initQuadruple();
-            head->op = OP_ASSIGN;
-            getExpressionsCode(stmts->leftChild->nextSibling, symTable);
-            tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
-            strcpy(head->operand1, stmts->leftChild->nextSibling->name);
-            if (atoi(head->operand1) == 0)
+
+            if (stmts->leftChild->nextSibling->type == TYPE_BOOLEAN)
             {
-                head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
+
+                int labelTrue = newLabel();
+                int labelFalse = newLabel();
+                int labelExit = newLabel();
+                quadruple *headTrue = initQuadruple();
+                headTrue->op = LABEL;
+                sprintf(headTrue->operand1, "label%d", labelTrue);
+                // qp if returns true
+                quadruple *qp1 = initQuadruple();
+                qp1->op = OP_ASSIGN;
+                strcpy(qp1->resultant, stmts->leftChild->tk->str);
+                qp1->offsetRes = getFromSymTable(symTable->corrHashtable, qp1->resultant)->offset;
+                qp1->resPtr = getFromSymTable(symTable->corrHashtable, qp1->resultant);
+                strcpy(qp1->operand1, "true");
+                // after this needs to jump to the end of this construct
+                quadruple *qp2 = initQuadruple();
+                qp2->op = JUMP;
+                sprintf(qp2->operand1, "label%d", labelExit);
+                // qp if returs false
+                quadruple *headFalse = initQuadruple();
+                headFalse->op = LABEL;
+                sprintf(headFalse->operand1, "label%d", labelFalse);
+
+                quadruple *qp3 = initQuadruple();
+                qp3->op = OP_ASSIGN;
+                strcpy(qp3->resultant, stmts->leftChild->tk->str);
+                qp3->offsetRes = getFromSymTable(symTable->corrHashtable, qp3->resultant)->offset;
+                qp3->resPtr = getFromSymTable(symTable->corrHashtable, qp3->resultant);
+                strcpy(qp3->operand1, "false");
+                // jump to exit
+                quadruple *qp4 = initQuadruple();
+                qp4->op = JUMP;
+                sprintf(qp4->operand1, "label%d", labelExit);
+                // generate expression's code
+                stmts->leftChild->nextSibling->falseCase = labelFalse;
+                stmts->leftChild->nextSibling->trueCase = labelTrue;
+                getExpressionsCode(stmts->leftChild->nextSibling, symTable);
+                // generate exit label
+                quadruple *qp5 = initQuadruple();
+                qp5->op = LABEL;
+                sprintf(qp5->operand1, "label%d", labelExit);
+                tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
+                tempHead = appendAtEnd(tempHead, headTrue);
+                tempHead = appendAtEnd(tempHead, qp1);
+                tempHead = appendAtEnd(tempHead, qp2);
+                tempHead = appendAtEnd(tempHead, headFalse);
+                tempHead = appendAtEnd(tempHead, qp3);
+                tempHead = appendAtEnd(tempHead, qp4);
+
+                tempHead = appendAtEnd(tempHead, qp5);
             }
-            if (stmts->leftChild->label == AST_ID)
+            else
             {
-                strcpy(head->resultant, stmts->leftChild->tk->str);
-                head->offsetRes = getFromSymTable(symTable->corrHashtable, head->resultant)->offset;
+                quadruple *head = initQuadruple();
+                head->op = OP_ASSIGN;
+                getExpressionsCode(stmts->leftChild->nextSibling, symTable);
+                tempHead = appendAtEnd(tempHead, stmts->leftChild->nextSibling->code);
+                strcpy(head->operand1, stmts->leftChild->nextSibling->name);
+                if (stmts->leftChild->nextSibling->label != AST_RNUM && stmts->leftChild->nextSibling->label != AST_NUM && stmts->leftChild->nextSibling->label != AST_BOOL && stmts->leftChild->nextSibling->label != AST_SIGNED)
+                {
+                    head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
+                    head->op1Ptr = getFromSymTable(symTable->corrHashtable, head->operand1);
+                }
+                else if (stmts->leftChild->nextSibling->label == AST_SIGNED)
+                {
+                    astNode *signedNode = stmts->leftChild->nextSibling;
+                    if (signedNode->leftChild->nextSibling->label != AST_NUM && signedNode->leftChild->nextSibling->label != AST_RNUM && signedNode->leftChild->nextSibling->label != AST_BOOL)
+                    {
+                        head->offsetOperand1 = getFromSymTable(symTable->corrHashtable, head->operand1)->offset;
+                        head->op1Ptr = getFromSymTable(symTable->corrHashtable, head->operand1);
+                    }
+                }
+                if (stmts->leftChild->label == AST_ID)
+                {
+                    strcpy(head->resultant, stmts->leftChild->tk->str);
+                    head->offsetRes = getFromSymTable(symTable->corrHashtable, head->resultant)->offset;
+                    head->resPtr = getFromSymTable(symTable->corrHashtable, head->resultant);
+                }
+                tempHead = appendAtEnd(tempHead, head);
             }
-            tempHead = appendAtEnd(tempHead, head);
         }
         stmts = stmts->nextSibling;
     }
@@ -840,32 +948,32 @@ char *EnumToOperatorString(operators nt)
     fclose(fp);
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("random2.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    inorder_ast(astRoot);
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-    // if (semanticallyCorrect)
-    //typeCheck(astRoot);
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("random4.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     inorder_ast(astRoot);
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot);
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }
