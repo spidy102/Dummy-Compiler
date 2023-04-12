@@ -214,7 +214,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
             {
                 if (printErrors)
                 {
-                    printf("Error: array index out of bounds at line number %d for array variable %s\n", bound->tk->line_num, arr_ele->leftChild->tk->str);
+                    printf("Line %d: Error: array index out of bounds for array variable %s\n", bound->tk->line_num, arr_ele->leftChild->tk->str);
                 }         
                 semanticRulesPassed = false;
                 // type_error?
@@ -227,7 +227,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
     {
         if (printErrors)
         {
-            printf("Error: array index is expected to be of integer, received real at line number %d\n", bound->tk->line_num);
+            printf("Line %d: Error: array index is expected to be of integer, received real\n", bound->tk->line_num);
         }
         semanticRulesPassed = false;
         arr_ele->type = TYPE_ERROR;
@@ -247,7 +247,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
                     {   
                         if (printErrors)
                         {
-                            printf("Error: array index out of bounds at line number %d\n", bound->leftChild->nextSibling->tk->line_num);
+                            printf("Line %d: Error: array index out of bounds\n", bound->leftChild->nextSibling->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -262,7 +262,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
                     {
                         if (printErrors)
                         {
-                            printf("Error: array index out of bounds at line number %d\n", bound->leftChild->nextSibling->tk->line_num);
+                            printf("Line %d: Error: array index out of bounds\n", bound->leftChild->nextSibling->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -278,7 +278,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
         {
             if (printErrors)
             {
-                printf("Error: array index is expected to be of integer, received %s at line number %d\n", EnumToTypeString(bound->type), bound->tk->line_num);
+                printf("Line %d: Error: array index is expected to be of integer, received %s\n", bound->tk->line_num, EnumToTypeString(bound->type));
             }
 
             semanticRulesPassed = false;
@@ -355,7 +355,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
                     {
                         if (printErrors)
                         {
-                            printf("Error: type mismatch in parameter %d on line number %d, received %s, required array\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type));
+                            printf("Line %d: Error: type mismatch in parameter %d, received %s, required array\n", actual_params->tk->line_num, i + 1, EnumToTypeString(actual_params->type));
                         }
                         semanticRulesPassed = false;
                     }
@@ -368,7 +368,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
                         {
                             if (printErrors)
                             {
-                                printf("Error: type mismatch in parameter %d on line number %d, received %s, required %s\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type), ipl->typeIfArray.type == TYPE_ARR_INT ? "array of integer" : (ipl->typeIfArray.type == TYPE_ARR_BOOL ? "array of boolean" : "array of real"));
+                                printf("Line %d: Error: type mismatch in parameter %d, received %s, required %s\n", actual_params->tk->line_num, i + 1, EnumToTypeString(actual_params->type), ipl->typeIfArray.type == TYPE_ARR_INT ? "array of integer" : (ipl->typeIfArray.type == TYPE_ARR_BOOL ? "array of boolean" : "array of real"));
                             }
                             semanticRulesPassed = false;
                         }
@@ -381,7 +381,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
                 {
                     if (printErrors)
                     {
-                        printf("Error: type mismatch in parameter %d on line number %d, received %s, required %s\n", i + 1, actual_params->tk->line_num, EnumToTypeString(actual_params->type), EnumToTypeString(ipl->typeIfNotArray));
+                        printf("Line %d: Error: type mismatch in parameter %d, received %s, required %s\n", actual_params->tk->line_num, i + 1, EnumToTypeString(actual_params->type), EnumToTypeString(ipl->typeIfNotArray));
                     }
                     semanticRulesPassed = false;
                 }
@@ -397,7 +397,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
     {
         if (printErrors)
         {
-            printf("Error: Received too few input arguments for function call on line number %d\n", line);
+            printf("Line %d: Error: Received too few input arguments for function call\n", line);
         }
         semanticRulesPassed = false;
     }
@@ -405,7 +405,7 @@ void compareActualAndFormalParams(list *ipl, astNode *actual_params, SymTablePoi
     {
         if (printErrors)
         {
-            printf("Error: received too many input arguments for function call on line number %d\n", line);
+            printf("Line %d: Error: received too many input arguments for function call\n", line);
         }
         semanticRulesPassed = false;
     }
@@ -434,7 +434,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
                     {   
                         if (printErrors)
                         {
-                            printf("Error: type mismatch in output parameter %d on line number %d, received %s, required array\n", i + 1, retParams->tk->line_num, EnumToTypeString(retParams->type));
+                            printf("Line %d: Error: type mismatch in output parameter %d, received %s, required array\n", retParams->tk->line_num, i + 1, EnumToTypeString(retParams->type));
                         }
                         semanticRulesPassed = false;
                     }
@@ -447,7 +447,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
                     semanticRulesPassed = false;
                     if (printErrors)
                     {
-                        printf("Error: type mismatch in output parameter %d on line number %d, received %s, required %s\n", i + 1, retParams->tk->line_num, EnumToTypeString(retParams->type), EnumToTypeString(opl->typeIfNotArray));
+                        printf("Line %d: Error: type mismatch in output parameter %d, received %s, required %s\n", retParams->tk->line_num, i + 1, EnumToTypeString(retParams->type), EnumToTypeString(opl->typeIfNotArray));
                     }
                 }
             }
@@ -463,7 +463,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
         semanticRulesPassed = false;
         if (printErrors)
         {
-            printf("Error: too few output parameters for function call at line number %d\n", line);
+            printf("Line %d: Error: too few output parameters for function call\n", line);
         }
     }
     if (retParams != NULL)
@@ -471,7 +471,7 @@ void compareRetParams(list *opl, astNode *retParams, SymTablePointer *symTable, 
         semanticRulesPassed = false;
         if (printErrors)
         {
-            printf("Error: too many output parameters for function call at line number %d\n", line);
+            printf("Line %d: Error: too many output parameters for function call\n", line);
         }
     }
 }
@@ -486,7 +486,7 @@ void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, astNode *loopVar,
             {
                 if (printErrors)
                 {
-                    printf("Error: for loop variable assigned a value at line number %d\n", stmts->leftChild->tk->line_num);
+                    printf("Line %d: Error: for loop variable assigned a value\n", stmts->leftChild->tk->line_num);
                 }
                 semanticRulesPassed = false;
             }
@@ -507,7 +507,7 @@ void checkIfLoopStmtsDoNotRedefineLoopVariable(astNode *stmts, astNode *loopVar,
                     {
                         if (printErrors)
                         {
-                            printf("Error: line number %d: for loop variable assigned a value\n", idList->tk->line_num);
+                            printf("Line %d: Error: for loop variable assigned a value\n", idList->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -718,7 +718,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
             {
                 if (printErrors)
                 {
-                    printf("Error: at line number %d: while's condition should only evaluate to boolean\n", stmts->tk->line_num);
+                    printf("Line %d: Error: while's condition should only evaluate to boolean\n", stmts->tk->line_num);
 
                 }
                 semanticRulesPassed = false;
@@ -731,7 +731,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
             {
                 if (printErrors)
                 {
-                    printf("Error: while loop at line number %d expression variables are not assigned any value\n", stmts->tk->line_num);
+                    printf("Line %d: Error: while loop expression variables are not assigned any value\n", stmts->tk->line_num);
                 }
                 semanticRulesPassed = false;
             }
@@ -762,7 +762,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     {
                         if(printErrors)
                         {
-                            printf("Error: A function cannot be called recursively, call received at line number %d\n", params->tk->line_num);
+                            printf("Line %d: Error: A function cannot be called recursively\n", params->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -804,7 +804,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 {
                     if(printErrors)
                     {
-                        printf("Error: Switch case statement must have a default statement associated when the identifier is integer, is absent for switch statement at line number %d\n", idNode->tk->line_num);
+                        printf("Line %d: Error: Switch case statement must have a default statement associated when the identifier is integer, is absent for switch statement\n", idNode->tk->line_num);
                     }
                     semanticRulesPassed = false;
                 }
@@ -815,7 +815,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     {
                         if(printErrors)
                         {
-                            printf("Error: should have integer case labels for switch statement with integer identifier, received boolean at line number %d\n", caseLabel->tk->line_num);
+                            printf("Line %d: Error: should have integer case labels for switch statement with integer identifier, received boolean\n", caseLabel->tk->line_num);
                         }
                         semanticRulesPassed = false;
                     }
@@ -833,7 +833,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 {
                     if(printErrors)
                     {
-                        printf("Error: Switch case statement must not have a default statement associated when the identifier is boolean, received one at line number %d\n", def->tk->line_num);
+                        printf("Line %d: Error: Switch case statement must not have a default statement associated when the identifier is boolean\n", def->tk->line_num);
                     }
                     semanticRulesPassed = false;
                 }
@@ -844,7 +844,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                     {
                         if(printErrors)
                         {
-                            printf("Error: case statement at line number %d should have a boolean identifier\n", caseLabel->tk->line_num);   
+                            printf("Line %d: Error: case statement should have a boolean identifier\n", caseLabel->tk->line_num);   
                         }
                         semanticRulesPassed = false;
                     }
@@ -857,7 +857,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts, bool printEr
                 semanticRulesPassed = false;
                 if (printErrors)
                 {
-                    printf("Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s at line number %d\n", (ptr->isArray ? "array" : "real"), idNode->tk->line_num);
+                    printf("Line %d: Error: switch case statement is expected to have only an integer or boolean typed identifier, got %s \n",  idNode->tk->line_num, (ptr->isArray ? "array" : "real"));
                 }
             }
             // check types???
