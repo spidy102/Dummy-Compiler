@@ -629,10 +629,6 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
             caselabels[i] = label1;
             casevalues[i] = case1->leftChild->tk->integer;
 
-<<<<<<< HEAD
-=======
-            // printf("Statements? %s\n",
->>>>>>> ceb9d93b49bb6ef76ba16530eddb981bd0b19d14
             head = appendAtEnd(head, tempQ1);
             quadruple *stmtsHead = stmtsCodeGen(case1->leftChild->nextSibling->leftChild, symTable);
             head = appendAtEnd(head, stmtsHead);

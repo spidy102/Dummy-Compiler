@@ -17,6 +17,7 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "twinbuffer.h"
 #include "lexer.h"
 #include "lexerDef.h"
+#include "parserDef.h"
 
 // typedef enum
 
@@ -167,6 +168,7 @@ char *copyLexeme(twinbuffer *tb, int size)
 void error(twinbuffer *tb, int line_num)
 {
     printf("Lexical error at line number: %d, lexeme read is %s\n", line_num, copyLexeme(tb, getSize(tb)));
+    isSyntaticallyCorrect = false;
     return;
 }
 
@@ -360,6 +362,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
 
                 char *temp = copyLexeme(tb, size1);
                 printf("Lexical error at line %d, lexeme %s is of length greater than 20\n", line_num, temp);
+                isSyntaticallyCorrect= false;
                 s = 0;
                 c = readOneCharacter(tb);
                 break;
