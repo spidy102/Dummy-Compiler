@@ -733,7 +733,6 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
         {
             astNode *idNode = stmts->leftChild;
             SymTablePointer *ptr = getFromAnySymTable(symTable, idNode->tk->str);
-
             if (!ptr->isArray && ptr->typeIfNotArray == TYPE_INTEGER)
             {
                 // need to check case conditions are integral or not
@@ -795,7 +794,7 @@ void checkTypesForModule(SymTablePointer *symTable, astNode *stmts)
             }
             astNode *def = stmts->leftChild->nextSibling->nextSibling;
             if (def->leftChild != NULL)
-                checkTypesForModule(stmts->symTable, def->leftChild->leftChild);
+                checkTypesForModule(def->symTable, def->leftChild->leftChild);
             stmts = stmts->nextSibling;
             break;
         }
@@ -974,7 +973,7 @@ void typeCheck(astNode *root)
 //     globalSymbolTable->parentHashTable = NULL;
 //     hashtable *ht1 = initHashtableForSymTable();
 //     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("test/t3.txt", "r");
+//     FILE *fp = fopen("random3.txt", "r");
 //     twinbuffer *tb = twinbuffer_init(fp, 256);
 //     fill_grammar(fopen("Grammar.txt", "r"));
 //     hashtable ht = initHashtable();
