@@ -355,39 +355,39 @@ void genCode(FILE *fp)
     }
 }
 
-int main()
-{
-    globalSymbolTable = initSymTablePointer();
-    globalSymbolTable->typeST = GLOBALST;
-    globalSymbolTable->parentHashTable = NULL;
-    hashtable ht1 = initHashtable();
-    globalSymbolTable->corrHashtable = &ht1;
-    FILE *fp = fopen("test/c2.txt", "r");
-    twinbuffer *tb = twinbuffer_init(fp, 256);
-    fill_grammar(fopen("Grammar.txt", "r"));
-    hashtable ht = initHashtable();
-    populate_hashtable(&ht);
-    populateParseTable();
-    treenode *root = parseInputSourceCode(fp, tb, ht);
-    astNode *astRoot = constructAST(root);
-    // inorder_ast(astRoot);
-    FILE *fp1 = fopen("temp.asm", "w");
-    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
-    // if (semanticallyCorrect)
-    typeCheck(astRoot, true);
-    getActivationRecords();
+// int main()
+// {
+//     globalSymbolTable = initSymTablePointer();
+//     globalSymbolTable->typeST = GLOBALST;
+//     globalSymbolTable->parentHashTable = NULL;
+//     hashtable ht1 = initHashtable();
+//     globalSymbolTable->corrHashtable = &ht1;
+//     FILE *fp = fopen("test/c2.txt", "r");
+//     twinbuffer *tb = twinbuffer_init(fp, 256);
+//     fill_grammar(fopen("Grammar.txt", "r"));
+//     hashtable ht = initHashtable();
+//     populate_hashtable(&ht);
+//     populateParseTable();
+//     treenode *root = parseInputSourceCode(fp, tb, ht);
+//     astNode *astRoot = constructAST(root);
+//     // inorder_ast(astRoot);
+//     FILE *fp1 = fopen("temp.asm", "w");
+//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+//     // if (semanticallyCorrect)
+//     typeCheck(astRoot, true);
+//     getActivationRecords();
 
-    if (semanticallyCorrect && semanticRulesPassed)
-    {
-        startIntermCodeGen(astRoot);
-    }
-    // FILE *fp1 = fopen("temp.asm", "w");
-    quadruple *qp = globalHead;
-    genCode(fp1);
-    globalHead = qp;
-    while (globalHead != NULL)
-    {
-        printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
-        globalHead = globalHead->next;
-    }
-}
+//     if (semanticallyCorrect && semanticRulesPassed)
+//     {
+//         startIntermCodeGen(astRoot);
+//     }
+//     // FILE *fp1 = fopen("temp.asm", "w");
+//     quadruple *qp = globalHead;
+//     genCode(fp1);
+//     globalHead = qp;
+//     while (globalHead != NULL)
+//     {
+//         printf("%20s %20s %20s %20s\n", EnumToOperatorString(globalHead->op), globalHead->operand1, globalHead->operand2, globalHead->resultant);
+//         globalHead = globalHead->next;
+//     }
+// }
