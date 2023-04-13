@@ -443,41 +443,28 @@ int main(int argc, char *argv[])
       globalSymbolTable->parentHashTable = NULL;
       hashtable *ht1 = initHashtableForSymTable();
       globalSymbolTable->corrHashtable = ht1;
-
-      FILE *ft = openfile(testcase, "r+");
-      FILE *fg = openfile("Grammar.txt", "r");
-      FILE *fasm = fopen(asmfile, "w");
-
-      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
+      FILE *fp = fopen(testcase, "r");
+      twinbuffer *tb = twinbuffer_init(fp, 256);
+      fill_grammar(fopen("Grammar.txt", "r"));
       hashtable ht = initHashtable();
-
       populate_hashtable(&ht);
-      fseek(fg, 0, SEEK_SET);
-      fill_grammar(fg);
       populateParseTable();
-      fseek(ft, 0, SEEK_SET);
-      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
-      if (!isSyntaticallyCorrect)
-      {
-        printf("Found syntax errors!\n");
-      }
-      else
-      {
-        astNode *astRoot = constructAST(root);
-        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
-        typeCheck(astRoot, true);
-        if (semanticallyCorrect && semanticRulesPassed)
-        {
-          startIntermCodeGen(astRoot);
-          quadruple * qp = globalHead;
-          genCode(fasm);
-          globalHead = qp;
-        }
-      }
+      treenode *root = parseInputSourceCode(fp, tb, ht);
+      astNode *astRoot = constructAST(root);
+      // inorder_ast(astRoot);
+      FILE *fp1 = fopen(asmfile, "w");
+      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
+      // if (semanticallyCorrect)
+      typeCheck(astRoot, false);
+      getActivationRecords();
 
-      fclose(ft);
-      fclose(fg);
-      fclose(fasm);
+      if (semanticallyCorrect && semanticRulesPassed)
+      {
+        printf("Code compiles successfully...\n");
+        startIntermCodeGen(astRoot);
+        genCode(fp1);
+      }
+      fclose(fp1);
 
     }
     else
