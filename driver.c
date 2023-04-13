@@ -24,7 +24,6 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "symbolTableDef.h"
 #include "symTableUtil.h"
 #include "typeCheckerDef.h"
-#include "intermedCodeGen.h"
 #include "intermCodeGenDef.h"
 #include "codeGenDef.h"
 #include <time.h>
@@ -34,6 +33,7 @@ void displayImplementationStatus()
   printf("____________________________________________________________\n");
   printf("LEVEL 4: Symbol table, type checking and semantic rules module work.\n");
   printf("Handled static and dynamic arrays in type checking.\n");
+  printf("Handled code generation for arithmetic (with integers), relational, logical, assignment, array and iterative statements.\n");
   printf("____________________________________________________________\n");
 }
 
@@ -443,27 +443,42 @@ int main(int argc, char *argv[])
       globalSymbolTable->parentHashTable = NULL;
       hashtable *ht1 = initHashtableForSymTable();
       globalSymbolTable->corrHashtable = ht1;
-      FILE *fp = fopen(testcase, "r");
-      twinbuffer *tb = twinbuffer_init(fp, 256);
-      fill_grammar(fopen("Grammar.txt", "r"));
-      hashtable ht = initHashtable();
-      populate_hashtable(&ht);
-      populateParseTable();
-      treenode *root = parseInputSourceCode(fp, tb, ht);
-      astNode *astRoot = constructAST(root);
-      // inorder_ast(astRoot);
-      FILE *fp1 = fopen(asmfile, "w");
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
-      // if (semanticallyCorrect)
-      typeCheck(astRoot, true);
-      getActivationRecords();
 
-      if (semanticallyCorrect && semanticRulesPassed)
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+      FILE *fasm = fopen(asmfile, "w");
+
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+
+      populate_hashtable(&ht);
+      fseek(fg, 0, SEEK_SET);
+      fill_grammar(fg);
+      populateParseTable();
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      if (!isSyntaticallyCorrect)
       {
-        printf("Code compiles successfully...\n");
-        startIntermCodeGen(astRoot);
-        genCode(fp1);
+        printf("Found syntax errors!\n");
       }
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+        typeCheck(astRoot, true);
+        if (semanticallyCorrect && semanticRulesPassed)
+        {
+          startIntermCodeGen(astRoot);
+          quadruple * qp = globalHead;
+          genCode(fasm);
+          globalHead = qp;
+        }
+      }
+
+      fclose(ft);
+      fclose(fg);
+      fclose(fasm);
+
     }
     else
     {
