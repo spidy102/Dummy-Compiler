@@ -464,6 +464,7 @@ int main(int argc, char *argv[])
         startIntermCodeGen(astRoot);
         genCode(fp1);
       }
+      fclose(fp1);
     }
     else
     {

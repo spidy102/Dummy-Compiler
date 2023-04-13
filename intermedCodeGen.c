@@ -164,7 +164,6 @@ int updateOffsets(char *str, SymTablePointer *symTable, types type)
     ptrnewT->str = str;
     SymTablePointer *modulesSymTable = getModulesSymTable(symTable);
     int offset = modulesSymTable->activationRecordSize;
-    printf("curoffset:%d\n", offset);
     ptrnewT->offset = offset;
     insertSymTable(symTable->corrHashtable, ptrnewT);
     if (type == TYPE_INTEGER)
@@ -659,7 +658,6 @@ void getGen(astNode *node, SymTablePointer *symTable)
 
 quadruple *generateSwitchCaseCode(astNode *stmts)
 {
-    printf("Generating code for switch case\n");
     quadruple *head = initQuadruple();
     SymTablePointer *symTable = stmts->symTable;
     head->op = JUMP;
@@ -737,7 +735,6 @@ quadruple *generateSwitchCaseCode(astNode *stmts)
     }
     else
     {
-        printf("detected integer case correctly\n");
         int *casevalues = malloc(sizeof(int) * 25);
         int *caselabels = malloc(sizeof(int) * 25);
         int size = 25;
@@ -874,7 +871,6 @@ quadruple *stmtsCodeGen(astNode *stmts, SymTablePointer *symTable)
             strcpy(head->operand1, stmts->leftChild->name);
             if (stmts->leftChild->label == AST_ID)
             {
-                printf("%d\n", getFromAnySymTable(symTable, stmts->leftChild->tk->str)->offset);
                 head->offsetOperand1 = getFromAnySymTable(symTable, stmts->leftChild->tk->str)->offset;
                 head->op1Ptr = getFromAnySymTable(symTable, stmts->leftChild->tk->str);
             }
