@@ -52,6 +52,7 @@ void getAttributeType(astNode *node, SymTablePointer *symTable, bool printErrors
     }
     case AST_DIV:
     {
+
         getAttributeType(node->leftChild, symTable, printErrors);
         getAttributeType(node->leftChild->nextSibling, symTable, printErrors);
         if (node->leftChild->type == TYPE_INTEGER && node->leftChild->nextSibling->type == TYPE_INTEGER)
@@ -74,6 +75,7 @@ void getAttributeType(astNode *node, SymTablePointer *symTable, bool printErrors
         {
             node->type = TYPE_ERROR;
         }
+
         break;
     }
     case AST_GT:
@@ -274,15 +276,17 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
     else
     {
         getAttributeType(bound, parent, printErrors);
+
         if (bound->type != TYPE_INTEGER)
         {
+
             if (printErrors)
             {
-                printf("Line %d: Error: array index is expected to be of integer, received %s\n", bound->tk->line_num, EnumToTypeString(bound->type));
+                printf("Line %d: Error: array index is expected to be of integer, received %s\n", arr_ele->leftChild->tk->line_num, EnumToTypeString(bound->type));
             }
 
             semanticRulesPassed = false;
-            arr_ele->type = TYPE_ERROR;
+            arr_ele->type = TYPE_MISSING;
         }
         else
         {
@@ -1044,23 +1048,23 @@ void typeCheck(astNode *root, bool printErrors)
     }
 }
 
-// int main()
-// {
-//     globalSymbolTable = initSymTablePointer();
-//     globalSymbolTable->typeST = GLOBALST;
-//     globalSymbolTable->parentHashTable = NULL;
-//     hashtable *ht1 = initHashtableForSymTable();
-//     globalSymbolTable->corrHashtable = ht1;
-//     FILE *fp = fopen("random3.txt", "r");
-//     twinbuffer *tb = twinbuffer_init(fp, 256);
-//     fill_grammar(fopen("Grammar.txt", "r"));
-//     hashtable ht = initHashtable();
-//     populate_hashtable(&ht);
-//     populateParseTable();
-//     treenode *root = parseInputSourceCode(fp, tb, ht);
+int main()
+{
+    globalSymbolTable = initSymTablePointer();
+    globalSymbolTable->typeST = GLOBALST;
+    globalSymbolTable->parentHashTable = NULL;
+    hashtable *ht1 = initHashtableForSymTable();
+    globalSymbolTable->corrHashtable = ht1;
+    FILE *fp = fopen("random4.txt", "r");
+    twinbuffer *tb = twinbuffer_init(fp, 256);
+    fill_grammar(fopen("Grammar.txt", "r"));
+    hashtable ht = initHashtable();
+    populate_hashtable(&ht);
+    populateParseTable();
+    treenode *root = parseInputSourceCode(fp, tb, ht);
 
-//     astNode *astRoot = constructAST(root);
-//     // inorder_ast(astRoot);
-//     populateGlobalSymbolTable(globalSymbolTable, astRoot, 0);
-//     typeCheck(astRoot);
-// }
+    astNode *astRoot = constructAST(root);
+    // inorder_ast(astRoot);
+    populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+    typeCheck(astRoot, true);
+}
