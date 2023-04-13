@@ -282,7 +282,7 @@ void checkBounds(astNode *arr_ele, SymTablePointer *ptr, SymTablePointer *parent
 
             if (printErrors)
             {
-                printf("Line %d: Error: array index is expected to be of integer, received %s\n", arr_ele->leftChild->tk->line_num, EnumToTypeString(bound->type));
+                printf("Line %d: Error: array index is expected to be of integer\n", arr_ele->leftChild->tk->line_num);
             }
 
             semanticRulesPassed = false;
