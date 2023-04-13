@@ -24,7 +24,6 @@ Dilip Venkatesh - 2020A7PS1203P
 #include "symbolTableDef.h"
 #include "symTableUtil.h"
 #include "typeCheckerDef.h"
-#include "intermedCodeGen.h"
 #include "intermCodeGenDef.h"
 #include "codeGenDef.h"
 #include <time.h>
@@ -34,6 +33,7 @@ void displayImplementationStatus()
   printf("____________________________________________________________\n");
   printf("LEVEL 4: Symbol table, type checking and semantic rules module work.\n");
   printf("Handled static and dynamic arrays in type checking.\n");
+  printf("Handled code generation for arithmetic (with integers), relational, logical, assignment, array and iterative statements.\n");
   printf("____________________________________________________________\n");
 }
 
@@ -453,9 +453,9 @@ int main(int argc, char *argv[])
       astNode *astRoot = constructAST(root);
       // inorder_ast(astRoot);
       FILE *fp1 = fopen(asmfile, "w");
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
       // if (semanticallyCorrect)
-      typeCheck(astRoot, true);
+      typeCheck(astRoot, false);
       getActivationRecords();
 
       if (semanticallyCorrect && semanticRulesPassed)
@@ -465,6 +465,7 @@ int main(int argc, char *argv[])
         genCode(fp1);
       }
       fclose(fp1);
+
     }
     else
     {
