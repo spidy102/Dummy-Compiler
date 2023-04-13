@@ -33,7 +33,8 @@ void displayImplementationStatus()
   printf("____________________________________________________________\n");
   printf("LEVEL 4: Symbol table, type checking and semantic rules module work.\n");
   printf("Handled static and dynamic arrays in type checking.\n");
-  printf("Handled code generation for arithmetic (with integers), relational, logical, assignment, array and iterative statements.\n");
+  printf("Handled code generation for arithmetic (excluding real), relational, logical, assignment, array and for statement.\n");
+  printf("Also the symbol table mentions the scopes for modules starting from the line where 'start' lexeme is present, and ending line is the line where the 'end' lexeme is present\n");
   printf("____________________________________________________________\n");
 }
 
@@ -453,9 +454,9 @@ int main(int argc, char *argv[])
       astNode *astRoot = constructAST(root);
       // inorder_ast(astRoot);
       FILE *fp1 = fopen(asmfile, "w");
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, false);
+      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
       // if (semanticallyCorrect)
-      typeCheck(astRoot, false);
+      typeCheck(astRoot, true);
       getActivationRecords();
 
       if (semanticallyCorrect && semanticRulesPassed)
@@ -465,7 +466,6 @@ int main(int argc, char *argv[])
         genCode(fp1);
       }
       fclose(fp1);
-
     }
     else
     {

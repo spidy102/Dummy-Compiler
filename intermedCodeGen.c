@@ -390,10 +390,6 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
             qp->op = OP_DIV;
         strcpy(qp->resultant, expr->name);
         qp->offsetRes = offset;
-        if (strcmp(qp->resultant, "temp17") == 0)
-        {
-            printf("off:%d\n", qp->offsetRes);
-        }
         qp->resPtr = getFromAnySymTable(symTable, qp->resultant);
         strcpy(qp->operand1, e1->name);
         if (expr->leftChild->label != AST_NUM && expr->leftChild->label != AST_RNUM && expr->leftChild->label != AST_BOOL)
@@ -406,10 +402,6 @@ void getExpressionsCode(astNode *expr, SymTablePointer *symTable)
 
         {
             qp->offsetOperand2 = getFromAnySymTable(symTable, qp->operand2)->offset;
-            if (strcmp(qp->operand2, "temp17") == 0)
-            {
-                printf("off:%d\n", qp->offsetOperand2);
-            }
             qp->op2Ptr = getFromAnySymTable(symTable, qp->operand2);
         }
         expr->code = appendAtEnd(expr->code, qp);
