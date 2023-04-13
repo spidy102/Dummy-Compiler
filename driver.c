@@ -425,8 +425,17 @@ int main(int argc, char *argv[])
         astNode *astRoot = constructAST(root);
         populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
         typeCheck(astRoot, true);
+        getActivationRecords();
+        if (semanticallyCorrect && semanticRulesPassed)
+        {
+          FILE* fp1 = fopen(asmfile, "w");
+          printf("Code compiles successfully...\n");
+          startIntermCodeGen(astRoot);
+          genCode(fp1);
+          fclose(fp1);
+        }
+  
       }
-
       end_time = clock();
       total_CPU_time = (double)(end_time - start_time);
       total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
@@ -444,29 +453,45 @@ int main(int argc, char *argv[])
       globalSymbolTable->parentHashTable = NULL;
       hashtable *ht1 = initHashtableForSymTable();
       globalSymbolTable->corrHashtable = ht1;
-      FILE *fp = fopen(testcase, "r");
-      twinbuffer *tb = twinbuffer_init(fp, 256);
-      fill_grammar(fopen("Grammar.txt", "r"));
-      hashtable ht = initHashtable();
-      populate_hashtable(&ht);
-      populateParseTable();
-      treenode *root = parseInputSourceCode(fp, tb, ht);
-      astNode *astRoot = constructAST(root);
-      // inorder_ast(astRoot);
-      FILE *fp1 = fopen(asmfile, "w");
-      populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
-      // if (semanticallyCorrect)
-      typeCheck(astRoot, true);
-      getActivationRecords();
 
-      if (semanticallyCorrect && semanticRulesPassed)
+      FILE *ft = openfile(testcase, "r+");
+      FILE *fg = openfile("Grammar.txt", "r");
+
+      twinbuffer *twin_buf = twinbuffer_init(ft, size_of_buffer);
+      hashtable ht = initHashtable();
+
+      populate_hashtable(&ht);
+      fseek(fg, 0, SEEK_SET);
+      fill_grammar(fg);
+      populateParseTable();
+      fseek(ft, 0, SEEK_SET);
+      treenode *root = parseInputSourceCode(ft, twin_buf, ht);
+      if (!isSyntaticallyCorrect)
       {
-        printf("Code compiles successfully...\n");
-        startIntermCodeGen(astRoot);
-        genCode(fp1);
+        printf("Found syntax errors!\n");
       }
-      fclose(fp1);
+      else
+      {
+        astNode *astRoot = constructAST(root);
+        populateGlobalSymbolTable(globalSymbolTable, astRoot, 0, true);
+        typeCheck(astRoot, true);
+        getActivationRecords();
+        if (semanticallyCorrect && semanticRulesPassed)
+        {
+          FILE* fp1 = fopen(asmfile, "w");
+          printf("Code compiles successfully...\n");
+          startIntermCodeGen(astRoot);
+          genCode(fp1);
+          fclose(fp1);
+        }
+  
+      }
+
+      fclose(ft);
+      fclose(fg);
+
     }
+
     else
     {
       printf("Invalid choice. Please try again.\n");
