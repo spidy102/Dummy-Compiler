@@ -1,3 +1,14 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #include "tree.h"
 #include <stdlib.h>
 #include "tree.h"
@@ -10,6 +21,10 @@ treenode *initNode(Symbol sym)
     root->nextSibling = NULL;
     root->parent = NULL;
     root->tk = NULL;
+    root->rule_No = -1;
+    root->inh = NULL;
+    root->syn = NULL;
+    root->addr = NULL;
 }
 
 treenode *addSibling(treenode *node, Symbol sym)
@@ -30,4 +45,18 @@ treenode *addChild(treenode *node, Symbol sym)
 {
     node->child = initNode(sym);
     return node->child;
+}
+
+int countNodes(treenode *root)
+{
+    if (root == NULL)
+        return 0;
+    int count = 1;
+    treenode *child = root->child;
+    while (child != NULL)
+    {
+        count += countNodes(child);
+        child = child->nextSibling;
+    }
+    return count;
 }

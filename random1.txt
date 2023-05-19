@@ -1,0 +1,58 @@
+declare module one;
+
+<<module two>>
+takes input [x: integer, q:array [-2..10] of real];
+returns [u:real];
+start
+declare z:integer;
+declare y:real;
+[z]:=use module one with parameters z,y; 
+switch(z)
+start
+case 1:
+switch(x)
+start
+case 2:
+declare x:integer;
+qw:=op+1;
+break;
+default:
+declare x:real;
+break;
+end
+break;
+default:
+declare x:real;
+break;
+end
+end
+
+<<module one>>
+takes input [x: integer, y:real];
+start
+
+declare ty:integer;
+declare zy: real;
+[ty]:=use module two with parameters ty,zy;
+declare z1:integer;
+declare arr,arr1: array [-3..10] of real;
+arr:=arr1+arr1;
+z1:=1+1.2;
+arr[z1+ty]:=3;
+declare a,b,c,d,e:integer;
+a:= a+b*c+d*e;
+declare op:real;
+declare rt:boolean;
+rt:=(1+1)>(2-0);
+for (k in 2..10)
+start
+rt:=1>2;
+op:=7*8;
+end
+end
+
+<<<driver program>>>
+start
+declare a,b,c:integer;
+a:=b+c;
+end

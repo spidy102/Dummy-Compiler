@@ -1,0 +1,16 @@
+<<<driver program>>>
+start
+		declare a: integer;
+		switch(a)
+		start
+			case 1: declare b: integer;
+					b:= 1;
+					break;
+			case 2: declare c: integer;
+					c:= 5;
+					break;
+			default: declare d: integer;
+					d:= 0;
+					break;
+		end
+end

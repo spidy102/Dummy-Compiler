@@ -3,7 +3,12 @@
     "*.ejs": "html",
     "twinbuffer.h": "c",
     "*.txt": "c",
-    "token_name.h": "c"
+    "token_name.h": "c",
+    "stdbool.h": "c",
+    "stdlib.h": "c",
+    "parser.h": "c",
+    "symboltabledef.h": "c",
+    "random": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

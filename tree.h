@@ -1,9 +1,20 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
 
 #ifndef TREE_H
 #define TREE_H
 
-#include "../parser.h"
-#include "../lexerDef.h"
+#include "parser.h"
+#include "lexerDef.h"
+#include "ast.h"
 #include <stdbool.h>
 
 typedef struct Symbol
@@ -23,6 +34,10 @@ typedef struct treenode
     struct treenode *nextSibling;
     struct treenode *parent;
     token *tk;
+    int rule_No;
+    astNode *addr;
+    astNode *inh;
+    astNode *syn;
 } treenode;
 
 treenode *initNode(Symbol sym);
@@ -30,5 +45,7 @@ treenode *initNode(Symbol sym);
 treenode *addSibling(treenode *node, Symbol sym);
 
 treenode *addChild(treenode *node, Symbol sym);
+
+int countNodes(treenode *root);
 
 #endif

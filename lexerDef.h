@@ -1,9 +1,20 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #ifndef LEXERDEF_H
 #define LEXERDEF_H
 
 #include <stdio.h>
-#include "./data_structures/hashmap.h"
-#include "./data_structures/twinbuffer.h"
+#include "hashmap.h"
+#include "twinbuffer.h"
 
 typedef struct TOKEN
 {

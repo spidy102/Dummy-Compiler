@@ -1,0 +1,6 @@
+<<<driver program>>>
+start
+declare A: array[1..10] of integer;
+declare a,b,c:integer;
+A[3]:=A[a/b];
+end

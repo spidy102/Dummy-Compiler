@@ -1,17 +1,28 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #include "parser.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "./data_structures/set.h"
-#include "./data_structures/token_name.h"
-#include "./data_structures/hashmap.h"
+#include "set.h"
+#include "token_name.h"
+#include "hashmap.h"
 #include "lexerDef.h"
 #include "parserDef.h"
-#include "./data_structures/twinbuffer.h"
-#include "./data_structures/stack.h"
-#include "./data_structures/tree.h"
+#include "twinbuffer.h"
+#include "stack.h"
+#include "tree.h"
 
 ruleNode *grammarHeadArray[NUM_RULES];
 
@@ -19,6 +30,8 @@ ull firsts[NON_TERMINALS + 1];
 ull follows[NON_TERMINALS + 1];
 
 ruleNode *parseTable[NON_TERMINALS][TERMINALS];
+
+bool isSyntaticallyCorrect = true;
 
 char *EnumToNTString(nonTerminal nt)
 {
@@ -316,6 +329,23 @@ void getFollowSets(nonTerminal nT)
     }
 }
 
+ruleNode *getEpsilonRule(nonTerminal nt)
+{
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+        if (grammarHeadArray[i]->nt == nt)
+        {
+            ruleNode *rule = grammarHeadArray[i];
+            if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
+            {
+                return rule;
+            }
+        }
+    }
+    // should not reach here
+    return NULL;
+}
+
 void populateParseTable()
 {
     for (int i = 0; i < NUM_RULES; i++)
@@ -342,25 +372,31 @@ void populateParseTable()
         if (contains_in_set(&first_set, EPSILON))
         {
             // remove_from_set(&first_set, EPSILON);
-            // getFollowSets(grammarHeadArray[i]->nt);
+            getFollowSets(grammarHeadArray[i]->nt);
             ull follow_set = follows[grammarHeadArray[i]->nt];
             // if (contains_in_set(&follow_set, EPSILON))
             // {
             //     remove_from_set(&follow_set, EPSILON);
             // }
             int j = 0;
+            ruleNode *epsilonRule = getEpsilonRule(grammarHeadArray[i]->nt);
+            // if (epsilonRule == NULL)
+            // {
+            //     printf("hello we have a problem at %s non terminal\n", EnumToNTString(grammarHeadArray[i]->nt));
+            // }
             while (follow_set != 0)
             {
                 if (follow_set % 2 == 1)
                 {
-                    ruleNode *new_rule = malloc(sizeof(ruleNode));
-                    new_rule->isTerminal = false;
-                    new_rule->nt = grammarHeadArray[i]->nt;
-                    new_rule->nextPtr = malloc(sizeof(ruleNode));
-                    new_rule->nextPtr->isTerminal = true;
-                    new_rule->nextPtr->t = EPSILON;
-                    new_rule->nextPtr->nextPtr = NULL;
-                    parseTable[grammarHeadArray[i]->nt][j] = new_rule;
+                    // printf("what number:%d, nt: %s\n", i, EnumToNTString(grammarHeadArray[i]->nt));
+                    // ruleNode *new_rule = malloc(sizeof(ruleNode));
+                    // new_rule->isTerminal = false;
+                    // new_rule->nt = grammarHeadArray[i]->nt;
+                    // new_rule->nextPtr = malloc(sizeof(ruleNode));
+                    // new_rule->nextPtr->isTerminal = true;
+                    // new_rule->nextPtr->t = EPSILON;
+                    // new_rule->nextPtr->nextPtr = NULL;
+                    parseTable[grammarHeadArray[i]->nt][j] = epsilonRule;
                 }
                 follow_set /= 2;
                 j++;
@@ -413,6 +449,20 @@ char *tolowercase(char *str)
     return str;
 }
 
+int getRuleNumber(ruleNode *rule)
+{
+    for (int i = 0; i < NUM_RULES; i++)
+    {
+
+        if (grammarHeadArray[i] == rule)
+        {
+            return i;
+        }
+    }
+    // should not reach here
+    return -1;
+}
+
 treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
 {
     line_num = 1;
@@ -432,7 +482,9 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
         if (top1 == NULL)
         {
             // report error E4
+
             printf("Error at line number %d: top of the stack is empty\n", lookAhead->line_num);
+            isSyntaticallyCorrect = false;
             return start;
         }
         else if (top1->node.isTerminal)
@@ -446,24 +498,30 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             else
             {
                 // report error e1;
-                if (lookAhead->token == NUM){
-                    char* nt = EnumToTString(top1->node.t);
+                if (lookAhead->token == NUM)
+                {
+                    char *nt = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %d instead\n", tolowercase(nt), lookAhead->line_num, lookAhead->integer);
+                    isSyntaticallyCorrect = false;
                     free(nt);
                 }
-        
-                else if (lookAhead->token == RNUM){
-                    char* t = EnumToTString(top1->node.t);
+
+                else if (lookAhead->token == RNUM)
+                {
+                    char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %lf instead\n", tolowercase(t), lookAhead->line_num, lookAhead->rnum);
+                    isSyntaticallyCorrect = false;
                     free(t);
                 }
-                    
-                else{
-                    char* t = EnumToTString(top1->node.t);
+
+                else
+                {
+                    char *t = EnumToTString(top1->node.t);
                     printf("Error: %s was expected at line number %d, got %s instead\n", tolowercase(t), lookAhead->line_num, lookAhead->str);
+                    isSyntaticallyCorrect = false;
                     free(t);
                 }
-            
+
                 // error recovery
                 // printf("Stack:\n");
                 // printStack(st);
@@ -484,6 +542,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             ruleNode *rule = parseTable[top1->node.nt][lookAhead->token];
 
             ruleNode *temp = rule;
+
+            // int ruleNo = getRuleNumber(rule);
 
             // printf("Rule:\n");
             // while (temp != NULL)
@@ -507,6 +567,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 if (rule->nextPtr->isTerminal && rule->nextPtr->t == EPSILON)
                 {
                     treenode *parent = pop(st);
+
+                    parent->rule_No = getRuleNumber(parseTable[top1->node.nt][lookAhead->token]);
                     // adding epsilon in the leaf nodes
                     Symbol sym;
                     sym.isTerminal = true;
@@ -518,6 +580,8 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 }
                 treenode *parent = pop(st);
                 ruleNode *rule = parseTable[top1->node.nt][lookAhead->token]->nextPtr;
+                int ruleNo = getRuleNumber(parseTable[top1->node.nt][lookAhead->token]);
+                parent->rule_No = ruleNo;
                 pushRecursive(st, rule, parent);
                 treenode *child = top(st);
                 parent->child = child;
@@ -529,11 +593,12 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 // printf("Stack:\n");
                 // printStack(st);
                 printf("Error at line number %d: Rule entry in the parse table is empty!\n", lookAhead->line_num);
+                isSyntaticallyCorrect = false;
                 // printf("%s %s", EnumToNTString(top1->node.nt), EnumToTString(lookAhead->token));
                 ull synchronisation_set = 0;
                 // getFirstSets(top1->node.nt);
                 // union_two_sets(&synchronisation_set, &synchronisation_set, &firsts[top1->node.nt]);
-                // getFollowSets(top1->node.nt);
+                getFollowSets(top1->node.nt);
                 union_two_sets(&synchronisation_set, &synchronisation_set, &follows[top1->node.nt]);
                 // being extra cautious in the sync set
                 // add_in_set(&synchronisation_set, START);
@@ -572,7 +637,9 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
                 sym.t = EPSILON;
                 top1->child = initNode(sym);
                 top1->child->parent = top1;
-                pop(st);
+                treenode *parent = pop(st);
+
+                parent->rule_No = getRuleNumber(parseTable[top1->node.nt][EPSILON]);
                 top1 = top(st);
             }
             else
@@ -581,7 +648,10 @@ treenode *parseInputSourceCode(FILE *fp, twinbuffer *tb, hashtable ht)
             }
         }
         if (!isEmpty(st))
+        {
             printf("Error: Input source code has been consumed but stack is non empty\n");
+            isSyntaticallyCorrect = false;
+        }
         // exit(0);
     }
     return start;
@@ -615,17 +685,17 @@ void printParseTree(treenode *root, FILE *fp)
         return;
     }
     printParseTree(root->child, fp);
+
     if (root->node.isTerminal)
     {
         if (root->node.t == EPSILON)
         {
             char *nt = EnumToNTString(root->parent->node.nt);
-            char* t = EnumToTString(root->node.t);
+            char *t = EnumToTString(root->node.t);
 
-            fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:Yes NodeSymbol: %s\n", nt, t);
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:  Yes NodeSymbol: %s\n", nt, t);
             free(nt);
             free(t);
- 
         }
         else
         {
@@ -633,26 +703,26 @@ void printParseTree(treenode *root, FILE *fp)
             token *tk = root->tk;
             if (tk->token == NUM)
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %d parentNode: %s isLeaf:Yes\n", tk->line_num, t, tk->integer, nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: ----- line number: %5d token_name: %5s value: %5d parentNode: %5s isLeaf:  Yes\n", tk->line_num, t, tk->integer, nt);
                 free(nt);
                 free(t);
             }
             else if (tk->token == RNUM)
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: ---- line number: %d token_name: %s value: %lf parentNode: %s isLeaf:Yes\n", tk->line_num, t, tk->rnum, nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: ----- line number: %5d token_name: %5s value: %5lf parentNode: %s isLeaf:  Yes\n", tk->line_num, t, tk->rnum, nt);
                 free(nt);
                 free(t);
             }
 
             else
             {
-                char* nt = EnumToNTString(root->parent->node.nt);
-                char* t = EnumToTString(tk->token);
-                fprintf(fp, "lexeme: %s line number: %d token_name: %s value: ---- parentNode: %s isLeaf:Yes\n", tk->str, tk->line_num, t , nt);
+                char *nt = EnumToNTString(root->parent->node.nt);
+                char *t = EnumToTString(tk->token);
+                fprintf(fp, "lexeme: %5s line number: %5d token_name: %5s value: ----- parentNode: %s isLeaf:  Yes\n", tk->str, tk->line_num, t, nt);
                 free(nt);
                 free(t);
             }
@@ -661,10 +731,15 @@ void printParseTree(treenode *root, FILE *fp)
     }
     else
     {
-        char* nt = EnumToNTString(root->parent->node.nt);
-        char* t = EnumToNTString(root->node.nt);
+        char *nt = EnumToNTString(root->parent->node.nt);
+        char *t = EnumToNTString(root->node.nt);
         // if (node)
-        fprintf(fp, "lexeme: ---- line number: ---- token_name: ---- value: ---- parentNode: %s isLeaf:No NodeSymbol: %s\n", nt, t);
+        if (root->node.nt == program)
+        {
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:   No NodeSymbol: %s\n", "ROOT", t);
+        }
+        else
+            fprintf(fp, "lexeme: ----- line number: ----- token_name: ----- value: ----- parentNode: %5s isLeaf:   No NodeSymbol: %5s\n", nt, t);
         free(nt);
         free(t);
         // fprintf(fp, "NON-TERMINAL: %s\n", EnumToNTString(root->node.nt));
@@ -685,7 +760,9 @@ void computeFirstAndFollowSets()
 {
     for (int i = 0; i <= NON_TERMINALS; i++)
     {
+
         firsts[i] = (ull)0;
+        printf("%d\nhello", i);
         getFirstSets(i);
         follows[i] = (ull)0;
         getFollowSets(i);

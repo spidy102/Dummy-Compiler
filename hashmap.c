@@ -1,3 +1,14 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -5,13 +16,13 @@
 #include "hashmap.h"
 #include "token_name.h"
 
-int hash(char *str, int length)
+int hash(void *str, int length)
 {
     // printf("what is the string read:%s %d\n", str, length);
     int corr_hash = 0;
     for (int i = 0; i < length; i++)
     {
-        corr_hash += (int)str[i];
+        corr_hash += *((char *)str + i);
     }
     // printf("hash:%d\n", corr_hash % HASHTABLE_SIZE);
     return corr_hash % HASHTABLE_SIZE;
@@ -29,7 +40,19 @@ hashtable initHashtable()
     return ht;
 }
 
-bool insert(hashtable *ht, char *str, int length, token_names tok)
+hashtable *initHashtableForSymTable()
+{
+    hashtable *ht = malloc(sizeof(hashtable));
+    for (int i = 0; i < HASHTABLE_SIZE; i++)
+    {
+        ht->table[i] = malloc(sizeof(hashtable_node));
+        ht->table[i]->idx = i;
+        ht->table[i]->bucket_ptr = NULL;
+    }
+    return ht;
+}
+
+bool insert(hashtable *ht, void *str, int length, token_names tok)
 {
     int getHash = hash(str, length);
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
@@ -47,10 +70,10 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     {
         ptr = ptr->next;
     }
-    if (strcmp("takes", str) == 0)
+/*     if (strcmp("takes", str) == 0)
     {
         printf("1hello\n");
-    }
+    } */
     ptr->next = malloc(sizeof(bucket_node));
     ptr->next->str = str;
     ptr->next->tok = tok;
@@ -58,7 +81,7 @@ bool insert(hashtable *ht, char *str, int length, token_names tok)
     return false;
 }
 
-bool exists(hashtable *ht, char *str, int length)
+bool exists(hashtable *ht, void *str, int length)
 {
     int getHash = hash(str, length);
     bucket_node *ptr = ht->table[getHash]->bucket_ptr;
@@ -73,7 +96,7 @@ bool exists(hashtable *ht, char *str, int length)
     return false;
 }
 
-bool delete(hashtable ht, char *str, int length)
+bool delete(hashtable ht, void *str, int length)
 {
     if (!exists(&ht, str, length))
         return false;
@@ -102,7 +125,7 @@ bool delete(hashtable ht, char *str, int length)
     return false;
 }
 
-token_names get(hashtable *ht, char *str, int length)
+token_names get(hashtable *ht, void *str, int length)
 {
     int getHash = hash(str, length);
 

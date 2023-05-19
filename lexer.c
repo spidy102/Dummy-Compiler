@@ -1,10 +1,23 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include "./data_structures/hashmap.h"
-#include "./data_structures/twinbuffer.h"
+#include "hashmap.h"
+#include "twinbuffer.h"
+#include "lexer.h"
 #include "lexerDef.h"
+#include "parserDef.h"
 
 // typedef enum
 
@@ -118,7 +131,7 @@ int getSize(twinbuffer *tb)
 
 char *copyLexeme(twinbuffer *tb, int size)
 {
-    char *lexeme = malloc(sizeof(char) * size);
+    char *lexeme = malloc(sizeof(char) * (size + 1));
     if (tb->fwd >= tb->begin)
     {
         int i = 0;
@@ -126,6 +139,7 @@ char *copyLexeme(twinbuffer *tb, int size)
         {
             lexeme[i++] = tb->buffer[j];
         }
+        lexeme[i] = '\0';
     }
     else
     {
@@ -139,7 +153,9 @@ char *copyLexeme(twinbuffer *tb, int size)
         {
             lexeme[j++] = tb->buffer[i];
         }
+        lexeme[j] = '\0';
     }
+
     // printf("fwd:%d begin %d\n", tb->fwd, tb->begin);
     tb->begin = tb->fwd + 1;
     if (tb->begin == tb->buffer_size)
@@ -152,6 +168,7 @@ char *copyLexeme(twinbuffer *tb, int size)
 void error(twinbuffer *tb, int line_num)
 {
     printf("Lexical error at line number: %d, lexeme read is %s\n", line_num, copyLexeme(tb, getSize(tb)));
+    isSyntaticallyCorrect = false;
     return;
 }
 
@@ -345,6 +362,7 @@ token *getNextToken(hashtable ht, twinbuffer *tb)
 
                 char *temp = copyLexeme(tb, size1);
                 printf("Lexical error at line %d, lexeme %s is of length greater than 20\n", line_num, temp);
+                isSyntaticallyCorrect= false;
                 s = 0;
                 c = readOneCharacter(tb);
                 break;

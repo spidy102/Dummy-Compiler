@@ -1,11 +1,22 @@
+/*
+Group - 29
+
+Shaurya Marwah - 2019B3A70459P
+Hari Sankar - 2019B3A70564P
+Ruchir Kumbhare - 2019B5A70650P
+Ashwin Murali - 2019B2A70957P
+Dilip Venkatesh - 2020A7PS1203P
+
+*/
+
 #ifndef __PARSER_DEF_H__
 #define __PARSER_DEF_H__
 
 #include "parser.h"
-#include "./data_structures/set.h"
-#include "./data_structures/tree.h"
+#include "set.h"
+#include "tree.h"
 
-#define NUM_RULES 151
+#define NUM_RULES 149
 #define NON_TERMINALS 78
 #define TERMINALS 57
 
@@ -15,6 +26,8 @@ extern ull firsts[NON_TERMINALS + 1];
 extern ull follows[NON_TERMINALS + 1];
 
 extern ruleNode *parseTable[NON_TERMINALS][TERMINALS];
+
+extern bool isSyntaticallyCorrect;
 
 char *EnumToNTString(nonTerminal nt);
 char *EnumToTString(token_names nt);
@@ -31,5 +44,6 @@ void fill_grammar(FILE *fp);
 bool isTerminal(char *str);
 token_names TStringMappedEnum(char *str);
 nonTerminal NTStringMappedEnum(char *str);
+void computeFirstAndFollowSets();
 
 #endif
