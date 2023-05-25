@@ -56,7 +56,10 @@ char *EnumToASTString(astNodeLabel nt)
         // printf("%s\n", buffer);
 
         if (nt == i)
+        {
+            fclose(fp);
             return buffer;
+        }
         i++;
     }
     fclose(fp);
@@ -96,7 +99,8 @@ astNode *constructAST(treenode *root)
 {
     switch (root->rule_No)
     {
-    case 0: // program moduleDeclarations otherModules(2) driverModule otherModules(1)
+    case 0:
+    { // program moduleDeclarations otherModules(2) driverModule otherModules(1)
         treenode *mds = getNodeWithSymbol(moduleDeclarations, root);
         treenode *oms2 = getNodeWithSymbol(otherModules, root);
         treenode *drimod = getNodeWithSymbol(driverModule, root);
@@ -141,6 +145,7 @@ astNode *constructAST(treenode *root)
 
         freeRHSList(root);
         return programNode;
+    }
     case 1: // moduleDeclarations moduleDeclaration moduleDeclarations(1)
     {
         treenode *md = getNodeWithSymbol(moduleDeclaration, root);

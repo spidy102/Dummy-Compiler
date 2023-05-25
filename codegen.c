@@ -85,7 +85,7 @@ void genCode(FILE *fp)
                     for (int i = 0; i < numElements; i++)
                     {
                         fprintf(fp, "mov rdi, intFormat\n");
-                        fprintf(fp, "lea rax, DWORD[rbp-8-%d]\n", startOffset * 16);
+                        fprintf(fp, "lea rax, [rbp-8-%d]\n", startOffset * 16);
                         fprintf(fp, "mov rsi, rax\n");
                         fprintf(fp, "call scanf WRT ..plt\n");
                         startOffset += 2;
@@ -99,7 +99,7 @@ void genCode(FILE *fp)
                 fprintf(fp, "mov rax, 0\n");
                 fprintf(fp, "call printf WRT ..plt\n");
                 fprintf(fp, "mov rdi, intFormat\n");
-                fprintf(fp, "lea rax, DWORD[rbp-8-%d]\n", globalHead->offsetOperand1 * 16);
+                fprintf(fp, "lea rax, [rbp-8-%d]\n", globalHead->offsetOperand1 * 16);
                 fprintf(fp, "mov rsi, rax\n");
                 fprintf(fp, "call scanf WRT ..plt\n");
             }

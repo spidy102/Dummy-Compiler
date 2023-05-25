@@ -49,7 +49,10 @@ char *EnumToNTString(nonTerminal nt)
         // printf("%s\n", buffer);
 
         if (nt == i)
+        {
+            fclose(fp);
             return buffer;
+        }
         i++;
     }
     fclose(fp);
@@ -66,7 +69,10 @@ char *EnumToTString(token_names nt)
         // printf("%s\n", buffer);
 
         if (nt == i)
+        {
+            fclose(fp);
             return buffer;
+        }
         i++;
     }
     fclose(fp);
@@ -84,12 +90,12 @@ nonTerminal NTStringMappedEnum(char *str)
         // printf("%s\n", buffer);
         if (strcmp(buffer, str) == 0)
         {
-
+            fclose(fp);
             return i;
         }
         i++;
     }
-
+    fclose(fp);
     return -1;
 }
 
@@ -104,11 +110,12 @@ token_names TStringMappedEnum(char *str)
         buffer[strlen(buffer) - 3] = '\0';
         if (strcmp(buffer, str) == 0)
         {
+            fclose(fp);
             return i;
         }
         i++;
     }
-
+    fclose(fp);
     return -1;
 }
 
